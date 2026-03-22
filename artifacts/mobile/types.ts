@@ -9,6 +9,11 @@ export interface UserProfile {
   selectedRooms: string[];
   cleaningFrequency: string;
   isDemo?: boolean;
+  livingSituation?: string;
+  preferredTime?: string;
+  sessionLength?: string;
+  hasPets?: boolean;
+  motivation?: string;
 }
 
 export interface SubTask {
@@ -26,6 +31,8 @@ export interface Chore {
   estimatedTime: number;
   subTasks: SubTask[];
   lastCompleted?: string;
+  notes?: string;
+  sortOrder?: number;
 }
 
 export type Room =

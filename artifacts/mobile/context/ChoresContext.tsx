@@ -19,6 +19,7 @@ interface ChoresContextValue {
   toggleChore: (id: string) => void;
   toggleSubTask: (choreId: string, subTaskId: string) => void;
   deleteChore: (id: string) => void;
+  reorderChores: (reordered: Chore[]) => void;
   getChoresByRoom: (room: Room) => Chore[];
   getRoomStats: (room: Room) => { total: number; completed: number };
 }
@@ -144,6 +145,15 @@ export function ChoresProvider({ children }: { children: React.ReactNode }) {
     [chores, persist]
   );
 
+  const reorderChores = useCallback(
+    (reordered: Chore[]) => {
+      // Assign sortOrder index so ordering is preserved across frequency groups
+      const withOrder = reordered.map((c, i) => ({ ...c, sortOrder: i }));
+      persist(withOrder);
+    },
+    [persist]
+  );
+
   const getChoresByRoom = useCallback(
     (room: Room) => chores.filter((c) => c.room === room),
     [chores]
@@ -171,6 +181,7 @@ export function ChoresProvider({ children }: { children: React.ReactNode }) {
         toggleChore,
         toggleSubTask,
         deleteChore,
+        reorderChores,
         getChoresByRoom,
         getRoomStats,
       }}

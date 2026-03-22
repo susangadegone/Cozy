@@ -8,6 +8,16 @@ import React, {
 import { UserProfile } from "@/types";
 import { loadUser, saveUser, clearUser, hashPassword } from "@/utils/storage";
 
+export interface OnboardingData {
+  selectedRooms: string[];
+  frequency: string;
+  livingSituation?: string;
+  preferredTime?: string;
+  sessionLength?: string;
+  hasPets?: boolean;
+  motivation?: string;
+}
+
 interface AuthContextValue {
   user: UserProfile | null;
   loading: boolean;
@@ -15,7 +25,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   enterDemo: () => void;
-  completeOnboarding: (selectedRooms: string[], frequency: string) => Promise<void>;
+  completeOnboarding: (data: OnboardingData) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -78,13 +88,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const enterDemo = useCallback(() => {
     const demoUser: UserProfile = {
-      name: "Demo",
+      name: "Alex",
       email: "",
       passwordHash: "",
       isLoggedIn: true,
-      onboarded: true,
-      selectedRooms: ["Kitchen", "Living Room", "Bedroom", "Bathroom", "Office", "Laundry"],
-      cleaningFrequency: "Bit of both",
+      onboarded: false,
+      selectedRooms: [],
+      cleaningFrequency: "",
       isDemo: true,
     };
     // Demo mode is in-memory only — not saved to AsyncStorage so it resets on relaunch
@@ -92,15 +102,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const completeOnboarding = useCallback(
-    async (selectedRooms: string[], frequency: string) => {
+    async (data: OnboardingData) => {
       if (!user) return;
       const updated: UserProfile = {
         ...user,
         onboarded: true,
-        selectedRooms,
-        cleaningFrequency: frequency,
+        selectedRooms: data.selectedRooms,
+        cleaningFrequency: data.frequency,
+        livingSituation: data.livingSituation,
+        preferredTime: data.preferredTime,
+        sessionLength: data.sessionLength,
+        hasPets: data.hasPets,
+        motivation: data.motivation,
       };
-      await saveUser(updated);
+      // Demo users stay in-memory only
+      if (!user.isDemo) await saveUser(updated);
       setUser(updated);
     },
     [user]
