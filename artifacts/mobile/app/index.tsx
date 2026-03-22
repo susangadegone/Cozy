@@ -9,12 +9,13 @@ import {
   ActivityIndicator,
   useColorScheme,
 } from "react-native";
-import { router } from "expo-router";
+import { router, Redirect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
 import { useChores } from "@/context/ChoresContext";
+import { useAuth } from "@/context/AuthContext";
 import { ROOMS, Room } from "@/types";
 import { RoomCard } from "@/components/RoomCard";
 
@@ -22,7 +23,9 @@ export default function RoomListScreen() {
   const insets = useSafeAreaInsets();
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? Colors.dark : Colors.light;
-  const { chores, loading, error } = useChores();
+
+  const { user, loading: authLoading } = useAuth();
+  const { chores, loading: choresLoading, error } = useChores();
 
   const totalChores = chores.length;
   const completedChores = chores.filter((c) => c.completed).length;
@@ -44,8 +47,8 @@ export default function RoomListScreen() {
     [chores]
   );
 
-  // ── Loading state ─────────────────────────────────────────────────────────
-  if (loading) {
+  // ── Auth guard ────────────────────────────────────────────────────────────
+  if (authLoading || choresLoading) {
     return (
       <View
         style={[
@@ -60,6 +63,9 @@ export default function RoomListScreen() {
       </View>
     );
   }
+
+  if (!user) return <Redirect href="/welcome" />;
+  if (!user.onboarded) return <Redirect href="/onboarding" />;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -86,10 +92,10 @@ export default function RoomListScreen() {
                 <Text
                   style={[styles.greeting, { color: colors.textSecondary }]}
                 >
-                  Welcome home
+                  {user.name ? `Hey, ${user.name.split(" ")[0]}` : "Welcome home"}
                 </Text>
                 <Text style={[styles.title, { color: colors.text }]}>
-                  Apartment Buddy
+                  Tidy Buddy
                 </Text>
               </View>
               <Pressable
@@ -208,9 +214,7 @@ export default function RoomListScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   centeredFull: {
     flex: 1,
     alignItems: "center",
@@ -312,9 +316,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 12,
   },
-  listContent: {
-    paddingHorizontal: 12,
-  },
+  listContent: { paddingHorizontal: 12 },
   row: {
     justifyContent: "space-between",
     paddingHorizontal: 8,

@@ -1,5 +1,15 @@
 export type Frequency = "Daily" | "Weekly" | "Monthly";
 
+export interface UserProfile {
+  name: string;
+  email: string;
+  passwordHash: string;
+  isLoggedIn: boolean;
+  onboarded: boolean;
+  selectedRooms: string[];
+  cleaningFrequency: string;
+}
+
 export interface SubTask {
   id: string;
   title: string;

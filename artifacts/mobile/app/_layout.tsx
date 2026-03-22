@@ -15,6 +15,7 @@ import { useColorScheme } from "react-native";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ChoresProvider } from "@/context/ChoresContext";
+import { AuthProvider } from "@/context/AuthContext";
 import Colors from "@/constants/colors";
 
 SplashScreen.preventAutoHideAsync();
@@ -44,28 +45,34 @@ function RootLayoutNav() {
         },
       }}
     >
+      {/* ── Main app screens ─────────────────────────────────── */}
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen
         name="room/[name]"
-        options={{
-          headerShown: true,
-          headerTransparent: false,
-        }}
+        options={{ headerShown: true, headerTransparent: false }}
       />
       <Stack.Screen
         name="chore/[id]"
-        options={{
-          headerShown: true,
-          title: "Chore Detail",
-        }}
+        options={{ headerShown: true, title: "Chore Detail" }}
       />
       <Stack.Screen
         name="add-chore"
-        options={{
-          headerShown: true,
-          title: "New Chore",
-          presentation: "modal",
-        }}
+        options={{ headerShown: true, title: "New Chore", presentation: "modal" }}
+      />
+
+      {/* ── Auth screens ─────────────────────────────────────── */}
+      <Stack.Screen name="welcome" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="login"
+        options={{ title: "Log In", headerBackTitle: "Back" }}
+      />
+      <Stack.Screen
+        name="signup"
+        options={{ title: "Create Account", headerBackTitle: "Back" }}
+      />
+      <Stack.Screen
+        name="onboarding"
+        options={{ headerShown: false, gestureEnabled: false }}
       />
     </Stack>
   );
@@ -92,9 +99,11 @@ export default function RootLayout() {
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <GestureHandlerRootView style={{ flex: 1 }}>
-            <ChoresProvider>
-              <RootLayoutNav />
-            </ChoresProvider>
+            <AuthProvider>
+              <ChoresProvider>
+                <RootLayoutNav />
+              </ChoresProvider>
+            </AuthProvider>
           </GestureHandlerRootView>
         </QueryClientProvider>
       </ErrorBoundary>
