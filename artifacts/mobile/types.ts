@@ -8,6 +8,7 @@ export interface UserProfile {
   onboarded: boolean;
   selectedRooms: string[];
   cleaningFrequency: string;
+  isDemo?: boolean;
 }
 
 export interface SubTask {

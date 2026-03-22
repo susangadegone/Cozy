@@ -1,20 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   Pressable,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Logo } from "@/components/Logo";
+import { useAuth } from "@/context/AuthContext";
 
 export default function WelcomeScreen() {
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+  const { enterDemo } = useAuth();
+  const [demoLoading, setDemoLoading] = useState(false);
+
+  function handleDemo() {
+    setDemoLoading(true);
+    enterDemo();
+    router.replace("/");
+  }
 
   return (
     <LinearGradient
@@ -23,8 +34,12 @@ export default function WelcomeScreen() {
       end={{ x: 0.85, y: 1 }}
       style={styles.gradient}
     >
-      <View style={[styles.container, { paddingTop: topPad, paddingBottom: bottomPad + 20 }]}>
-
+      <View
+        style={[
+          styles.container,
+          { paddingTop: topPad, paddingBottom: bottomPad + 20 },
+        ]}
+      >
         {/* ── Hero ──────────────────────────────────────────────── */}
         <View style={styles.hero}>
           <View style={styles.logoWrap}>
@@ -41,6 +56,7 @@ export default function WelcomeScreen() {
 
         {/* ── CTA buttons ───────────────────────────────────────── */}
         <View style={styles.actions}>
+          {/* Primary: Get Started */}
           <Pressable
             onPress={() => router.push("/signup")}
             style={({ pressed }) => [
@@ -51,6 +67,30 @@ export default function WelcomeScreen() {
             <Text style={styles.primaryBtnText}>Get Started</Text>
           </Pressable>
 
+          {/* Demo: Try without signing up */}
+          <Pressable
+            onPress={handleDemo}
+            disabled={demoLoading}
+            style={({ pressed }) => [
+              styles.demoBtn,
+              { opacity: pressed || demoLoading ? 0.75 : 1 },
+            ]}
+          >
+            {demoLoading ? (
+              <ActivityIndicator color="rgba(255,255,255,0.9)" size="small" />
+            ) : (
+              <>
+                <Ionicons
+                  name="play-circle-outline"
+                  size={18}
+                  color="rgba(255,255,255,0.9)"
+                />
+                <Text style={styles.demoBtnText}>Try a Demo</Text>
+              </>
+            )}
+          </Pressable>
+
+          {/* Tertiary: Log in */}
           <Pressable
             onPress={() => router.push("/login")}
             style={({ pressed }) => [
@@ -58,7 +98,9 @@ export default function WelcomeScreen() {
               { opacity: pressed ? 0.7 : 1 },
             ]}
           >
-            <Text style={styles.secondaryBtnText}>I already have an account</Text>
+            <Text style={styles.secondaryBtnText}>
+              I already have an account
+            </Text>
           </Pressable>
         </View>
       </View>
@@ -79,9 +121,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     paddingTop: 40,
   },
-  logoWrap: {
-    marginBottom: 36,
-  },
+  logoWrap: { marginBottom: 36 },
   headline: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 22,
@@ -107,9 +147,7 @@ const styles = StyleSheet.create({
     borderRadius: 90,
     backgroundColor: "rgba(255,255,255,0.05)",
   },
-  actions: {
-    gap: 12,
-  },
+  actions: { gap: 12 },
   primaryBtn: {
     backgroundColor: "#fff",
     borderRadius: 16,
@@ -126,14 +164,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#2B7A78",
   },
+  demoBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 16,
+    paddingVertical: 16,
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.35)",
+    backgroundColor: "rgba(255,255,255,0.1)",
+  },
+  demoBtnText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 15,
+    color: "rgba(255,255,255,0.9)",
+  },
   secondaryBtn: {
-    paddingVertical: 14,
+    paddingVertical: 12,
     alignItems: "center",
   },
   secondaryBtnText: {
     fontFamily: "Inter_500Medium",
-    fontSize: 15,
-    color: "rgba(255,255,255,0.75)",
+    fontSize: 14,
+    color: "rgba(255,255,255,0.6)",
     textDecorationLine: "underline",
   },
 });

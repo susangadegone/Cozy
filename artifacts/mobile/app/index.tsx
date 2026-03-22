@@ -112,6 +112,25 @@ export default function RoomListScreen() {
               </Pressable>
             </View>
 
+            {/* ── Demo mode banner ──────────────────────────────────── */}
+            {user.isDemo ? (
+              <Pressable
+                onPress={() => router.push("/signup")}
+                style={[
+                  styles.demoBanner,
+                  { backgroundColor: isDark ? "#2A1F00" : "#FFF8E6" },
+                ]}
+              >
+                <Ionicons name="play-circle-outline" size={16} color={colors.accent} />
+                <Text style={[styles.demoBannerText, { color: isDark ? colors.accent : "#7A5A00" }]}>
+                  You're in demo mode.{" "}
+                  <Text style={{ fontFamily: "Inter_600SemiBold" }}>
+                    Sign up to save your progress →
+                  </Text>
+                </Text>
+              </Pressable>
+            ) : null}
+
             {/* ── Storage error banner ───────────────────────────────── */}
             {error ? (
               <View
@@ -259,6 +278,22 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   errorText: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 13,
+    flex: 1,
+    lineHeight: 18,
+  },
+  demoBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginHorizontal: 20,
+    marginBottom: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    borderRadius: 12,
+  },
+  demoBannerText: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,
     flex: 1,

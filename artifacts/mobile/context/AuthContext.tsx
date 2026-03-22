@@ -14,6 +14,7 @@ interface AuthContextValue {
   signup: (name: string, email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  enterDemo: () => void;
   completeOnboarding: (selectedRooms: string[], frequency: string) => Promise<void>;
 }
 
@@ -75,6 +76,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, [user]);
 
+  const enterDemo = useCallback(() => {
+    const demoUser: UserProfile = {
+      name: "Demo",
+      email: "",
+      passwordHash: "",
+      isLoggedIn: true,
+      onboarded: true,
+      selectedRooms: ["Kitchen", "Living Room", "Bedroom", "Bathroom", "Office", "Laundry"],
+      cleaningFrequency: "Bit of both",
+      isDemo: true,
+    };
+    // Demo mode is in-memory only — not saved to AsyncStorage so it resets on relaunch
+    setUser(demoUser);
+  }, []);
+
   const completeOnboarding = useCallback(
     async (selectedRooms: string[], frequency: string) => {
       if (!user) return;
@@ -92,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, signup, login, logout, completeOnboarding }}
+      value={{ user, loading, signup, login, logout, enterDemo, completeOnboarding }}
     >
       {children}
     </AuthContext.Provider>
