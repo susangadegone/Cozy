@@ -1,12 +1,19 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Chore, DEFAULT_CHORES, Frequency, Room, SubTask } from "@/types";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { Chore, DEFAULT_CHORES, Room } from "@/types";
+import { loadChores, saveChores } from "@/utils/storage";
 
-const STORAGE_KEY = "@apartment_buddy_chores";
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface ChoresContextValue {
   chores: Chore[];
   loading: boolean;
+  error: string | null;
   addChore: (chore: Omit<Chore, "id">) => void;
   updateChore: (id: string, updates: Partial<Chore>) => void;
   toggleChore: (id: string) => void;
@@ -16,7 +23,7 @@ interface ChoresContextValue {
   getRoomStats: (room: Room) => { total: number; completed: number };
 }
 
-const ChoresContext = createContext<ChoresContextValue | undefined>(undefined);
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function generateId(): string {
   return Date.now().toString() + Math.random().toString(36).substr(2, 9);
@@ -26,33 +33,57 @@ function seedDefaultChores(): Chore[] {
   return DEFAULT_CHORES.map((c) => ({ ...c, id: generateId() }));
 }
 
+// ─── Context ─────────────────────────────────────────────────────────────────
+
+const ChoresContext = createContext<ChoresContextValue | undefined>(undefined);
+
 export function ChoresProvider({ children }: { children: React.ReactNode }) {
   const [chores, setChores] = useState<Chore[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // ── Load on mount ───────────────────────────────────────────────────────
   useEffect(() => {
     (async () => {
       try {
-        const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          setChores(JSON.parse(raw));
+        setError(null);
+        const saved = await loadChores();
+
+        if (saved !== null) {
+          // Data exists — restore it exactly
+          setChores(saved);
         } else {
+          // First launch — seed defaults and persist immediately
           const defaults = seedDefaultChores();
           setChores(defaults);
-          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
+          await saveChores(defaults);
         }
       } catch (e) {
-        setChores(seedDefaultChores());
+        // Storage read failed — fall back to defaults in memory only
+        const defaults = seedDefaultChores();
+        setChores(defaults);
+        setError(
+          "Could not load saved chores. Changes may not persist until storage is available."
+        );
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
+  // ── Persist helper ──────────────────────────────────────────────────────
+  // Optimistically updates state first so the UI responds instantly,
+  // then writes to AsyncStorage in the background.
   const persist = useCallback(async (updated: Chore[]) => {
     setChores(updated);
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    try {
+      await saveChores(updated);
+    } catch {
+      // Swallow write errors silently — state is already updated in memory
+    }
   }, []);
+
+  // ── Mutations ───────────────────────────────────────────────────────────
 
   const addChore = useCallback(
     (chore: Omit<Chore, "id">) => {
@@ -77,7 +108,9 @@ export function ChoresProvider({ children }: { children: React.ReactNode }) {
             ? {
                 ...c,
                 completed: !c.completed,
-                lastCompleted: !c.completed ? new Date().toISOString() : c.lastCompleted,
+                lastCompleted: !c.completed
+                  ? new Date().toISOString()
+                  : c.lastCompleted,
               }
             : c
         )
@@ -132,6 +165,7 @@ export function ChoresProvider({ children }: { children: React.ReactNode }) {
       value={{
         chores,
         loading,
+        error,
         addChore,
         updateChore,
         toggleChore,

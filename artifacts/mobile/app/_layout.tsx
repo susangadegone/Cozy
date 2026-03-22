@@ -56,7 +56,7 @@ function RootLayoutNav() {
         name="chore/[id]"
         options={{
           headerShown: true,
-          presentation: "modal",
+          title: "Chore Detail",
         }}
       />
       <Stack.Screen

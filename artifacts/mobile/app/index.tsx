@@ -6,6 +6,7 @@ import {
   FlatList,
   Pressable,
   Platform,
+  ActivityIndicator,
   useColorScheme,
 } from "react-native";
 import { router } from "expo-router";
@@ -14,14 +15,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
 import { useChores } from "@/context/ChoresContext";
-import { ROOMS, ROOM_ICONS, ROOM_COLORS, Room } from "@/types";
+import { ROOMS, Room } from "@/types";
 import { RoomCard } from "@/components/RoomCard";
 
 export default function RoomListScreen() {
   const insets = useSafeAreaInsets();
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? Colors.dark : Colors.light;
-  const { chores } = useChores();
+  const { chores, loading, error } = useChores();
 
   const totalChores = chores.length;
   const completedChores = chores.filter((c) => c.completed).length;
@@ -43,6 +44,23 @@ export default function RoomListScreen() {
     [chores]
   );
 
+  // ── Loading state ─────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <View
+        style={[
+          styles.centeredFull,
+          { backgroundColor: colors.background, paddingTop: topPad },
+        ]}
+      >
+        <ActivityIndicator size="large" color={colors.tint} />
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+          Loading your chores…
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <FlatList
@@ -57,6 +75,7 @@ export default function RoomListScreen() {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View>
+            {/* ── App header ─────────────────────────────────────────── */}
             <View
               style={[
                 styles.header,
@@ -64,7 +83,9 @@ export default function RoomListScreen() {
               ]}
             >
               <View>
-                <Text style={[styles.greeting, { color: colors.textSecondary }]}>
+                <Text
+                  style={[styles.greeting, { color: colors.textSecondary }]}
+                >
                   Welcome home
                 </Text>
                 <Text style={[styles.title, { color: colors.text }]}>
@@ -75,13 +96,39 @@ export default function RoomListScreen() {
                 onPress={() => router.push("/add-chore")}
                 style={({ pressed }) => [
                   styles.addBtn,
-                  { backgroundColor: colors.tint, opacity: pressed ? 0.8 : 1 },
+                  {
+                    backgroundColor: colors.tint,
+                    opacity: pressed ? 0.8 : 1,
+                  },
                 ]}
               >
                 <Ionicons name="add" size={22} color="#fff" />
               </Pressable>
             </View>
 
+            {/* ── Storage error banner ───────────────────────────────── */}
+            {error ? (
+              <View
+                style={[
+                  styles.errorBanner,
+                  { backgroundColor: isDark ? "#3D1000" : "#FFF3F0" },
+                ]}
+              >
+                <Ionicons
+                  name="warning-outline"
+                  size={16}
+                  color={colors.danger}
+                />
+                <Text
+                  style={[styles.errorText, { color: colors.danger }]}
+                  numberOfLines={2}
+                >
+                  {error}
+                </Text>
+              </View>
+            ) : null}
+
+            {/* ── Progress card ──────────────────────────────────────── */}
             <View
               style={[
                 styles.progressCard,
@@ -95,7 +142,10 @@ export default function RoomListScreen() {
               <View style={styles.progressTop}>
                 <View>
                   <Text
-                    style={[styles.progressLabel, { color: colors.textSecondary }]}
+                    style={[
+                      styles.progressLabel,
+                      { color: colors.textSecondary },
+                    ]}
                   >
                     Today's Progress
                   </Text>
@@ -109,22 +159,24 @@ export default function RoomListScreen() {
                     { backgroundColor: colors.tintLight },
                   ]}
                 >
-                  <Text
-                    style={[styles.progressPct, { color: colors.tint }]}
-                  >
+                  <Text style={[styles.progressPct, { color: colors.tint }]}>
                     {Math.round(progressPct * 100)}%
                   </Text>
                 </View>
               </View>
 
               <View
-                style={[styles.barBg, { backgroundColor: colors.surfaceSecondary }]}
+                style={[
+                  styles.barBg,
+                  { backgroundColor: colors.surfaceSecondary },
+                ]}
               >
                 <View
                   style={[
                     styles.barFill,
                     {
-                      backgroundColor: colors.tint,
+                      backgroundColor:
+                        progressPct === 1 ? colors.success : colors.tint,
                       width: `${Math.round(progressPct * 100)}%` as any,
                     },
                   ]}
@@ -132,9 +184,7 @@ export default function RoomListScreen() {
               </View>
             </View>
 
-            <Text
-              style={[styles.sectionLabel, { color: colors.textSecondary }]}
-            >
+            <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
               Rooms
             </Text>
           </View>
@@ -161,6 +211,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  centeredFull: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
+  },
+  loadingText: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 15,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -183,6 +243,22 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
+  },
+  errorBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginHorizontal: 20,
+    marginBottom: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  errorText: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 13,
+    flex: 1,
+    lineHeight: 18,
   },
   progressCard: {
     marginHorizontal: 20,
