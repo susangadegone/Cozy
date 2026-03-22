@@ -57,7 +57,7 @@ export default function OnboardingScreen() {
     setLoading(true);
     try {
       await completeOnboarding(selectedRooms, frequency);
-      router.replace("/");
+      router.replace("/(tabs)/");
     } finally {
       setLoading(false);
     }

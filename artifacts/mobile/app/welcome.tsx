@@ -24,7 +24,7 @@ export default function WelcomeScreen() {
   function handleDemo() {
     setDemoLoading(true);
     enterDemo();
-    router.replace("/");
+    router.replace("/(tabs)/");
   }
 
   return (

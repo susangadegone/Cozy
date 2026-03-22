@@ -45,8 +45,13 @@ function RootLayoutNav() {
         },
       }}
     >
-      {/* ── Main app screens ─────────────────────────────────── */}
+      {/* ── Auth / loading entry point ────────────────────────── */}
       <Stack.Screen name="index" options={{ headerShown: false }} />
+
+      {/* ── Main tabs (no header — tabs have their own headers) ── */}
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+      {/* ── Stack screens pushed above tabs ─────────────────── */}
       <Stack.Screen
         name="room/[name]"
         options={{ headerShown: true, headerTransparent: false }}
@@ -62,18 +67,9 @@ function RootLayoutNav() {
 
       {/* ── Auth screens ─────────────────────────────────────── */}
       <Stack.Screen name="welcome" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="login"
-        options={{ title: "Log In", headerBackTitle: "Back" }}
-      />
-      <Stack.Screen
-        name="signup"
-        options={{ title: "Create Account", headerBackTitle: "Back" }}
-      />
-      <Stack.Screen
-        name="onboarding"
-        options={{ headerShown: false, gestureEnabled: false }}
-      />
+      <Stack.Screen name="login" options={{ title: "Log In", headerBackTitle: "Back" }} />
+      <Stack.Screen name="signup" options={{ title: "Create Account", headerBackTitle: "Back" }} />
+      <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
     </Stack>
   );
 }
