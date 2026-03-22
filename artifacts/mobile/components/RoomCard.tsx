@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -11,6 +11,9 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withDelay,
+  withTiming,
+  Easing,
 } from "react-native-reanimated";
 
 import { Room, ROOM_COLORS, ROOM_ICONS } from "@/types";
@@ -21,11 +24,13 @@ interface Props {
   total: number;
   completed: number;
   onPress: () => void;
+  index?: number;
+  animKey?: number;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function RoomCard({ room, total, completed, onPress }: Props) {
+export function RoomCard({ room, total, completed, onPress, index = 0, animKey = 0 }: Props) {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? Colors.dark : Colors.light;
   const roomColor = ROOM_COLORS[room];
@@ -36,8 +41,28 @@ export function RoomCard({ room, total, completed, onPress }: Props) {
   const pct = total > 0 ? completed / total : 0;
   const allDone = total > 0 && completed === total;
 
-  const animStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+  // ── Press animation ────────────────────────────────────────────────
+  const pressScale = useSharedValue(1);
+  const pressAnim = useAnimatedStyle(() => ({
+    transform: [{ scale: pressScale.value }],
+  }));
+
+  // ── Entrance stagger ────────────────────────────────────────────────
+  const entranceOpacity = useSharedValue(0);
+  const entranceY = useSharedValue(24);
+
+  useEffect(() => {
+    const delay = 300 + index * 70;
+    entranceOpacity.value = withDelay(delay, withTiming(1, { duration: 350 }));
+    entranceY.value = withDelay(
+      delay,
+      withTiming(0, { duration: 350, easing: Easing.out(Easing.quad) })
+    );
+  }, [animKey]);
+
+  const entranceStyle = useAnimatedStyle(() => ({
+    opacity: entranceOpacity.value,
+    transform: [{ translateY: entranceY.value }, { scale: pressScale.value }],
   }));
 
   return (
@@ -48,14 +73,14 @@ export function RoomCard({ room, total, completed, onPress }: Props) {
           backgroundColor: cardBg,
           shadowColor: colors.shadow,
         },
-        animStyle,
+        entranceStyle,
       ]}
       onPress={onPress}
       onPressIn={() => {
-        scale.value = withSpring(0.95, { damping: 15 });
+        pressScale.value = withSpring(0.96, { damping: 15, stiffness: 300 });
       }}
       onPressOut={() => {
-        scale.value = withSpring(1, { damping: 15 });
+        pressScale.value = withSpring(1, { damping: 15, stiffness: 300 });
       }}
     >
       <View

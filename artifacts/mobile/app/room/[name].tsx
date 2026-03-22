@@ -92,10 +92,13 @@ export default function ChoreListScreen() {
 
   const sections = useMemo(() => {
     const filtered = showCompleted ? chores : chores.filter((c) => !c.completed);
-    return FREQUENCY_ORDER.map((freq) => ({
-      title: freq,
-      data: filtered.filter((c) => c.frequency === freq),
-    })).filter((s) => s.data.length > 0);
+    return FREQUENCY_ORDER.map((freq) => {
+      const items = filtered.filter((c) => c.frequency === freq);
+      // Completed chores sink to the bottom within each section
+      const incomplete = items.filter((c) => !c.completed);
+      const complete = items.filter((c) => c.completed);
+      return { title: freq, data: [...incomplete, ...complete] };
+    }).filter((s) => s.data.length > 0);
   }, [chores, showCompleted]);
 
   const completed = chores.filter((c) => c.completed).length;
@@ -276,7 +279,7 @@ export default function ChoreListScreen() {
           ]}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            router.replace("/");
+            router.replace("/(tabs)/");
           }}
         >
           <Ionicons
