@@ -37,7 +37,7 @@ artifacts-monorepo/
 
 ## Artifacts
 
-### `artifacts/mobile` — Apartment Buddy (Expo)
+### `artifacts/mobile` — Tidy Buddy (Expo)
 
 Chore tracking app with:
 - Room-based chore organization: Kitchen, Living Room, Bedroom, Bathroom, Office, Laundry
