@@ -218,6 +218,9 @@ importers:
       '@nkzw/create-context-hook':
         specifier: ^1.1.0
         version: 1.1.0(react@19.1.0)
+      react-native-confetti-cannon:
+        specifier: ^1.5.2
+        version: 1.5.2
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2
@@ -4712,6 +4715,9 @@ packages:
 
   react-is@19.2.4:
     resolution: {integrity: sha512-W+EWGn2v0ApPKgKKCy/7s7WHXkboGcsrXE+2joLyVxkbyVQfO3MUEaUQDHoSmb8TFFrSKYa9mw64WZHNHSDzYA==}
+
+  react-native-confetti-cannon@1.5.2:
+    resolution: {integrity: sha512-IZuWjlW7QsdxEGNnvpD6W+7iKCCQhnd5BvuNvMtirU7Nxm8WS2N6LPGMBz1ZYDuusG+GRZkoXXTNCdoAAGpCTg==}
 
   react-native-gesture-handler@2.28.0:
     resolution: {integrity: sha512-0msfJ1vRxXKVgTgvL+1ZOoYw3/0z1R+Ked0+udoJhyplC2jbVKIJ8Z1bzWdpQRCV3QcQ87Op0zJVE5DhKK2A0A==}
@@ -10699,6 +10705,8 @@ snapshots:
   react-is@18.3.1: {}
 
   react-is@19.2.4: {}
+
+  react-native-confetti-cannon@1.5.2: {}
 
   react-native-gesture-handler@2.28.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
     dependencies:

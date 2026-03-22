@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -7,11 +7,14 @@ import {
   Pressable,
   Platform,
   useColorScheme,
+  Dimensions,
 } from "react-native";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLayoutEffect } from "react";
+import * as Haptics from "expo-haptics";
+import ConfettiCannon from "react-native-confetti-cannon";
 
 import Colors from "@/constants/colors";
 import { useChores } from "@/context/ChoresContext";
@@ -19,6 +22,7 @@ import { Room, ROOM_COLORS, ROOM_ICONS, Frequency } from "@/types";
 import { ChoreCard } from "@/components/ChoreCard";
 
 const FREQUENCY_ORDER: Frequency[] = ["Daily", "Weekly", "Monthly"];
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function ChoreListScreen() {
   const { name } = useLocalSearchParams<{ name: string }>();
@@ -26,9 +30,10 @@ export default function ChoreListScreen() {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? Colors.dark : Colors.light;
   const insets = useSafeAreaInsets();
-  const { getChoresByRoom, toggleChore } = useChores();
+  const { chores: allChores, getChoresByRoom, toggleChore } = useChores();
   const navigation = useNavigation();
   const [showCompleted, setShowCompleted] = useState(true);
+  const confettiRef = useRef<ConfettiCannon>(null);
 
   const roomColor = ROOM_COLORS[room];
   const iconColor = roomColor.icon;
@@ -36,23 +41,54 @@ export default function ChoreListScreen() {
   useLayoutEffect(() => {
     navigation.setOptions({
       title: room,
+      headerStyle: {
+        backgroundColor: colors.surface,
+        shadowColor: isDark ? "#000" : "rgba(43,122,120,0.12)",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 8,
+        elevation: 6,
+      },
+      headerTitleStyle: {
+        fontFamily: "Inter_700Bold",
+        fontSize: 17,
+        color: colors.text,
+      },
+      headerTintColor: colors.tint,
+      headerShadowVisible: true,
       headerRight: () => (
         <Pressable
           onPress={() =>
-            router.push({
-              pathname: "/add-chore",
-              params: { room },
-            })
+            router.push({ pathname: "/add-chore", params: { room } })
           }
-          hitSlop={8}
+          hitSlop={12}
+          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
         >
-          <Ionicons name="add" size={26} color={iconColor} />
+          <Ionicons name="add-circle-outline" size={26} color={iconColor} />
         </Pressable>
       ),
     });
-  }, [navigation, room, iconColor]);
+  }, [navigation, room, iconColor, colors, isDark]);
 
   const chores = getChoresByRoom(room);
+
+  const handleToggle = useCallback(
+    (id: string) => {
+      const chore = allChores.find((c) => c.id === id);
+      if (!chore) return;
+      const wasIncomplete = !chore.completed;
+      toggleChore(id);
+      if (wasIncomplete) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setTimeout(() => {
+          confettiRef.current?.start();
+        }, 80);
+      } else {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    },
+    [allChores, toggleChore]
+  );
 
   const sections = useMemo(() => {
     const filtered = showCompleted ? chores : chores.filter((c) => !c.completed);
@@ -64,6 +100,7 @@ export default function ChoreListScreen() {
 
   const completed = chores.filter((c) => c.completed).length;
   const total = chores.length;
+  const allDone = total > 0 && completed === total;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
   return (
@@ -73,7 +110,7 @@ export default function ChoreListScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={[
           styles.listContent,
-          { paddingBottom: bottomPad + 20 },
+          { paddingBottom: bottomPad + 100 },
         ]}
         showsVerticalScrollIndicator={false}
         stickySectionHeadersEnabled={false}
@@ -84,7 +121,7 @@ export default function ChoreListScreen() {
                 styles.statsCard,
                 {
                   backgroundColor: isDark ? roomColor.dark : roomColor.bg,
-                  shadowColor: colors.shadow,
+                  shadowColor: isDark ? "#000" : roomColor.icon,
                 },
               ]}
             >
@@ -112,7 +149,8 @@ export default function ChoreListScreen() {
                       { color: isDark ? "#E8F4F3" : "#17252A" },
                     ]}
                   >
-                    {completed}/{total}
+                    {completed}
+                    <Text style={styles.statsTotal}>/{total}</Text>
                   </Text>
                   <Text
                     style={[
@@ -124,9 +162,16 @@ export default function ChoreListScreen() {
                       },
                     ]}
                   >
-                    chores done
+                    {allDone ? "All done!" : "chores done"}
                   </Text>
                 </View>
+                {allDone && (
+                  <View
+                    style={[styles.allDoneBadge, { backgroundColor: colors.success }]}
+                  >
+                    <Ionicons name="checkmark-done" size={18} color="#fff" />
+                  </View>
+                )}
               </View>
 
               <View
@@ -143,10 +188,11 @@ export default function ChoreListScreen() {
                   style={[
                     styles.barFill,
                     {
-                      backgroundColor: iconColor,
-                      width: total > 0
-                        ? `${Math.round((completed / total) * 100)}%` as any
-                        : "0%",
+                      backgroundColor: allDone ? colors.success : iconColor,
+                      width:
+                        total > 0
+                          ? (`${Math.round((completed / total) * 100)}%` as any)
+                          : "0%",
                     },
                   ]}
                 />
@@ -154,12 +200,19 @@ export default function ChoreListScreen() {
             </View>
 
             <Pressable
-              style={[styles.filterBtn, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+              style={({ pressed }) => [
+                styles.filterBtn,
+                {
+                  backgroundColor: colors.surface,
+                  borderColor: colors.cardBorder,
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}
               onPress={() => setShowCompleted(!showCompleted)}
             >
               <Ionicons
                 name={showCompleted ? "eye-outline" : "eye-off-outline"}
-                size={16}
+                size={15}
                 color={colors.textSecondary}
               />
               <Text style={[styles.filterText, { color: colors.textSecondary }]}>
@@ -176,27 +229,79 @@ export default function ChoreListScreen() {
         renderItem={({ item }) => (
           <ChoreCard
             chore={item}
-            onToggle={() => toggleChore(item.id)}
+            onToggle={() => handleToggle(item.id)}
             onPress={() =>
-              router.push({
-                pathname: "/chore/[id]",
-                params: { id: item.id },
-              })
+              router.push({ pathname: "/chore/[id]", params: { id: item.id } })
             }
           />
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Ionicons name="checkmark-circle-outline" size={48} color={colors.textSecondary} />
+            <Ionicons
+              name="checkmark-circle-outline"
+              size={56}
+              color={colors.textSecondary}
+            />
             <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              All done!
+              {showCompleted ? "No chores yet" : "All caught up!"}
             </Text>
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              No chores here. Add one with the + button.
+              {showCompleted
+                ? "Tap + to add your first chore."
+                : "All chores are done. Great work!"}
             </Text>
           </View>
         }
       />
+
+      <View
+        style={[
+          styles.footer,
+          {
+            paddingBottom: bottomPad + 10,
+            backgroundColor: colors.surface,
+            borderTopColor: colors.separator,
+            shadowColor: isDark ? "#000" : "rgba(43,122,120,0.15)",
+          },
+        ]}
+      >
+        <Pressable
+          style={({ pressed }) => [
+            styles.doneBtn,
+            {
+              backgroundColor: allDone ? colors.success : colors.tint,
+              opacity: pressed ? 0.88 : 1,
+              transform: [{ scale: pressed ? 0.98 : 1 }],
+            },
+          ]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            router.replace("/");
+          }}
+        >
+          <Ionicons
+            name={allDone ? "checkmark-done-circle" : "home-outline"}
+            size={20}
+            color="#fff"
+          />
+          <Text style={styles.doneBtnText}>
+            {allDone ? "All Done — Go Home" : "Done"}
+          </Text>
+        </Pressable>
+      </View>
+
+      {Platform.OS !== "web" && (
+        <ConfettiCannon
+          ref={confettiRef}
+          count={80}
+          origin={{ x: SCREEN_WIDTH / 2, y: -20 }}
+          autoStart={false}
+          fadeOut
+          fallSpeed={3000}
+          explosionSpeed={350}
+          colors={[iconColor, "#F6AE2D", "#27AE60", "#2B7A78", "#E55C5C", "#fff"]}
+        />
+      )}
     </View>
   );
 }
@@ -207,16 +312,15 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
-    gap: 0,
   },
   statsCard: {
     borderRadius: 20,
     padding: 20,
     marginBottom: 12,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 5,
   },
   statsRow: {
     flexDirection: "row",
@@ -236,12 +340,24 @@ const styles = StyleSheet.create({
   },
   statsCount: {
     fontFamily: "Inter_700Bold",
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 30,
+    lineHeight: 36,
+  },
+  statsTotal: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 22,
   },
   statsLabel: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Inter_500Medium",
     fontSize: 14,
+    marginTop: 2,
+  },
+  allDoneBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
   },
   barBg: {
     height: 8,
@@ -256,8 +372,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 6,
     alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     borderRadius: 20,
     borderWidth: 1,
     alignSelf: "flex-start",
@@ -265,15 +381,15 @@ const styles = StyleSheet.create({
   },
   filterText: {
     fontFamily: "Inter_500Medium",
-    fontSize: 13,
+    fontSize: 12,
   },
   sectionHeader: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 12,
-    letterSpacing: 0.8,
+    fontSize: 11,
+    letterSpacing: 1,
     textTransform: "uppercase",
     marginBottom: 10,
-    marginTop: 4,
+    marginTop: 6,
   },
   empty: {
     alignItems: "center",
@@ -289,5 +405,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     paddingHorizontal: 30,
+  },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingTop: 12,
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  doneBtn: {
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 15,
+    borderRadius: 16,
+  },
+  doneBtnText: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 16,
+    color: "#fff",
+    letterSpacing: 0.2,
   },
 });

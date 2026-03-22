@@ -7,12 +7,10 @@ import {
   useColorScheme,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  withTiming,
 } from "react-native-reanimated";
 
 import { Chore } from "@/types";
@@ -34,7 +32,6 @@ export function ChoreCard({ chore, onToggle, onPress }: Props) {
   const checkScale = useSharedValue(chore.completed ? 1 : 0);
 
   const handleToggle = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     checkScale.value = withSpring(chore.completed ? 0 : 1, { damping: 12 });
     onToggle();
   };
