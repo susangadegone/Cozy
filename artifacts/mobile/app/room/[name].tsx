@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,9 @@ import {
   Platform,
   useColorScheme,
   ScrollView,
+  Dimensions,
 } from "react-native";
+import ConfettiCannon from "react-native-confetti-cannon";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,6 +24,7 @@ import { Room, ROOM_COLORS, ROOM_ICONS, Frequency } from "@/types";
 import { ChoreCard } from "@/components/ChoreCard";
 
 const FREQUENCY_ORDER: Frequency[] = ["Daily", "Weekly", "Monthly"];
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function ChoreListScreen() {
   const { name } = useLocalSearchParams<{ name: string }>();
@@ -34,6 +37,8 @@ export default function ChoreListScreen() {
   const navigation = useNavigation();
   const [showCompleted, setShowCompleted] = useState(true);
   const [memberFilter, setMemberFilter] = useState<string | null>(null);
+  const confettiRef = useRef<ConfettiCannon>(null);
+  const prevCompleted = useRef(-1);
 
   const householdMembers = user?.householdMembers ?? [];
 
@@ -73,6 +78,22 @@ export default function ChoreListScreen() {
   }, [navigation, room, iconColor, colors, isDark]);
 
   const chores = getChoresByRoom(room);
+
+  // Fire confetti when all chores in the room are completed
+  useEffect(() => {
+    if (chores.length === 0) return;
+    const completedCount = chores.filter((c) => c.completed).length;
+    if (
+      completedCount === chores.length &&
+      prevCompleted.current !== completedCount &&
+      prevCompleted.current !== -1
+    ) {
+      if (Platform.OS !== "web") {
+        setTimeout(() => confettiRef.current?.start(), 250);
+      }
+    }
+    prevCompleted.current = completedCount;
+  }, [chores]);
 
   const handleToggle = useCallback(
     (id: string) => {
@@ -342,6 +363,18 @@ export default function ChoreListScreen() {
         </Pressable>
       </View>
 
+      {Platform.OS !== "web" && (
+        <ConfettiCannon
+          ref={confettiRef}
+          count={80}
+          origin={{ x: SCREEN_WIDTH / 2, y: -20 }}
+          autoStart={false}
+          fadeOut
+          fallSpeed={3000}
+          explosionSpeed={350}
+          colors={[iconColor, "#F6AE2D", "#27AE60", "#2B7A78", "#E55C5C", "#fff"]}
+        />
+      )}
     </View>
   );
 }

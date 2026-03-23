@@ -31,6 +31,8 @@ import Animated, {
   withSequence,
 } from "react-native-reanimated";
 
+import ConfettiCannon from "react-native-confetti-cannon";
+
 import Colors from "@/constants/colors";
 import { useChores } from "@/context/ChoresContext";
 import { Chore, ROOM_COLORS } from "@/types";
@@ -296,6 +298,82 @@ function DayHeader({
   );
 }
 
+// ─── Chore list (extracted so React sees a stable component type) ─────────────
+
+interface ChoreListProps {
+  dateStr: string;
+  allChores: Chore[];
+  colors: any;
+  isDark: boolean;
+  bottomPad: number;
+  dragChoreId: string | null;
+  isWeekView: boolean;
+  onToggle: (id: string) => void;
+  onPress: (chore: Chore) => void;
+  onStartDrag: (chore: Chore, pageX: number, pageY: number) => void;
+}
+
+const ChoreListView = React.memo(function ChoreListView({
+  dateStr,
+  allChores,
+  colors,
+  isDark,
+  bottomPad,
+  dragChoreId,
+  isWeekView,
+  onToggle,
+  onPress,
+  onStartDrag,
+}: ChoreListProps) {
+  const dc = useMemo(
+    () => getChoresForDate(allChores, dateStr),
+    [allChores, dateStr]
+  );
+  const sorted = useMemo(
+    () =>
+      [...dc].sort((a, b) => {
+        if (a.completed !== b.completed) return a.completed ? 1 : -1;
+        return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+      }),
+    [dc]
+  );
+
+  return (
+    <FlatList
+      data={sorted}
+      keyExtractor={(item) => item.id}
+      contentContainerStyle={[
+        styles.choreListContent,
+        { paddingBottom: bottomPad + 24 },
+      ]}
+      showsVerticalScrollIndicator={false}
+      ListHeaderComponent={
+        <DayHeader dateStr={dateStr} chores={dc} colors={colors} />
+      }
+      ListEmptyComponent={<EmptyDay colors={colors} />}
+      renderItem={({ item }) => (
+        <ChoreRow
+          chore={item}
+          colors={colors}
+          isDark={isDark}
+          lifted={dragChoreId === item.id}
+          onToggle={() => {
+            if (Platform.OS !== "web")
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            onToggle(item.id);
+          }}
+          onPress={() => onPress(item)}
+          onLongPress={
+            isWeekView
+              ? (pageX, pageY) => onStartDrag(item, pageX, pageY)
+              : undefined
+          }
+        />
+      )}
+    />
+  );
+});
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function CalendarTab() {
@@ -316,9 +394,28 @@ export default function CalendarTab() {
   const dragY = useRef(new RNAnimated.Value(0)).current;
   const dragVisible = useRef(new RNAnimated.Value(0)).current;
   const dayTabsY = useRef(0);
+  const confettiRef = useRef<ConfettiCannon>(null);
+  const prevDoneCount = useRef(-1);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+
+  // Confetti when all chores for selected day are completed
+  useEffect(() => {
+    if (dayChores.length === 0) return;
+    const doneCount = dayChores.filter((c) => c.completed).length;
+    if (
+      doneCount === dayChores.length &&
+      prevDoneCount.current !== doneCount &&
+      prevDoneCount.current !== -1
+    ) {
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setTimeout(() => confettiRef.current?.start(), 150);
+      }
+    }
+    prevDoneCount.current = doneCount;
+  }, [dayChores]);
 
   // Load saved view preference on mount
   useEffect(() => {
@@ -534,7 +631,18 @@ export default function CalendarTab() {
         </View>
 
         {/* Chore list */}
-        <ChoreList dateStr={selectedDate} />
+        <ChoreListView
+          dateStr={selectedDate}
+          allChores={chores}
+          colors={colors}
+          isDark={isDark}
+          bottomPad={bottomPad}
+          dragChoreId={dragChore?.id ?? null}
+          isWeekView
+          onToggle={handleToggleChore}
+          onPress={handlePressChore}
+          onStartDrag={startDrag}
+        />
       </View>
     );
   }
@@ -585,7 +693,18 @@ export default function CalendarTab() {
           }}
         />
 
-        <ChoreList dateStr={selectedDate} />
+        <ChoreListView
+          dateStr={selectedDate}
+          allChores={chores}
+          colors={colors}
+          isDark={isDark}
+          bottomPad={bottomPad}
+          dragChoreId={null}
+          isWeekView={false}
+          onToggle={handleToggleChore}
+          onPress={handlePressChore}
+          onStartDrag={startDrag}
+        />
       </View>
     );
   }
@@ -627,57 +746,30 @@ export default function CalendarTab() {
           </Pressable>
         )}
 
-        <ChoreList dateStr={selectedDate} />
+        <ChoreListView
+          dateStr={selectedDate}
+          allChores={chores}
+          colors={colors}
+          isDark={isDark}
+          bottomPad={bottomPad}
+          dragChoreId={null}
+          isWeekView={false}
+          onToggle={handleToggleChore}
+          onPress={handlePressChore}
+          onStartDrag={startDrag}
+        />
       </View>
     );
   }
 
-  // ── Shared chore list ────────────────────────────────────────────────────
-
-  function ChoreList({ dateStr }: { dateStr: string }) {
-    const dc = useMemo(() => getChoresForDate(chores, dateStr), [dateStr]);
-    const sorted = useMemo(
-      () => [...dc].sort((a, b) => {
-        if (a.completed !== b.completed) return a.completed ? 1 : -1;
-        return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
-      }),
-      [dc]
-    );
-    const done = dc.filter((c) => c.completed).length;
-
-    return (
-      <FlatList
-        data={sorted}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={[
-          styles.choreListContent,
-          { paddingBottom: bottomPad + 24 },
-        ]}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <DayHeader dateStr={dateStr} chores={dc} colors={colors} />
-        }
-        ListEmptyComponent={<EmptyDay colors={colors} />}
-        renderItem={({ item }) => (
-          <ChoreRow
-            chore={item}
-            colors={colors}
-            isDark={isDark}
-            lifted={dragChore?.id === item.id}
-            onToggle={() => {
-              if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              toggleChore(item.id);
-            }}
-            onPress={() => setModalChore(item)}
-            onLongPress={view === "week"
-              ? (pageX, pageY) => startDrag(item, pageX, pageY)
-              : undefined
-            }
-          />
-        )}
-      />
-    );
-  }
+  const handleToggleChore = useCallback(
+    (id: string) => toggleChore(id),
+    [toggleChore]
+  );
+  const handlePressChore = useCallback(
+    (chore: Chore) => setModalChore(chore),
+    []
+  );
 
   if (!viewLoaded) return null;
 
@@ -748,6 +840,19 @@ export default function CalendarTab() {
         />
       )}
 
+      {/* ── Confetti ─────────────────────────────────────────────────── */}
+      {Platform.OS !== "web" && (
+        <ConfettiCannon
+          ref={confettiRef}
+          count={80}
+          origin={{ x: SW / 2, y: -10 }}
+          autoStart={false}
+          fadeOut
+          fallSpeed={3000}
+          explosionSpeed={350}
+          colors={["#2B7A78", "#F6AE2D", "#27AE60", "#3AAFA9", "#E55C5C", "#fff"]}
+        />
+      )}
     </View>
   );
 }
