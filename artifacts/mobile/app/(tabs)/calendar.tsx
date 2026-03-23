@@ -400,23 +400,6 @@ export default function CalendarTab() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
-  // Confetti when all chores for selected day are completed
-  useEffect(() => {
-    if (dayChores.length === 0) return;
-    const doneCount = dayChores.filter((c) => c.completed).length;
-    if (
-      doneCount === dayChores.length &&
-      prevDoneCount.current !== doneCount &&
-      prevDoneCount.current !== -1
-    ) {
-      if (Platform.OS !== "web") {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setTimeout(() => confettiRef.current?.start(), 150);
-      }
-    }
-    prevDoneCount.current = doneCount;
-  }, [dayChores]);
-
   // Load saved view preference on mount
   useEffect(() => {
     loadCalendarView().then((saved) => {
@@ -433,6 +416,23 @@ export default function CalendarTab() {
     () => getChoresForDate(chores, selectedDate),
     [chores, selectedDate]
   );
+
+  // Confetti when all chores for selected day are completed (must be after dayChores)
+  useEffect(() => {
+    if (dayChores.length === 0) return;
+    const doneCount = dayChores.filter((c) => c.completed).length;
+    if (
+      doneCount === dayChores.length &&
+      prevDoneCount.current !== doneCount &&
+      prevDoneCount.current !== -1
+    ) {
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setTimeout(() => confettiRef.current?.start(), 150);
+      }
+    }
+    prevDoneCount.current = doneCount;
+  }, [dayChores]);
 
 
   const handleViewChange = useCallback((v: CalendarView) => {
