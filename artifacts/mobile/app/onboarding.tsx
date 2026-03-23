@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   useColorScheme,
   Dimensions,
+  TextInput,
 } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -101,6 +102,7 @@ export default function OnboardingScreen() {
 
   // Answers
   const [livingSituation, setLivingSituation] = useState("");
+  const [memberNames, setMemberNames] = useState<string[]>(["", ""]);
   const [selectedRooms, setSelectedRooms] = useState<Room[]>([]);
   const [frequency, setFrequency] = useState("");
   const [preferredTime, setPreferredTime] = useState("");
@@ -150,6 +152,7 @@ export default function OnboardingScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setLoading(true);
     try {
+      const filledNames = memberNames.filter((n) => n.trim().length > 0);
       await completeOnboarding({
         selectedRooms: selectedRooms.length ? selectedRooms : ["Kitchen", "Living Room", "Bedroom"],
         frequency: frequency || "Bit of both",
@@ -158,6 +161,7 @@ export default function OnboardingScreen() {
         sessionLength: sessionLength || undefined,
         hasPets: hasPets ?? undefined,
         motivation: motivation || undefined,
+        householdMembers: filledNames.length > 0 ? filledNames : undefined,
       });
       router.replace("/(tabs)/");
     } finally {
@@ -369,6 +373,37 @@ export default function OnboardingScreen() {
                   />
                 ))}
               </View>
+
+              {livingSituation && livingSituation !== "Solo" && (
+                <View style={styles.memberNamesWrap}>
+                  <Text style={[styles.memberNamesTitle, { color: colors.textSecondary }]}>
+                    Who do you live with? (optional)
+                  </Text>
+                  {(livingSituation === "Partner"
+                    ? [0]
+                    : [0, 1, 2]
+                  ).map((i) => (
+                    <View key={i} style={[styles.memberNameRow, { borderColor: colors.border, backgroundColor: colors.card }]}>
+                      <Ionicons name="person-circle-outline" size={20} color={colors.primary} />
+                      <TextInput
+                        style={[styles.memberNameInput, { color: colors.text }]}
+                        placeholder={`Housemate ${i + 1} name…`}
+                        placeholderTextColor={colors.textSecondary}
+                        value={memberNames[i] ?? ""}
+                        onChangeText={(t) =>
+                          setMemberNames((prev) => {
+                            const next = [...prev];
+                            next[i] = t;
+                            return next;
+                          })
+                        }
+                        maxLength={30}
+                        autoCorrect={false}
+                      />
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
           )}
 
@@ -869,6 +904,26 @@ const styles = StyleSheet.create({
   featureRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   featureText: { fontFamily: "Inter_500Medium", fontSize: 14 },
   optList: { marginTop: 16, gap: 10 },
+  memberNamesWrap: { marginTop: 20, gap: 10 },
+  memberNamesTitle: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 13,
+    marginBottom: 4,
+  },
+  memberNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  memberNameInput: {
+    flex: 1,
+    fontFamily: "Inter_400Regular",
+    fontSize: 15,
+  },
   optCard: {
     flexDirection: "row",
     alignItems: "center",

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -7,22 +7,21 @@ import {
   Pressable,
   Platform,
   useColorScheme,
-  Dimensions,
+  ScrollView,
 } from "react-native";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLayoutEffect } from "react";
 import * as Haptics from "expo-haptics";
-import ConfettiCannon from "react-native-confetti-cannon";
 
 import Colors from "@/constants/colors";
 import { useChores } from "@/context/ChoresContext";
+import { useAuth } from "@/context/AuthContext";
 import { Room, ROOM_COLORS, ROOM_ICONS, Frequency } from "@/types";
 import { ChoreCard } from "@/components/ChoreCard";
 
 const FREQUENCY_ORDER: Frequency[] = ["Daily", "Weekly", "Monthly"];
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function ChoreListScreen() {
   const { name } = useLocalSearchParams<{ name: string }>();
@@ -31,9 +30,12 @@ export default function ChoreListScreen() {
   const colors = isDark ? Colors.dark : Colors.light;
   const insets = useSafeAreaInsets();
   const { chores: allChores, getChoresByRoom, toggleChore } = useChores();
+  const { user } = useAuth();
   const navigation = useNavigation();
   const [showCompleted, setShowCompleted] = useState(true);
-  const confettiRef = useRef<ConfettiCannon>(null);
+  const [memberFilter, setMemberFilter] = useState<string | null>(null);
+
+  const householdMembers = user?.householdMembers ?? [];
 
   const roomColor = ROOM_COLORS[room];
   const iconColor = roomColor.icon;
@@ -80,9 +82,6 @@ export default function ChoreListScreen() {
       toggleChore(id);
       if (wasIncomplete) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setTimeout(() => {
-          confettiRef.current?.start();
-        }, 80);
       } else {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
@@ -91,9 +90,16 @@ export default function ChoreListScreen() {
   );
 
   const sections = useMemo(() => {
-    const filtered = showCompleted ? chores : chores.filter((c) => !c.completed);
+    let base = showCompleted ? chores : chores.filter((c) => !c.completed);
+    if (memberFilter) {
+      base = base.filter((c) =>
+        memberFilter === "Unassigned"
+          ? !c.assignedTo
+          : c.assignedTo === memberFilter
+      );
+    }
     return FREQUENCY_ORDER.map((freq) => {
-      const items = filtered.filter((c) => c.frequency === freq);
+      const items = base.filter((c) => c.frequency === freq);
       // Completed chores sink to the bottom within each section
       const incomplete = items.filter((c) => !c.completed);
       const complete = items.filter((c) => c.completed);
@@ -202,26 +208,69 @@ export default function ChoreListScreen() {
               </View>
             </View>
 
-            <Pressable
-              style={({ pressed }) => [
-                styles.filterBtn,
-                {
-                  backgroundColor: colors.surface,
-                  borderColor: colors.cardBorder,
-                  opacity: pressed ? 0.7 : 1,
-                },
-              ]}
-              onPress={() => setShowCompleted(!showCompleted)}
-            >
-              <Ionicons
-                name={showCompleted ? "eye-outline" : "eye-off-outline"}
-                size={15}
-                color={colors.textSecondary}
-              />
-              <Text style={[styles.filterText, { color: colors.textSecondary }]}>
-                {showCompleted ? "Hide completed" : "Show completed"}
-              </Text>
-            </Pressable>
+            <View style={styles.filterRow}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.filterBtn,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.cardBorder,
+                    opacity: pressed ? 0.7 : 1,
+                  },
+                ]}
+                onPress={() => setShowCompleted(!showCompleted)}
+              >
+                <Ionicons
+                  name={showCompleted ? "eye-outline" : "eye-off-outline"}
+                  size={15}
+                  color={colors.textSecondary}
+                />
+                <Text style={[styles.filterText, { color: colors.textSecondary }]}>
+                  {showCompleted ? "Hide completed" : "Show completed"}
+                </Text>
+              </Pressable>
+            </View>
+
+            {/* Member filter — only shown for households with 2+ members */}
+            {householdMembers.length > 1 && (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.memberFilterRow}
+              >
+                {[null, ...householdMembers].map((m) => {
+                  const label = m ?? "Everyone";
+                  const isActive = memberFilter === m;
+                  return (
+                    <Pressable
+                      key={label}
+                      onPress={() => {
+                        if (Platform.OS !== "web") Haptics.selectionAsync();
+                        setMemberFilter(isActive ? null : m);
+                      }}
+                      style={[
+                        styles.memberChip,
+                        {
+                          backgroundColor: isActive ? iconColor : colors.surface,
+                          borderColor: isActive ? iconColor : colors.cardBorder,
+                        },
+                      ]}
+                    >
+                      {m && (
+                        <View style={[styles.memberAvatar, { backgroundColor: isActive ? "rgba(255,255,255,0.3)" : iconColor + "22" }]}>
+                          <Text style={[styles.memberAvatarText, { color: isActive ? "#fff" : iconColor }]}>
+                            {m.charAt(0).toUpperCase()}
+                          </Text>
+                        </View>
+                      )}
+                      <Text style={[styles.memberChipText, { color: isActive ? "#fff" : colors.text }]}>
+                        {label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            )}
           </View>
         }
         renderSectionHeader={({ section }) => (
@@ -293,18 +342,6 @@ export default function ChoreListScreen() {
         </Pressable>
       </View>
 
-      {Platform.OS !== "web" && (
-        <ConfettiCannon
-          ref={confettiRef}
-          count={80}
-          origin={{ x: SCREEN_WIDTH / 2, y: -20 }}
-          autoStart={false}
-          fadeOut
-          fallSpeed={3000}
-          explosionSpeed={350}
-          colors={[iconColor, "#F6AE2D", "#27AE60", "#2B7A78", "#E55C5C", "#fff"]}
-        />
-      )}
     </View>
   );
 }
@@ -371,6 +408,9 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
   },
+  filterRow: {
+    marginBottom: 10,
+  },
   filterBtn: {
     flexDirection: "row",
     gap: 6,
@@ -380,11 +420,40 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     alignSelf: "flex-start",
-    marginBottom: 16,
   },
   filterText: {
     fontFamily: "Inter_500Medium",
     fontSize: 12,
+  },
+  memberFilterRow: {
+    flexDirection: "row",
+    gap: 8,
+    paddingBottom: 14,
+    paddingTop: 2,
+  },
+  memberChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1.5,
+  },
+  memberAvatar: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  memberAvatarText: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 10,
+  },
+  memberChipText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
   },
   sectionHeader: {
     fontFamily: "Inter_600SemiBold",

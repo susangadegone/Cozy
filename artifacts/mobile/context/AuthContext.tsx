@@ -16,6 +16,7 @@ export interface OnboardingData {
   sessionLength?: string;
   hasPets?: boolean;
   motivation?: string;
+  householdMembers?: string[];
 }
 
 interface AuthContextValue {
@@ -96,11 +97,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       selectedRooms: ["Kitchen", "Living Room", "Bedroom", "Bathroom", "Office", "Laundry"],
       cleaningFrequency: "Bit of both",
       isDemo: true,
-      livingSituation: "Solo",
+      livingSituation: "Partner",
       preferredTime: "Evening",
       sessionLength: "15–30 min",
       hasPets: false,
       motivation: "Stats & progress",
+      householdMembers: ["Alex", "Sam"],
     };
     // Demo is in-memory only — not saved to AsyncStorage so it resets on relaunch
     setUser(demoUser);
@@ -119,6 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         sessionLength: data.sessionLength,
         hasPets: data.hasPets,
         motivation: data.motivation,
+        householdMembers: data.householdMembers,
       };
       // Demo users stay in-memory only
       if (!user.isDemo) await saveUser(updated);

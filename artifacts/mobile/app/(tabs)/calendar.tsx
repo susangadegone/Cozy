@@ -30,7 +30,6 @@ import Animated, {
   withSpring,
   withSequence,
 } from "react-native-reanimated";
-import ConfettiCannon from "react-native-confetti-cannon";
 
 import Colors from "@/constants/colors";
 import { useChores } from "@/context/ChoresContext";
@@ -318,9 +317,6 @@ export default function CalendarTab() {
   const dragVisible = useRef(new RNAnimated.Value(0)).current;
   const dayTabsY = useRef(0);
 
-  const confettiRef = useRef<ConfettiCannon>(null);
-  const prevDoneCount = useRef(-1);
-
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
@@ -341,22 +337,6 @@ export default function CalendarTab() {
     [chores, selectedDate]
   );
 
-  // Confetti when all chores for selected day are completed
-  useEffect(() => {
-    if (dayChores.length === 0) return;
-    const doneCount = dayChores.filter((c) => c.completed).length;
-    if (
-      doneCount === dayChores.length &&
-      prevDoneCount.current !== doneCount &&
-      prevDoneCount.current !== -1
-    ) {
-      if (Platform.OS !== "web") {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setTimeout(() => confettiRef.current?.start(), 150);
-      }
-    }
-    prevDoneCount.current = doneCount;
-  }, [dayChores]);
 
   const handleViewChange = useCallback((v: CalendarView) => {
     if (Platform.OS !== "web") Haptics.selectionAsync();
@@ -768,19 +748,6 @@ export default function CalendarTab() {
         />
       )}
 
-      {/* ── Confetti ─────────────────────────────────────────────────── */}
-      {Platform.OS !== "web" && (
-        <ConfettiCannon
-          ref={confettiRef}
-          count={80}
-          origin={{ x: SW / 2, y: -10 }}
-          autoStart={false}
-          fadeOut
-          fallSpeed={3000}
-          explosionSpeed={350}
-          colors={["#2B7A78", "#F6AE2D", "#27AE60", "#3AAFA9", "#E55C5C", "#fff"]}
-        />
-      )}
     </View>
   );
 }

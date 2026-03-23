@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
 import { useChores } from "@/context/ChoresContext";
+import { useAuth } from "@/context/AuthContext";
 import { Room, ROOMS, Frequency, ROOM_COLORS, ROOM_ICONS } from "@/types";
 import { FrequencyBadge } from "@/components/FrequencyBadge";
 
@@ -28,18 +29,24 @@ export default function AddChoreScreen() {
   const colors = isDark ? Colors.dark : Colors.light;
   const insets = useSafeAreaInsets();
   const { addChore } = useChores();
+  const { user } = useAuth();
 
   const [title, setTitle] = useState("");
   const [room, setRoom] = useState<Room>((presetRoom as Room) || "Kitchen");
   const [frequency, setFrequency] = useState<Frequency>("Weekly");
   const [estimatedTime, setEstimatedTime] = useState(15);
+  const [assignedTo, setAssignedTo] = useState<string | undefined>(undefined);
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+
+  const members = user?.householdMembers ?? [];
+  const showAssign = members.length >= 2;
 
   const isValid = title.trim().length > 0;
 
   const handleSave = () => {
     if (!isValid) return;
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    if (Platform.OS !== "web")
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     addChore({
       title: title.trim(),
       room,
@@ -47,6 +54,7 @@ export default function AddChoreScreen() {
       completed: false,
       estimatedTime,
       subTasks: [],
+      assignedTo: assignedTo || undefined,
     });
     router.back();
   };
@@ -98,7 +106,8 @@ export default function AddChoreScreen() {
                 <Pressable
                   key={r}
                   onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    if (Platform.OS !== "web")
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     setRoom(r);
                   }}
                   style={[
@@ -140,7 +149,8 @@ export default function AddChoreScreen() {
               <Pressable
                 key={f}
                 onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  if (Platform.OS !== "web")
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setFrequency(f);
                 }}
                 style={[
@@ -178,7 +188,8 @@ export default function AddChoreScreen() {
               <Pressable
                 key={t}
                 onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  if (Platform.OS !== "web")
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setEstimatedTime(t);
                 }}
                 style={[
@@ -203,6 +214,68 @@ export default function AddChoreScreen() {
             ))}
           </View>
         </View>
+
+        {showAssign && (
+          <View style={styles.section}>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>
+              ASSIGN TO
+            </Text>
+            <View style={styles.assignRow}>
+              <Pressable
+                onPress={() => {
+                  if (Platform.OS !== "web")
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setAssignedTo(undefined);
+                }}
+                style={[
+                  styles.assignChip,
+                  {
+                    backgroundColor: assignedTo === undefined ? colors.tint : colors.surface,
+                    borderColor: assignedTo === undefined ? colors.tint : colors.cardBorder,
+                  },
+                ]}
+              >
+                <Ionicons
+                  name="people-outline"
+                  size={14}
+                  color={assignedTo === undefined ? "#fff" : colors.textSecondary}
+                />
+                <Text style={[styles.assignChipText, { color: assignedTo === undefined ? "#fff" : colors.text }]}>
+                  Anyone
+                </Text>
+              </Pressable>
+              {members.map((m) => {
+                const selected = assignedTo === m;
+                return (
+                  <Pressable
+                    key={m}
+                    onPress={() => {
+                      if (Platform.OS !== "web")
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setAssignedTo(m);
+                    }}
+                    style={[
+                      styles.assignChip,
+                      {
+                        backgroundColor: selected ? colors.tint : colors.surface,
+                        borderColor: selected ? colors.tint : colors.cardBorder,
+                      },
+                    ]}
+                  >
+                    <View style={[styles.assignAvatar, { backgroundColor: selected ? "rgba(255,255,255,0.25)" : colors.tintLight }]}>
+                      <Text style={[styles.assignAvatarText, { color: selected ? "#fff" : colors.tint }]}>
+                        {m.charAt(0).toUpperCase()}
+                      </Text>
+                    </View>
+                    <Text style={[styles.assignChipText, { color: selected ? "#fff" : colors.text }]}>
+                      {m}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        )}
       </ScrollView>
 
       <View
@@ -311,6 +384,35 @@ const styles = StyleSheet.create({
   timeText: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 14,
+  },
+  assignRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  assignChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 20,
+    borderWidth: 1.5,
+  },
+  assignAvatar: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  assignAvatarText: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 10,
+  },
+  assignChipText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
   },
   footer: {
     padding: 16,

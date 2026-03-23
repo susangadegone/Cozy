@@ -142,6 +142,18 @@ export const ChoreCard = React.memo(function ChoreCard({ chore, onToggle, onPres
               </Text>
             </View>
           )}
+          {chore.assignedTo && (
+            <View style={[styles.assigneeBadge, { backgroundColor: colors.tintLight }]}>
+              <View style={[styles.assigneeAvatar, { backgroundColor: colors.tint }]}>
+                <Text style={styles.assigneeAvatarText}>
+                  {chore.assignedTo.charAt(0).toUpperCase()}
+                </Text>
+              </View>
+              <Text style={[styles.assigneeText, { color: colors.tint }]}>
+                {chore.assignedTo}
+              </Text>
+            </View>
+          )}
         </View>
       </View>
     </AnimatedPressable>
@@ -199,4 +211,28 @@ const styles = StyleSheet.create({
   },
   pill: { flexDirection: "row", gap: 3, alignItems: "center" },
   pillText: { fontFamily: "Inter_400Regular", fontSize: 11 },
+  assigneeBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  assigneeAvatar: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  assigneeAvatarText: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 8,
+    color: "#fff",
+  },
+  assigneeText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 10,
+  },
 });

@@ -14,6 +14,7 @@ export interface UserProfile {
   sessionLength?: string;
   hasPets?: boolean;
   motivation?: string;
+  householdMembers?: string[]; // names of everyone in the household (including the user)
 }
 
 export interface SubTask {
@@ -34,6 +35,7 @@ export interface Chore {
   notes?: string;
   sortOrder?: number;
   scheduledDate?: string; // YYYY-MM-DD override — chore only appears on this date
+  assignedTo?: string;   // name of the household member responsible
 }
 
 export type Room =

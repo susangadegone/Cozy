@@ -8,7 +8,6 @@ import {
   Platform,
   useColorScheme,
   RefreshControl,
-  Dimensions,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,15 +21,12 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
-import ConfettiCannon from "react-native-confetti-cannon";
 
 import Colors from "@/constants/colors";
 import { useChores } from "@/context/ChoresContext";
 import { useAuth } from "@/context/AuthContext";
 import { ROOMS } from "@/types";
 import { RoomCard } from "@/components/RoomCard";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -80,7 +76,6 @@ export default function HomeTab() {
   const colors = isDark ? Colors.dark : Colors.light;
   const { user } = useAuth();
   const { chores, error, retryLoad } = useChores();
-  const confettiRef = useRef<ConfettiCannon>(null);
   const prevAllDone = useRef(false);
   const flatRef = useRef<FlatList>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -99,7 +94,6 @@ export default function HomeTab() {
     if (allDone && !prevAllDone.current) {
       if (Platform.OS !== "web") {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setTimeout(() => confettiRef.current?.start(), 200);
       }
     }
     prevAllDone.current = allDone;
@@ -295,18 +289,6 @@ export default function HomeTab() {
         )}
       />
 
-      {Platform.OS !== "web" && (
-        <ConfettiCannon
-          ref={confettiRef}
-          count={120}
-          origin={{ x: SCREEN_WIDTH / 2, y: -10 }}
-          autoStart={false}
-          fadeOut
-          fallSpeed={3500}
-          explosionSpeed={400}
-          colors={["#2B7A78", "#F6AE2D", "#27AE60", "#3AAFA9", "#E55C5C", "#fff"]}
-        />
-      )}
     </View>
   );
 }
