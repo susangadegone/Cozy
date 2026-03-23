@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { Chore, DEFAULT_CHORES, Room } from "@/types";
@@ -14,12 +15,14 @@ interface ChoresContextValue {
   chores: Chore[];
   loading: boolean;
   error: string | null;
+  retryLoad: () => void;
   addChore: (chore: Omit<Chore, "id">) => void;
   updateChore: (id: string, updates: Partial<Chore>) => void;
   toggleChore: (id: string) => void;
   toggleSubTask: (choreId: string, subTaskId: string) => void;
   deleteChore: (id: string) => void;
   reorderChores: (reordered: Chore[]) => void;
+  scheduleChore: (id: string, date: string | undefined) => void;
   getChoresByRoom: (room: Room) => Chore[];
   getRoomStats: (room: Room) => { total: number; completed: number };
 }
@@ -42,52 +45,67 @@ export function ChoresProvider({ children }: { children: React.ReactNode }) {
   const [chores, setChores] = useState<Chore[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Load on mount ───────────────────────────────────────────────────────
-  useEffect(() => {
-    (async () => {
-      try {
-        setError(null);
-        const saved = await loadChores();
+  const loadData = useCallback(async () => {
+    try {
+      setError(null);
+      setLoading(true);
+      const saved = await loadChores();
 
-        if (saved !== null) {
-          // Data exists — restore it exactly
-          setChores(saved);
-        } else {
-          // First launch — seed defaults and persist immediately
-          const defaults = seedDefaultChores();
-          setChores(defaults);
-          await saveChores(defaults);
-        }
-      } catch (e) {
-        // Storage read failed — fall back to defaults in memory only
+      if (saved !== null && Array.isArray(saved)) {
+        setChores(saved);
+      } else {
         const defaults = seedDefaultChores();
         setChores(defaults);
-        setError(
-          "Could not load saved chores. Changes may not persist until storage is available."
-        );
-      } finally {
-        setLoading(false);
+        await saveChores(defaults);
       }
-    })();
+    } catch {
+      const defaults = seedDefaultChores();
+      setChores(defaults);
+      setError("Could not load saved chores. Tap to retry.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // ── Persist helper ──────────────────────────────────────────────────────
-  // Optimistically updates state first so the UI responds instantly,
-  // then writes to AsyncStorage in the background.
-  const persist = useCallback(async (updated: Chore[]) => {
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const retryLoad = useCallback(() => {
+    loadData();
+  }, [loadData]);
+
+  // ── Debounced persist ────────────────────────────────────────────────────
+  // Optimistically updates state immediately; debounces AsyncStorage writes
+  // by 300ms to batch rapid changes (e.g. toggling subtasks).
+  const debouncedSave = useCallback((updated: Chore[]) => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      saveChores(updated).catch(() => {});
+      saveTimer.current = null;
+    }, 300);
+  }, []);
+
+  const persist = useCallback((updated: Chore[]) => {
     setChores(updated);
-    try {
-      await saveChores(updated);
-    } catch {
-      // Swallow write errors silently — state is already updated in memory
-    }
+    debouncedSave(updated);
+  }, [debouncedSave]);
+
+  // Flush any pending save on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
   }, []);
 
   // ── Mutations ───────────────────────────────────────────────────────────
 
   const addChore = useCallback(
     (chore: Omit<Chore, "id">) => {
+      if (!chore.title?.trim()) return;
       const newChore: Chore = { ...chore, id: generateId() };
       persist([...chores, newChore]);
     },
@@ -147,11 +165,21 @@ export function ChoresProvider({ children }: { children: React.ReactNode }) {
 
   const reorderChores = useCallback(
     (reordered: Chore[]) => {
-      // Assign sortOrder index so ordering is preserved across frequency groups
       const withOrder = reordered.map((c, i) => ({ ...c, sortOrder: i }));
       persist(withOrder);
     },
     [persist]
+  );
+
+  const scheduleChore = useCallback(
+    (id: string, date: string | undefined) => {
+      persist(
+        chores.map((c) =>
+          c.id === id ? { ...c, scheduledDate: date } : c
+        )
+      );
+    },
+    [chores, persist]
   );
 
   const getChoresByRoom = useCallback(
@@ -176,12 +204,14 @@ export function ChoresProvider({ children }: { children: React.ReactNode }) {
         chores,
         loading,
         error,
+        retryLoad,
         addChore,
         updateChore,
         toggleChore,
         toggleSubTask,
         deleteChore,
         reorderChores,
+        scheduleChore,
         getChoresByRoom,
         getRoomStats,
       }}

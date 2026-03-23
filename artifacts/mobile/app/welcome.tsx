@@ -98,8 +98,7 @@ export default function WelcomeScreen() {
     if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setDemoLoading(true);
     enterDemo();
-    // Route to / which checks onboarding — demo starts onboarded:false so it goes to onboarding
-    router.replace("/");
+    router.replace("/(tabs)/");
   }
 
   return (

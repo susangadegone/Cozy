@@ -30,7 +30,7 @@ interface Props {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function RoomCard({ room, total, completed, onPress, index = 0, animKey = 0 }: Props) {
+export const RoomCard = React.memo(function RoomCard({ room, total, completed, onPress, index = 0, animKey = 0 }: Props) {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? Colors.dark : Colors.light;
   const roomColor = ROOM_COLORS[room];
@@ -140,7 +140,7 @@ export function RoomCard({ room, total, completed, onPress, index = 0, animKey =
       )}
     </AnimatedPressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

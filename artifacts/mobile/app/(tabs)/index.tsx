@@ -79,7 +79,7 @@ export default function HomeTab() {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? Colors.dark : Colors.light;
   const { user } = useAuth();
-  const { chores, error } = useChores();
+  const { chores, error, retryLoad } = useChores();
   const confettiRef = useRef<ConfettiCannon>(null);
   const prevAllDone = useRef(false);
   const flatRef = useRef<FlatList>(null);
@@ -223,12 +223,18 @@ export default function HomeTab() {
 
             {/* ── Error banner ────────────────────────────────────── */}
             {error ? (
-              <View style={[styles.errorBanner, { backgroundColor: isDark ? "#3D1000" : "#FFF3F0" }]}>
+              <Pressable
+                onPress={retryLoad}
+                style={[styles.errorBanner, { backgroundColor: isDark ? "#3D1000" : "#FFF3F0" }]}
+              >
                 <Ionicons name="warning-outline" size={16} color={colors.danger} />
                 <Text style={[styles.errorText, { color: colors.danger }]} numberOfLines={2}>
                   {error}
                 </Text>
-              </View>
+                <View style={[styles.retryBtn, { borderColor: colors.danger }]}>
+                  <Text style={[styles.retryText, { color: colors.danger }]}>Retry</Text>
+                </View>
+              </Pressable>
             ) : null}
 
             {/* ── Progress card ────────────────────────────────────── */}
@@ -326,6 +332,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12,
   },
   errorText: { fontFamily: "Inter_400Regular", fontSize: 13, flex: 1, lineHeight: 18 },
+  retryBtn: {
+    borderWidth: 1, borderRadius: 8,
+    paddingHorizontal: 10, paddingVertical: 4,
+  },
+  retryText: { fontFamily: "Inter_600SemiBold", fontSize: 12 },
   progressCard: {
     marginHorizontal: 20, marginBottom: 24, borderRadius: 16,
     padding: 18, borderWidth: 1.5,

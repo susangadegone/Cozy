@@ -29,7 +29,7 @@ interface Props {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function ChoreCard({ chore, onToggle, onPress, onLongPress }: Props) {
+export const ChoreCard = React.memo(function ChoreCard({ chore, onToggle, onPress, onLongPress }: Props) {
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? Colors.dark : Colors.light;
 
@@ -146,7 +146,7 @@ export function ChoreCard({ chore, onToggle, onPress, onLongPress }: Props) {
       </View>
     </AnimatedPressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

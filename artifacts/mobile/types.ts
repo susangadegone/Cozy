@@ -33,6 +33,7 @@ export interface Chore {
   lastCompleted?: string;
   notes?: string;
   sortOrder?: number;
+  scheduledDate?: string; // YYYY-MM-DD override — chore only appears on this date
 }
 
 export type Room =

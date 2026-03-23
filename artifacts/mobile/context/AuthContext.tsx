@@ -92,12 +92,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: "",
       passwordHash: "",
       isLoggedIn: true,
-      onboarded: false,
-      selectedRooms: [],
-      cleaningFrequency: "",
+      onboarded: true,
+      selectedRooms: ["Kitchen", "Living Room", "Bedroom", "Bathroom", "Office", "Laundry"],
+      cleaningFrequency: "Bit of both",
       isDemo: true,
+      livingSituation: "Solo",
+      preferredTime: "Evening",
+      sessionLength: "15–30 min",
+      hasPets: false,
+      motivation: "Stats & progress",
     };
-    // Demo mode is in-memory only — not saved to AsyncStorage so it resets on relaunch
+    // Demo is in-memory only — not saved to AsyncStorage so it resets on relaunch
     setUser(demoUser);
   }, []);
 

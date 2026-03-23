@@ -1,4 +1,10 @@
-import React, { useState, useMemo, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+  useEffect,
+} from "react";
 import {
   View,
   Text,
@@ -6,7 +12,12 @@ import {
   Platform,
   useColorScheme,
   TouchableOpacity,
+  FlatList,
+  PanResponder,
+  Animated as RNAnimated,
+  Dimensions,
   ScrollView,
+  Pressable,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,19 +26,30 @@ import * as Haptics from "expo-haptics";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  withTiming,
   withSpring,
   withSequence,
-  withTiming,
 } from "react-native-reanimated";
+import ConfettiCannon from "react-native-confetti-cannon";
+
 import Colors from "@/constants/colors";
 import { useChores } from "@/context/ChoresContext";
-import { Chore, ROOM_COLORS, Room } from "@/types";
+import { Chore, ROOM_COLORS } from "@/types";
 import { ChoreDetailModal } from "@/components/ChoreDetailModal";
+import { loadCalendarView, saveCalendarView } from "@/utils/storage";
+
+const { width: SW } = Dimensions.get("window");
+const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTH_LABELS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+type CalendarView = "week" | "month" | "day";
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
 
-function todayStr(): string {
-  const d = new Date();
+function toDateStr(d: Date): string {
   return (
     d.getFullYear() +
     "-" +
@@ -37,18 +59,65 @@ function todayStr(): string {
   );
 }
 
+function todayStr(): string {
+  return toDateStr(new Date());
+}
+
+function addDays(dateStr: string, n: number): string {
+  const d = new Date(dateStr + "T12:00:00");
+  d.setDate(d.getDate() + n);
+  return toDateStr(d);
+}
+
+function getWeekDates(anchor: string): string[] {
+  const d = new Date(anchor + "T12:00:00");
+  const dow = d.getDay();
+  const sunday = new Date(d);
+  sunday.setDate(d.getDate() - dow);
+  return Array.from({ length: 7 }, (_, i) => {
+    const day = new Date(sunday);
+    day.setDate(sunday.getDate() + i);
+    return toDateStr(day);
+  });
+}
+
+function formatDayLabel(dateStr: string): string {
+  const d = new Date(dateStr + "T12:00:00");
+  return DAY_LABELS[d.getDay()];
+}
+
+function formatDateNum(dateStr: string): number {
+  return new Date(dateStr + "T12:00:00").getDate();
+}
+
+function formatMonthYear(dateStr: string): string {
+  const d = new Date(dateStr + "T12:00:00");
+  return `${MONTH_LABELS[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function formatFullDate(dateStr: string): string {
+  const d = new Date(dateStr + "T12:00:00");
+  const today = todayStr();
+  const yesterday = addDays(today, -1);
+  const tomorrow = addDays(today, 1);
+  if (dateStr === today) return "Today";
+  if (dateStr === yesterday) return "Yesterday";
+  if (dateStr === tomorrow) return "Tomorrow";
+  return `${DAY_LABELS[d.getDay()]}, ${MONTH_LABELS[d.getMonth()].slice(0, 3)} ${d.getDate()}`;
+}
+
+// ─── Chore scheduling ─────────────────────────────────────────────────────────
+
 function getChoresForDate(allChores: Chore[], dateStr: string): Chore[] {
   const date = new Date(dateStr + "T12:00:00");
   const dayOfWeek = date.getDay();
   const dayOfMonth = date.getDate();
-  const daysInMonth = new Date(
-    date.getFullYear(),
-    date.getMonth() + 1,
-    0
-  ).getDate();
+  const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const weeklyChores = allChores.filter((c) => c.frequency === "Weekly");
 
   return allChores.filter((chore) => {
+    // scheduledDate override: only show on that specific date
+    if (chore.scheduledDate) return chore.scheduledDate === dateStr;
     if (chore.frequency === "Daily") return true;
     if (chore.frequency === "Weekly") {
       const idx = weeklyChores.findIndex((c) => c.id === chore.id);
@@ -61,590 +130,819 @@ function getChoresForDate(allChores: Chore[], dateStr: string): Chore[] {
   });
 }
 
-type DotStatus = "all-done" | "some-done" | "pending";
+function dotColor(chores: Chore[]): string | null {
+  if (chores.length === 0) return null;
+  const done = chores.filter((c) => c.completed).length;
+  if (done === chores.length) return "#4CAF50";
+  if (done > 0) return "#FFC107";
+  return "#2B7A78";
+}
 
-const DOT_COLORS: Record<DotStatus, string> = {
-  "all-done": "#4CAF50",
-  "some-done": "#FFC107",
-  pending: "#2B7A78",
-};
+// ─── Chore row ────────────────────────────────────────────────────────────────
 
-// ─── Chore Row ────────────────────────────────────────────────────────────────
-
-function ChoreRow({
-  chore,
-  onTap,
-  onToggle,
-  colors,
-  dragActive,
-  onDragStart,
-}: {
+interface ChoreRowProps {
   chore: Chore;
-  onTap: (c: Chore) => void;
-  onToggle: (id: string) => void;
-  colors: typeof Colors.light;
-  dragActive?: boolean;
-  onDragStart?: () => void;
-}) {
-  const rc = ROOM_COLORS[chore.room as Room];
+  onToggle: () => void;
+  onPress: () => void;
+  onLongPress?: (pageX: number, pageY: number) => void;
+  dragHandleRef?: (ref: View | null) => void;
+  lifted?: boolean;
+  colors: any;
+  isDark: boolean;
+}
+
+const ChoreRow = React.memo(function ChoreRow({
+  chore,
+  onToggle,
+  onPress,
+  onLongPress,
+  lifted,
+  colors,
+  isDark,
+}: ChoreRowProps) {
+  const roomColor = ROOM_COLORS[chore.room];
+  const accent = isDark ? roomColor.icon : roomColor.icon;
   const scale = useSharedValue(1);
+  const checkScale = useSharedValue(chore.completed ? 1 : 0);
 
-  const animStyle = useAnimatedStyle(() => ({
+  useEffect(() => {
+    checkScale.value = withSpring(chore.completed ? 1 : 0, { damping: 12, stiffness: 200 });
+  }, [chore.completed]);
+
+  useEffect(() => {
+    scale.value = withSpring(lifted ? 1.04 : 1, { damping: 14, stiffness: 200 });
+  }, [lifted]);
+
+  const rowStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
-    shadowOpacity: dragActive ? 0.18 : 0,
-    elevation: dragActive ? 8 : 0,
+    opacity: chore.completed ? 0.7 : 1,
   }));
-
-  function handleCheck() {
-    if (Platform.OS !== "web")
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    scale.value = withSequence(
-      withTiming(0.96, { duration: 80 }),
-      withSpring(1, { damping: 10, stiffness: 220 })
-    );
-    onToggle(chore.id);
-  }
+  const checkStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: checkScale.value }],
+  }));
 
   return (
     <Animated.View
       style={[
         styles.choreRow,
-        animStyle,
         {
-          backgroundColor: dragActive ? colors.tintLight : colors.surface,
-          borderColor: dragActive ? colors.tint : colors.cardBorder,
+          backgroundColor: lifted
+            ? isDark ? "#1e3a3a" : "#e8f6f5"
+            : colors.surface,
+          borderColor: lifted ? colors.tint : colors.cardBorder,
+          shadowColor: colors.shadow,
+          shadowOpacity: lifted ? 0.18 : 0.06,
+          shadowRadius: lifted ? 12 : 4,
+          elevation: lifted ? 8 : 2,
         },
+        rowStyle,
       ]}
     >
-      {/* Drag handle */}
-      <TouchableOpacity
-        onLongPress={() => {
-          if (Platform.OS !== "web")
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          onDragStart?.();
-        }}
-        delayLongPress={200}
-        style={styles.dragHandle}
-        activeOpacity={0.5}
-      >
-        <Ionicons
-          name="reorder-three-outline"
-          size={20}
-          color={colors.textSecondary}
-        />
-      </TouchableOpacity>
+      <View style={[styles.choreAccent, { backgroundColor: accent }]} />
 
-      {/* Color accent bar */}
-      <View
-        style={[styles.colorBar, { backgroundColor: rc?.icon ?? colors.tint }]}
-      />
+      {/* drag handle */}
+      {onLongPress && (
+        <TouchableOpacity
+          onLongPress={(e) =>
+            onLongPress(
+              e.nativeEvent.pageX,
+              e.nativeEvent.pageY
+            )
+          }
+          delayLongPress={300}
+          style={styles.dragHandle}
+          hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+        >
+          <Ionicons name="reorder-three-outline" size={18} color={colors.textSecondary} />
+        </TouchableOpacity>
+      )}
 
-      {/* Body — tap for detail */}
-      <TouchableOpacity
-        style={styles.choreBody}
-        onPress={() => onTap(chore)}
-        activeOpacity={0.7}
-      >
+      <Pressable style={styles.choreBody} onPress={onPress}>
         <Text
           style={[
             styles.choreTitle,
-            {
-              color: chore.completed ? colors.textSecondary : colors.text,
-              textDecorationLine: chore.completed ? "line-through" : "none",
-            },
+            { color: colors.text, textDecorationLine: chore.completed ? "line-through" : "none" },
           ]}
           numberOfLines={1}
         >
           {chore.title}
         </Text>
-        <View style={styles.choreMeta}>
-          <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-            {chore.room}
-          </Text>
-          <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-            &nbsp;·&nbsp;{chore.estimatedTime}m
-          </Text>
-          {chore.subTasks.length > 0 && (
-            <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-              &nbsp;·&nbsp;{chore.subTasks.filter((s) => s.completed).length}/
-              {chore.subTasks.length} steps
-            </Text>
-          )}
-        </View>
-      </TouchableOpacity>
+        <Text style={[styles.choreMeta, { color: colors.textSecondary }]} numberOfLines={1}>
+          {chore.room} · {chore.estimatedTime}m
+          {chore.subTasks.length > 0
+            ? ` · ${chore.subTasks.filter((s) => s.completed).length}/${chore.subTasks.length} steps`
+            : ""}
+        </Text>
+      </Pressable>
 
-      {/* Checkbox */}
-      <TouchableOpacity onPress={handleCheck} style={styles.checkBtn}>
-        <View
-          style={[
-            styles.checkbox,
-            {
-              backgroundColor: chore.completed ? colors.tint : "transparent",
-              borderColor: chore.completed ? colors.tint : colors.cardBorder,
-            },
-          ]}
-        >
-          {chore.completed && (
-            <Ionicons name="checkmark" size={13} color="#fff" />
-          )}
-        </View>
-      </TouchableOpacity>
+      <Pressable
+        onPress={onToggle}
+        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        style={[
+          styles.checkCircle,
+          {
+            borderColor: chore.completed ? accent : colors.cardBorder,
+            backgroundColor: chore.completed ? accent : "transparent",
+          },
+        ]}
+      >
+        <Animated.View style={checkStyle}>
+          <Ionicons name="checkmark" size={14} color="#fff" />
+        </Animated.View>
+      </Pressable>
     </Animated.View>
   );
-}
+});
 
-// ─── Draggable list (native) ──────────────────────────────────────────────────
+// ─── Empty state ──────────────────────────────────────────────────────────────
 
-function DraggableChoreList({
-  chores,
-  onReorder,
-  onTap,
-  onToggle,
-  colors,
-}: {
-  chores: Chore[];
-  onReorder: (reordered: Chore[]) => void;
-  onTap: (c: Chore) => void;
-  onToggle: (id: string) => void;
-  colors: typeof Colors.light;
-}) {
-  const [items, setItems] = React.useState(chores);
-  const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
-  const dragStartY = useRef<number>(0);
-
-  // Sync when external chores change
-  React.useEffect(() => {
-    setItems(chores);
-  }, [chores]);
-
+function EmptyDay({ colors }: { colors: any }) {
   return (
-    <View style={{ gap: 8 }}>
-      {items.map((chore, idx) => (
-        <ChoreRow
-          key={chore.id}
-          chore={chore}
-          onTap={onTap}
-          onToggle={onToggle}
-          colors={colors}
-          dragActive={activeIndex === idx}
-          onDragStart={() => {
-            // Simple: just move item to top when long-pressed
-            if (activeIndex === idx) {
-              setActiveIndex(null);
-              return;
-            }
-            setActiveIndex(idx);
-            if (idx > 0) {
-              const newItems = [...items];
-              const [picked] = newItems.splice(idx, 1);
-              newItems.unshift(picked);
-              setItems(newItems);
-              setActiveIndex(0);
-              onReorder(newItems);
-            }
-          }}
-        />
-      ))}
+    <View style={styles.emptyWrap}>
+      <Ionicons name="sunny-outline" size={40} color={colors.textSecondary} style={{ marginBottom: 10 }} />
+      <Text style={[styles.emptyTitle, { color: colors.text }]}>Nothing scheduled</Text>
+      <Text style={[styles.emptySub, { color: colors.textSecondary }]}>
+        No chores for this day. Enjoy your free time!
+      </Text>
     </View>
   );
 }
 
-// ─── Main screen ──────────────────────────────────────────────────────────────
+// ─── Day Header ───────────────────────────────────────────────────────────────
 
-export default function CalendarScreen() {
+function DayHeader({
+  dateStr,
+  chores,
+  colors,
+}: {
+  dateStr: string;
+  chores: Chore[];
+  colors: any;
+}) {
+  const done = chores.filter((c) => c.completed).length;
+  const total = chores.length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  return (
+    <View style={styles.dayHeaderWrap}>
+      <Text style={[styles.dayHeaderLabel, { color: colors.text }]}>
+        {formatFullDate(dateStr)}
+      </Text>
+      {total > 0 && (
+        <View style={[styles.dayPct, { backgroundColor: colors.tintLight }]}>
+          <Text style={[styles.dayPctText, { color: colors.tint }]}>{pct}%</Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
+export default function CalendarTab() {
   const insets = useSafeAreaInsets();
   const isDark = useColorScheme() === "dark";
   const colors = isDark ? Colors.dark : Colors.light;
-  const { chores, toggleChore, reorderChores } = useChores();
+  const { chores, toggleChore, scheduleChore } = useChores();
+
+  const [view, setView] = useState<CalendarView>("week");
+  const [selectedDate, setSelectedDate] = useState(todayStr());
+  const [modalChore, setModalChore] = useState<Chore | null>(null);
+  const [viewLoaded, setViewLoaded] = useState(false);
+
+  // drag state for week view
+  const [dragChore, setDragChore] = useState<Chore | null>(null);
+  const [hoveredDayIdx, setHoveredDayIdx] = useState<number | null>(null);
+  const dragX = useRef(new RNAnimated.Value(0)).current;
+  const dragY = useRef(new RNAnimated.Value(0)).current;
+  const dragVisible = useRef(new RNAnimated.Value(0)).current;
+  const dayTabsY = useRef(0);
+
+  const confettiRef = useRef<ConfettiCannon>(null);
+  const prevDoneCount = useRef(-1);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
-  const [selectedDate, setSelectedDate] = useState(todayStr());
-  const [currentMonth, setCurrentMonth] = useState(todayStr().slice(0, 7));
-  const [selectedChore, setSelectedChore] = useState<Chore | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
-
-  // ── Compute marked dates ───────────────────────────────────────────
-  const markedDates = useMemo(() => {
-    const [yearS, monthS] = currentMonth.split("-");
-    const year = parseInt(yearS, 10);
-    const month = parseInt(monthS, 10);
-    const daysInMonth = new Date(year, month, 0).getDate();
-    const result: Record<string, any> = {};
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      const ds =
-        yearS +
-        "-" +
-        String(month).padStart(2, "0") +
-        "-" +
-        String(day).padStart(2, "0");
-      const dayChores = getChoresForDate(chores, ds);
-      if (dayChores.length === 0) continue;
-
-      const done = dayChores.filter((c) => c.completed).length;
-      let status: DotStatus =
-        done === dayChores.length
-          ? "all-done"
-          : done > 0
-          ? "some-done"
-          : "pending";
-
-      result[ds] = {
-        dots: [{ key: "s", color: DOT_COLORS[status] }],
-        selected: ds === selectedDate,
-        selectedColor: colors.tint,
-      };
-    }
-
-    if (!result[selectedDate]) {
-      result[selectedDate] = { selected: true, selectedColor: colors.tint };
-    } else {
-      result[selectedDate] = { ...result[selectedDate], selected: true, selectedColor: colors.tint };
-    }
-
-    return result;
-  }, [chores, currentMonth, selectedDate, colors.tint]);
-
-  // ── Chores for selected date ───────────────────────────────────────
-  const dateChores = useMemo(() => {
-    const list = getChoresForDate(chores, selectedDate);
-    return [...list].sort((a, b) => {
-      const ai = a.sortOrder ?? 9999;
-      const bi = b.sortOrder ?? 9999;
-      if (ai !== bi) return ai - bi;
-      return Number(a.completed) - Number(b.completed);
+  // Load saved view preference on mount
+  useEffect(() => {
+    loadCalendarView().then((saved) => {
+      if (saved === "week" || saved === "month" || saved === "day") {
+        setView(saved as CalendarView);
+      }
+      setViewLoaded(true);
     });
-  }, [chores, selectedDate]);
+  }, []);
 
-  const dateLabel = useMemo(() => {
-    if (selectedDate === todayStr()) return "Today";
-    const d = new Date(selectedDate + "T12:00:00");
-    return d.toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    });
-  }, [selectedDate]);
+  const weekDates = useMemo(() => getWeekDates(selectedDate), [selectedDate]);
 
-  const completedCount = dateChores.filter((c) => c.completed).length;
-
-  const handleDayPress = useCallback(
-    (day: { dateString: string }) => {
-      if (Platform.OS !== "web")
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      setSelectedDate(day.dateString);
-    },
-    []
+  const dayChores = useMemo(
+    () => getChoresForDate(chores, selectedDate),
+    [chores, selectedDate]
   );
 
-  function openDetail(chore: Chore) {
-    if (Platform.OS !== "web")
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSelectedChore(chore);
-    setModalVisible(true);
+  // Confetti when all chores for selected day are completed
+  useEffect(() => {
+    if (dayChores.length === 0) return;
+    const doneCount = dayChores.filter((c) => c.completed).length;
+    if (
+      doneCount === dayChores.length &&
+      prevDoneCount.current !== doneCount &&
+      prevDoneCount.current !== -1
+    ) {
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setTimeout(() => confettiRef.current?.start(), 150);
+      }
+    }
+    prevDoneCount.current = doneCount;
+  }, [dayChores]);
+
+  const handleViewChange = useCallback((v: CalendarView) => {
+    if (Platform.OS !== "web") Haptics.selectionAsync();
+    setView(v);
+    saveCalendarView(v);
+  }, []);
+
+  // ── Month view: marked dates ─────────────────────────────────────────────
+  const markedDates = useMemo(() => {
+    const today = todayStr();
+    const marked: Record<string, any> = {};
+    // Check ±60 days for dots
+    for (let i = -60; i <= 60; i++) {
+      const d = addDays(today, i);
+      const dc = getChoresForDate(chores, d);
+      const color = dotColor(dc);
+      if (color) {
+        marked[d] = {
+          dots: [{ color }],
+          ...(d === selectedDate ? { selected: true, selectedColor: colors.tint } : {}),
+        };
+      } else if (d === selectedDate) {
+        marked[d] = { selected: true, selectedColor: colors.tint };
+      }
+    }
+    if (!marked[today]) {
+      marked[today] = {
+        ...(marked[today] || {}),
+        marked: true,
+        dotColor: colors.tint,
+      };
+    }
+    return marked;
+  }, [chores, selectedDate, colors.tint]);
+
+  // ── Drag PanResponder ────────────────────────────────────────────────────
+  const DAY_COL_W = SW / 7;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: (e) => {
+        dragX.setValue(e.nativeEvent.pageX - 80);
+        dragY.setValue(e.nativeEvent.pageY - 30);
+        dragVisible.setValue(1);
+      },
+      onPanResponderMove: (e) => {
+        dragX.setValue(e.nativeEvent.pageX - 80);
+        dragY.setValue(e.nativeEvent.pageY - 30);
+        const col = Math.floor(e.nativeEvent.pageX / DAY_COL_W);
+        setHoveredDayIdx(Math.max(0, Math.min(6, col)));
+      },
+      onPanResponderRelease: (e) => {
+        const col = Math.floor(e.nativeEvent.pageX / DAY_COL_W);
+        const clampedCol = Math.max(0, Math.min(6, col));
+        setHoveredDayIdx(null);
+        dragVisible.setValue(0);
+        setDragChore((dc) => {
+          if (dc) {
+            const targetDate = weekDates[clampedCol];
+            scheduleChore(dc.id, targetDate);
+            setSelectedDate(targetDate);
+            if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          }
+          return null;
+        });
+      },
+      onPanResponderTerminate: () => {
+        dragVisible.setValue(0);
+        setDragChore(null);
+        setHoveredDayIdx(null);
+      },
+    })
+  ).current;
+
+  function startDrag(chore: Chore, pageX: number, pageY: number) {
+    if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    dragX.setValue(pageX - 80);
+    dragY.setValue(pageY - 30);
+    dragVisible.setValue(1);
+    setDragChore(chore);
   }
 
-  function handleReorder(reordered: Chore[]) {
-    const allUpdated = chores.map((c) => {
-      const idx = reordered.findIndex((r) => r.id === c.id);
-      return idx >= 0 ? { ...c, sortOrder: idx } : c;
-    });
-    reorderChores(allUpdated);
-  }
+  // ── Segmented control ────────────────────────────────────────────────────
 
-  const calTheme = {
-    backgroundColor: "transparent",
-    calendarBackground: "transparent",
-    textSectionTitleColor: colors.textSecondary,
-    selectedDayBackgroundColor: colors.tint,
-    selectedDayTextColor: "#ffffff",
-    todayTextColor: colors.tint,
-    dayTextColor: colors.text,
-    textDisabledColor: colors.cardBorder,
-    dotColor: colors.tint,
-    arrowColor: colors.tint,
-    monthTextColor: colors.text,
-    textMonthFontFamily: "Inter_700Bold",
-    textDayFontFamily: "Inter_500Medium",
-    textDayHeaderFontFamily: "Inter_600SemiBold",
-    textDayFontSize: 14,
-    textMonthFontSize: 16,
-    textDayHeaderFontSize: 11,
-    indicatorColor: colors.tint,
-  };
-
-  return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: bottomPad + 80 }}
-      >
-        {/* Header */}
-        <View
-          style={[
-            styles.header,
-            { paddingTop: topPad + 16, backgroundColor: colors.background },
-          ]}
-        >
-          <View>
+  function SegmentedControl() {
+    const segments: { key: CalendarView; label: string }[] = [
+      { key: "week", label: "Week" },
+      { key: "month", label: "Month" },
+      { key: "day", label: "Day" },
+    ];
+    return (
+      <View style={[styles.segmentWrap, { backgroundColor: colors.surfaceSecondary }]}>
+        {segments.map((s) => (
+          <Pressable
+            key={s.key}
+            onPress={() => handleViewChange(s.key)}
+            style={[
+              styles.segment,
+              view === s.key && { backgroundColor: colors.tint },
+            ]}
+          >
             <Text
-              style={[styles.headerSub, { color: colors.textSecondary }]}
+              style={[
+                styles.segmentText,
+                { color: view === s.key ? "#fff" : colors.textSecondary },
+              ]}
             >
-              {new Date(currentMonth + "-15").toLocaleString("default", {
-                month: "long",
-                year: "numeric",
-              })}
+              {s.label}
             </Text>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>
-              Schedule
-            </Text>
-          </View>
-          <View style={[styles.badge, { backgroundColor: colors.tintLight }]}>
-            <Text style={[styles.badgeText, { color: colors.tint }]}>
-              {chores.length} chores
-            </Text>
-          </View>
+          </Pressable>
+        ))}
+      </View>
+    );
+  }
+
+  // ── Week view ────────────────────────────────────────────────────────────
+
+  function WeekView() {
+    return (
+      <View style={styles.flex1}>
+        {/* Month + nav */}
+        <View style={styles.monthNavRow}>
+          <Pressable
+            onPress={() => setSelectedDate((d) => addDays(d, -7))}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <Ionicons name="chevron-back" size={22} color={colors.text} />
+          </Pressable>
+          <Text style={[styles.monthTitle, { color: colors.text }]}>
+            {formatMonthYear(selectedDate)}
+          </Text>
+          <Pressable
+            onPress={() => setSelectedDate((d) => addDays(d, 7))}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <Ionicons name="chevron-forward" size={22} color={colors.text} />
+          </Pressable>
         </View>
 
-        {/* Legend */}
-        <View style={styles.legend}>
-          {(
-            [
-              { status: "all-done" as DotStatus, label: "All done" },
-              { status: "some-done" as DotStatus, label: "In progress" },
-              { status: "pending" as DotStatus, label: "Pending" },
-            ]
-          ).map(({ status, label }) => (
-            <View key={status} style={styles.legendItem}>
-              <View
+        {/* Day tabs — drag target overlay */}
+        <View
+          style={styles.dayTabsRow}
+          onLayout={(e) => {
+            dayTabsY.current = e.nativeEvent.layout.y;
+          }}
+          {...(dragChore ? panResponder.panHandlers : {})}
+        >
+          {weekDates.map((d, idx) => {
+            const isSelected = d === selectedDate;
+            const isToday = d === todayStr();
+            const dc = getChoresForDate(chores, d);
+            const dot = dotColor(dc);
+            const isHovered = hoveredDayIdx === idx && dragChore !== null;
+            return (
+              <Pressable
+                key={d}
+                onPress={() => setSelectedDate(d)}
                 style={[
-                  styles.legendDot,
-                  { backgroundColor: DOT_COLORS[status] },
+                  styles.dayTab,
+                  isSelected && { backgroundColor: colors.tint },
+                  isHovered && {
+                    backgroundColor: colors.tint + "55",
+                    borderColor: colors.tint,
+                    borderWidth: 2,
+                  },
                 ]}
-              />
-              <Text
-                style={[styles.legendText, { color: colors.textSecondary }]}
               >
-                {label}
-              </Text>
+                <Text
+                  style={[
+                    styles.dayTabLabel,
+                    { color: isSelected ? "#fff" : colors.textSecondary },
+                  ]}
+                >
+                  {formatDayLabel(d).charAt(0)}
+                </Text>
+                <Text
+                  style={[
+                    styles.dayTabNum,
+                    {
+                      color: isSelected ? "#fff" : isToday ? colors.tint : colors.text,
+                      fontFamily: isToday ? "Inter_700Bold" : "Inter_600SemiBold",
+                    },
+                  ]}
+                >
+                  {formatDateNum(d)}
+                </Text>
+                {dot && !isSelected && (
+                  <View style={[styles.dayDot, { backgroundColor: dot }]} />
+                )}
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {/* Chore list */}
+        <ChoreList dateStr={selectedDate} />
+      </View>
+    );
+  }
+
+  // ── Month view ───────────────────────────────────────────────────────────
+
+  function MonthView() {
+    return (
+      <View style={styles.flex1}>
+        {/* Legend */}
+        <View style={styles.legendRow}>
+          {[
+            { color: "#4CAF50", label: "All done" },
+            { color: "#FFC107", label: "In progress" },
+            { color: "#2B7A78", label: "Pending" },
+          ].map((l) => (
+            <View key={l.label} style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: l.color }]} />
+              <Text style={[styles.legendText, { color: colors.textSecondary }]}>{l.label}</Text>
             </View>
           ))}
         </View>
 
-        {/* Calendar */}
-        <View
-          style={[
-            styles.calendarWrap,
-            {
-              backgroundColor: colors.surface,
-              borderColor: colors.cardBorder,
-            },
-          ]}
-        >
-          <Calendar
-            markingType="multi-dot"
-            markedDates={markedDates}
-            onDayPress={handleDayPress}
-            onMonthChange={(m: { year: number; month: number }) =>
-              setCurrentMonth(
-                m.year + "-" + String(m.month).padStart(2, "0")
-              )
-            }
-            theme={calTheme}
-            enableSwipeMonths={true}
-            style={{ borderRadius: 16, overflow: "hidden" }}
-          />
-        </View>
+        <Calendar
+          current={selectedDate}
+          onDayPress={(day: { dateString: string }) => setSelectedDate(day.dateString)}
+          onMonthChange={(month: { dateString: string }) =>
+            setSelectedDate(month.dateString)
+          }
+          markingType="multi-dot"
+          markedDates={markedDates}
+          style={{ borderRadius: 16, overflow: "hidden" }}
+          theme={{
+            backgroundColor: colors.surface,
+            calendarBackground: colors.surface,
+            textSectionTitleColor: colors.textSecondary,
+            dayTextColor: colors.text,
+            todayTextColor: colors.tint,
+            selectedDayTextColor: "#fff",
+            selectedDayBackgroundColor: colors.tint,
+            dotColor: colors.tint,
+            selectedDotColor: "#fff",
+            arrowColor: colors.tint,
+            monthTextColor: colors.text,
+            textDayFontFamily: "Inter_400Regular",
+            textMonthFontFamily: "Inter_700Bold",
+            textDayHeaderFontFamily: "Inter_500Medium",
+          }}
+        />
 
-        {/* Selected date header */}
-        <View style={styles.dateSectionHeader}>
-          <View>
-            <Text style={[styles.dateSectionTitle, { color: colors.text }]}>
-              {dateLabel}
+        <ChoreList dateStr={selectedDate} />
+      </View>
+    );
+  }
+
+  // ── Day view ─────────────────────────────────────────────────────────────
+
+  function DayView() {
+    return (
+      <View style={styles.flex1}>
+        <View style={styles.dayNavRow}>
+          <Pressable
+            onPress={() => setSelectedDate((d) => addDays(d, -1))}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <Ionicons name="chevron-back" size={22} color={colors.text} />
+          </Pressable>
+          <View style={{ alignItems: "center" }}>
+            <Text style={[styles.dayNavDate, { color: colors.text }]}>
+              {formatFullDate(selectedDate)}
             </Text>
-            <Text
-              style={[
-                styles.dateSectionSub,
-                { color: colors.textSecondary },
-              ]}
-            >
-              {dateChores.length === 0
-                ? "No chores scheduled"
-                : `${completedCount}/${dateChores.length} completed`}
+            <Text style={[styles.dayNavSub, { color: colors.textSecondary }]}>
+              {formatMonthYear(selectedDate)}
             </Text>
           </View>
-          {dateChores.length > 0 && (
-            <View
-              style={[
-                styles.progressPill,
-                { backgroundColor: colors.tintLight },
-              ]}
-            >
-              <Text
-                style={[styles.progressText, { color: colors.tint }]}
-              >
-                {Math.round((completedCount / dateChores.length) * 100)}%
-              </Text>
-            </View>
-          )}
+          <Pressable
+            onPress={() => setSelectedDate((d) => addDays(d, 1))}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <Ionicons name="chevron-forward" size={22} color={colors.text} />
+          </Pressable>
         </View>
 
-        {Platform.OS !== "web" && dateChores.length > 1 && (
-          <Text style={[styles.dragHint, { color: colors.textSecondary }]}>
-            Long-press the ≡ handle to reorder
-          </Text>
+        {selectedDate !== todayStr() && (
+          <Pressable
+            onPress={() => setSelectedDate(todayStr())}
+            style={[styles.todayBtn, { borderColor: colors.tint }]}
+          >
+            <Text style={[styles.todayBtnText, { color: colors.tint }]}>Back to today</Text>
+          </Pressable>
         )}
 
-        {/* Chore list */}
-        <View style={styles.choreList}>
-          {dateChores.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons
-                name="calendar-outline"
-                size={40}
-                color={colors.cardBorder}
-              />
-              <Text
-                style={[styles.emptyText, { color: colors.textSecondary }]}
-              >
-                Nothing scheduled for this day
-              </Text>
-            </View>
-          ) : (
-            <DraggableChoreList
-              chores={dateChores}
-              onReorder={handleReorder}
-              onTap={openDetail}
-              onToggle={toggleChore}
-              colors={colors}
-            />
-          )}
-        </View>
-      </ScrollView>
+        <ChoreList dateStr={selectedDate} />
+      </View>
+    );
+  }
 
-      <ChoreDetailModal
-        chore={selectedChore}
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+  // ── Shared chore list ────────────────────────────────────────────────────
+
+  function ChoreList({ dateStr }: { dateStr: string }) {
+    const dc = useMemo(() => getChoresForDate(chores, dateStr), [dateStr]);
+    const sorted = useMemo(
+      () => [...dc].sort((a, b) => {
+        if (a.completed !== b.completed) return a.completed ? 1 : -1;
+        return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+      }),
+      [dc]
+    );
+    const done = dc.filter((c) => c.completed).length;
+
+    return (
+      <FlatList
+        data={sorted}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={[
+          styles.choreListContent,
+          { paddingBottom: bottomPad + 24 },
+        ]}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <DayHeader dateStr={dateStr} chores={dc} colors={colors} />
+        }
+        ListEmptyComponent={<EmptyDay colors={colors} />}
+        renderItem={({ item }) => (
+          <ChoreRow
+            chore={item}
+            colors={colors}
+            isDark={isDark}
+            lifted={dragChore?.id === item.id}
+            onToggle={() => {
+              if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              toggleChore(item.id);
+            }}
+            onPress={() => setModalChore(item)}
+            onLongPress={view === "week"
+              ? (pageX, pageY) => startDrag(item, pageX, pageY)
+              : undefined
+            }
+          />
+        )}
       />
+    );
+  }
+
+  if (!viewLoaded) return null;
+
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* ── Page header ─────────────────────────────────────────────── */}
+      <View
+        style={[
+          styles.header,
+          { paddingTop: topPad + 12, backgroundColor: colors.background },
+        ]}
+      >
+        <View>
+          <Text style={[styles.headerSub, { color: colors.textSecondary }]}>
+            {formatMonthYear(selectedDate)}
+          </Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Schedule</Text>
+        </View>
+        <View style={[styles.choreCountBadge, { backgroundColor: colors.tintLight }]}>
+          <Text style={[styles.choreCountText, { color: colors.tint }]}>
+            {dayChores.length} chore{dayChores.length !== 1 ? "s" : ""}
+          </Text>
+        </View>
+      </View>
+
+      {/* ── Segmented control ───────────────────────────────────────── */}
+      <View style={styles.segmentContainer}>
+        <SegmentedControl />
+      </View>
+
+      {/* ── View content ────────────────────────────────────────────── */}
+      <View style={styles.flex1}>
+        {view === "week" && <WeekView />}
+        {view === "month" && <MonthView />}
+        {view === "day" && <DayView />}
+      </View>
+
+      {/* ── Floating drag ghost ─────────────────────────────────────── */}
+      {dragChore && (
+        <RNAnimated.View
+          style={[
+            styles.dragGhost,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.tint,
+              shadowColor: colors.shadow,
+              opacity: dragVisible,
+              left: dragX,
+              top: dragY,
+            },
+          ]}
+          pointerEvents="none"
+        >
+          <Text style={[styles.dragGhostText, { color: colors.text }]} numberOfLines={1}>
+            {dragChore.title}
+          </Text>
+          <Text style={[styles.dragGhostSub, { color: colors.textSecondary }]}>
+            Drop on a day to reschedule
+          </Text>
+        </RNAnimated.View>
+      )}
+
+      {/* ── Chore detail modal ───────────────────────────────────────── */}
+      {modalChore && (
+        <ChoreDetailModal
+          chore={modalChore}
+          onClose={() => setModalChore(null)}
+        />
+      )}
+
+      {/* ── Confetti ─────────────────────────────────────────────────── */}
+      {Platform.OS !== "web" && (
+        <ConfettiCannon
+          ref={confettiRef}
+          count={80}
+          origin={{ x: SW / 2, y: -10 }}
+          autoStart={false}
+          fadeOut
+          fallSpeed={3000}
+          explosionSpeed={350}
+          colors={["#2B7A78", "#F6AE2D", "#27AE60", "#3AAFA9", "#E55C5C", "#fff"]}
+        />
+      )}
     </View>
   );
 }
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
+  flex1: { flex: 1 },
   container: { flex: 1 },
   header: {
     flexDirection: "row",
-    alignItems: "flex-end",
     justifyContent: "space-between",
+    alignItems: "flex-end",
     paddingHorizontal: 20,
     paddingBottom: 12,
   },
-  headerSub: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    marginBottom: 2,
-  },
+  headerSub: { fontFamily: "Inter_500Medium", fontSize: 13, marginBottom: 2 },
   headerTitle: { fontFamily: "Inter_700Bold", fontSize: 26 },
-  badge: {
+  choreCountBadge: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
   },
-  badgeText: { fontFamily: "Inter_600SemiBold", fontSize: 13 },
-  legend: {
+  choreCountText: { fontFamily: "Inter_600SemiBold", fontSize: 13 },
+
+  // Segmented control
+  segmentContainer: { paddingHorizontal: 20, paddingBottom: 12 },
+  segmentWrap: {
     flexDirection: "row",
-    gap: 16,
-    paddingHorizontal: 20,
-    marginBottom: 10,
+    borderRadius: 12,
+    padding: 3,
   },
-  legendItem: { flexDirection: "row", alignItems: "center", gap: 5 },
-  legendDot: { width: 8, height: 8, borderRadius: 4 },
-  legendText: { fontFamily: "Inter_400Regular", fontSize: 11 },
-  calendarWrap: {
-    marginHorizontal: 16,
-    borderRadius: 18,
-    borderWidth: 1,
-    overflow: "hidden",
-    marginBottom: 4,
+  segment: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 10,
+    alignItems: "center",
   },
-  dateSectionHeader: {
+  segmentText: { fontFamily: "Inter_600SemiBold", fontSize: 13 },
+
+  // Month nav
+  monthNavRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 10,
+    paddingBottom: 10,
   },
-  dateSectionTitle: { fontFamily: "Inter_700Bold", fontSize: 18 },
-  dateSectionSub: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    marginTop: 2,
-  },
-  progressPill: {
+  monthTitle: { fontFamily: "Inter_700Bold", fontSize: 16 },
+
+  // Day tabs (week view)
+  dayTabsRow: {
+    flexDirection: "row",
     paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 20,
+    paddingBottom: 10,
+    gap: 4,
   },
-  progressText: { fontFamily: "Inter_700Bold", fontSize: 13 },
-  dragHint: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 12,
-    fontStyle: "italic",
-    paddingHorizontal: 20,
-    marginBottom: 6,
-  },
-  choreList: { paddingHorizontal: 20, gap: 8 },
-  emptyState: {
+  dayTab: {
+    flex: 1,
     alignItems: "center",
-    paddingVertical: 40,
-    gap: 12,
+    paddingVertical: 8,
+    borderRadius: 14,
+    gap: 2,
   },
-  emptyText: { fontFamily: "Inter_400Regular", fontSize: 14 },
+  dayTabLabel: { fontFamily: "Inter_500Medium", fontSize: 11 },
+  dayTabNum: { fontFamily: "Inter_600SemiBold", fontSize: 15 },
+  dayDot: { width: 5, height: 5, borderRadius: 2.5, marginTop: 2 },
+
+  // Day view nav
+  dayNavRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+  },
+  dayNavDate: { fontFamily: "Inter_700Bold", fontSize: 18 },
+  dayNavSub: { fontFamily: "Inter_400Regular", fontSize: 12, marginTop: 2 },
+  todayBtn: {
+    alignSelf: "center",
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    marginBottom: 12,
+  },
+  todayBtnText: { fontFamily: "Inter_600SemiBold", fontSize: 13 },
+
+  // Legend
+  legendRow: {
+    flexDirection: "row",
+    gap: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
+  legendItem: { flexDirection: "row", alignItems: "center", gap: 5 },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
+  legendText: { fontFamily: "Inter_400Regular", fontSize: 12 },
+
+  // Day header
+  dayHeaderWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    paddingBottom: 10,
+  },
+  dayHeaderLabel: { fontFamily: "Inter_700Bold", fontSize: 17 },
+  dayPct: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  dayPctText: { fontFamily: "Inter_600SemiBold", fontSize: 12 },
+
+  // Chore list
+  choreListContent: { paddingHorizontal: 16 },
+
+  // Chore row
   choreRow: {
     flexDirection: "row",
     alignItems: "center",
     borderRadius: 14,
     borderWidth: 1,
-    overflow: "hidden",
-    shadowColor: "#000",
+    marginBottom: 8,
     shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
+    overflow: "hidden",
   },
+  choreAccent: { width: 4, alignSelf: "stretch" },
   dragHandle: {
-    width: 40,
-    alignItems: "center",
-    justifyContent: "center",
+    paddingHorizontal: 10,
     paddingVertical: 16,
   },
-  colorBar: { width: 4, alignSelf: "stretch" },
-  choreBody: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingLeft: 10,
-  },
-  choreTitle: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 14,
-    marginBottom: 3,
-  },
-  choreMeta: { flexDirection: "row", flexWrap: "wrap" },
-  metaText: { fontFamily: "Inter_400Regular", fontSize: 12 },
-  checkBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+  choreBody: { flex: 1, paddingVertical: 14, paddingRight: 4 },
+  choreTitle: { fontFamily: "Inter_600SemiBold", fontSize: 14, marginBottom: 3 },
+  choreMeta: { fontFamily: "Inter_400Regular", fontSize: 12 },
+  checkCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     borderWidth: 2,
     alignItems: "center",
     justifyContent: "center",
+    marginHorizontal: 12,
   },
+
+  // Empty state
+  emptyWrap: { alignItems: "center", paddingVertical: 48, paddingHorizontal: 32 },
+  emptyTitle: { fontFamily: "Inter_600SemiBold", fontSize: 16, marginBottom: 6 },
+  emptySub: { fontFamily: "Inter_400Regular", fontSize: 14, textAlign: "center", lineHeight: 20 },
+
+  // Drag ghost
+  dragGhost: {
+    position: "absolute",
+    width: 160,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    elevation: 12,
+    zIndex: 9999,
+  },
+  dragGhostText: { fontFamily: "Inter_600SemiBold", fontSize: 13, marginBottom: 2 },
+  dragGhostSub: { fontFamily: "Inter_400Regular", fontSize: 11 },
 });
