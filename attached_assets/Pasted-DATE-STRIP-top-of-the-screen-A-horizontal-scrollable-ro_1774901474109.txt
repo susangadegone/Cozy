@@ -1,0 +1,98 @@
+DATE STRIP — top of the screen:
+
+A horizontal scrollable row of 7 day pills
+Start from today's actual date and go 6 days forward
+Calculate the dates dynamically using JavaScript Date — do not hardcode them
+Each pill shows two lines of text: abbreviated day name on top (Mon, Tue, Wed, Thu, Fri, Sat, Sun) and the date number below (30, 31, 1, etc.)
+Pill size: 44px wide, 64px tall, border-radius 12px, centered text
+Selected day pill: background color #4CAF7D, white text
+Unselected day pills: white background, color #1A1A1A, thin border 1px solid #E0D8CE
+Tapping any pill sets that day as the selected day and updates the chore list below
+
+
+DAY HEADING — directly below the date strip:
+
+Show the full day name and date: for example "Monday, March 30"
+Fraunces font, 22px, bold, color #1A1A1A
+Updates when a different day pill is tapped
+
+
+CHORE LIST — below the day heading, scrollable:
+Group chores into three sections with a section label above each group:
+
+Morning: chores scheduled before 12:00 PM
+Afternoon: chores scheduled 12:00 PM to 4:59 PM
+Evening: chores scheduled 5:00 PM or later
+Section label style: DM Sans, 11px, letter-spacing 1.5px, all caps, color #999999
+Only show a section if it has chores in it
+
+Each chore displays as a card. Use the card style from Prompt 1 (white background, 16px border-radius, left color border in that room's color, box-shadow 0 2px 12px rgba(0,0,0,0.08), 16px padding).
+Inside each chore card show these elements in one horizontal row:
+
+Left: a circle dot (filled circle in #4CAF7D for done, hollow circle outline in #4CAF7D for not done), 12px diameter
+Room name label in small text below the dot (8px, gray)
+Chore name in DM Sans bold, 15px, color #1A1A1A
+Time badge: small rounded pill, background is that room's color, white text, 12px DM Sans (example: "7:00 AM")
+Duration badge: small rounded pill, background #F0EDE8, color #1A1A1A, 12px DM Sans (example: "15 min")
+Far right: a drag handle. Use three horizontal lines stacked (render as text "= = =" rotated 90 degrees or use three short gray horizontal divs). Color #CCCCCC.
+
+Timeline connector between cards:
+
+A vertical dashed line in #CCCCCC runs down the left side connecting all the circle dots
+Completed chore dots are filled solid #4CAF7D
+Incomplete chore dots are hollow with #4CAF7D border
+
+
+DRAG TO MOVE LOGIC:
+When user taps the drag handle on a chore card, that card enters "picked up" state:
+
+Card scales to 1.04
+Card box-shadow increases to 0 8px 24px rgba(0,0,0,0.18)
+A label appears below the date strip: "Tap a day above to move this chore" — DM Sans 13px, gray, centered
+All 7 day pills in the date strip get a green outline border (2px solid #4CAF7D) to indicate they are drop targets
+The picked-up card is visually lifted (slightly translucent, 0.85 opacity on its original position)
+
+When a day pill is tapped while a card is in picked-up state:
+
+Remove the chore from the current day in state
+Add the chore to the tapped day in state
+Exit picked-up state
+Flash the receiving day pill background to #4CAF7D for 0.4 seconds then return to normal
+Clear the "Tap a day above" label
+
+When any area outside a day pill is tapped while a card is in picked-up state:
+
+Cancel the move, return card to normal state
+Clear the label
+
+Store chore state as a JavaScript object where each key is a date string in format "YYYY-MM-DD" and the value is an array of chore objects.
+Each chore object has these fields:
+
+id: unique string (use Math.random().toString())
+name: string
+room: string (Kitchen, Bathroom, Bedroom, Living Room, Laundry, Office)
+roomColor: hex string for that room's color
+time: string in "HH:MM" 24-hour format
+duration: string (example: "15 min")
+done: boolean, starts as false
+
+
+SAMPLE CHORE DATA — populate the initial state with these chores spread across today and the next 6 days. Distribute them so each day has between 3 and 5 chores.
+Chore list to use:
+
+Wash dishes | Kitchen | 07:00 | 15 min
+Wipe counters | Kitchen | 08:30 | 10 min
+Take out trash | Kitchen | 19:00 | 5 min
+Clean toilet | Bathroom | 09:00 | 10 min
+Wipe mirrors | Bathroom | 08:00 | 5 min
+Scrub shower | Bathroom | 10:00 | 15 min
+Make bed | Bedroom | 07:30 | 5 min
+Change sheets | Bedroom | 10:00 | 15 min
+Vacuum living room | Living Room | 13:00 | 20 min
+Sweep floors | Living Room | 16:00 | 10 min
+Do laundry | Laundry | 10:00 | 45 min
+Fold clothes | Laundry | 17:00 | 20 min
+Clear desk | Office | 09:00 | 10 min
+Dust shelves | Office | 14:00 | 10 min
+
+Spread these 14 chores across 7 days in any combination. Each day must have at least 3 chores.
