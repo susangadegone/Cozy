@@ -511,4 +511,35 @@
     margin: 0 auto;
     line-height: 1.5;
   }
+
+  /* Placeholder tabs */
+  .placeholder-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 60px 40px;
+    min-height: 60vh;
+  }
+
+  .placeholder-icon {
+    font-size: 52px;
+    line-height: 1;
+  }
+
+  .placeholder-label {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  .placeholder-desc {
+    font-size: 13px;
+    color: var(--muted-foreground);
+    text-align: center;
+    line-height: 1.5;
+  }
 }
