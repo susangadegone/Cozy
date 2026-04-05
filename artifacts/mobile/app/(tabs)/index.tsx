@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,9 +12,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  useAnimatedProps,
   withTiming,
   withSequence,
+  withDelay,
+  withSpring,
+  Easing,
 } from "react-native-reanimated";
+import Svg, { Circle } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 
 import { useChores } from "@/context/ChoresContext";
@@ -29,6 +34,15 @@ const SHORT_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const FULL_DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const MONTHS = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"];
+
+const RING_SIZE = 52;
+const RING_RADIUS = 20;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+
+const PARTICLE_COLORS = ["#4CAF7D", "#FFB347", "#C3A8D1", "#F0EDE8", "#F6AE2D", "#87CEEB", "#FFB6C1", "#98FB98"];
+const PARTICLE_ANGLES = Array.from({ length: 8 }, (_, i) => (i / 8) * 2 * Math.PI);
+
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -66,6 +80,147 @@ function sortByTime(a: Chore, b: Chore): number {
   return (a.time ?? "00:00").localeCompare(b.time ?? "00:00");
 }
 
+function getNudge(done: number, total: number): string | null {
+  if (total === 0) return null;
+  const pct = done / total;
+  if (done === total) return "You did it! 🏡 Home sweet done.";
+  if (pct >= 0.75) return "Almost there! 🌿 Keep going.";
+  if (pct >= 0.5) return "Halfway there! 💪 You're crushing it.";
+  if (pct >= 0.25) return "Good start! One chore at a time 🍃";
+  return null;
+}
+
+// ─── ProgressRing ─────────────────────────────────────────────────────────────
+
+function ProgressRing({ done, total, isDark }: { done: number; total: number; isDark: boolean }) {
+  const allDone = total > 0 && done === total;
+  const progress = total > 0 ? done / total : 0;
+  const strokeOffset = useSharedValue(RING_CIRCUMFERENCE);
+
+  useEffect(() => {
+    strokeOffset.value = withTiming(RING_CIRCUMFERENCE * (1 - progress), {
+      duration: 600,
+      easing: Easing.out(Easing.quad),
+    });
+  }, [progress]);
+
+  const animProps = useAnimatedProps(() => ({
+    strokeDashoffset: strokeOffset.value,
+  }));
+
+  const ringColor = allDone ? "#27AE60" : COZY_GREEN;
+  const trackColor = isDark ? "#2C4443" : "#E8F0EE";
+
+  return (
+    <View style={styles.ringContainer}>
+      <Svg width={RING_SIZE} height={RING_SIZE}>
+        <Circle
+          cx={RING_SIZE / 2}
+          cy={RING_SIZE / 2}
+          r={RING_RADIUS}
+          stroke={trackColor}
+          strokeWidth={4}
+          fill="none"
+        />
+        <AnimatedCircle
+          cx={RING_SIZE / 2}
+          cy={RING_SIZE / 2}
+          r={RING_RADIUS}
+          stroke={ringColor}
+          strokeWidth={4}
+          fill="none"
+          strokeDasharray={RING_CIRCUMFERENCE}
+          animatedProps={animProps}
+          strokeLinecap="round"
+          rotation={-90}
+          origin={`${RING_SIZE / 2}, ${RING_SIZE / 2}`}
+        />
+      </Svg>
+      <View style={styles.ringCenter}>
+        <Text style={[styles.ringText, { color: isDark ? "#E8F4F3" : "#1A1A1A" }]}>
+          {total === 0 ? "–" : `${done}/${total}`}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+// ─── NudgeMessage ─────────────────────────────────────────────────────────────
+
+function NudgeMessage({ message }: { message: string | null }) {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(8);
+  const prevMsg = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (message && message !== prevMsg.current) {
+      opacity.value = 0;
+      translateY.value = 8;
+      opacity.value = withTiming(1, { duration: 300 });
+      translateY.value = withSpring(0, { damping: 14, stiffness: 180 });
+    } else if (!message) {
+      opacity.value = withTiming(0, { duration: 200 });
+    }
+    prevMsg.current = message;
+  }, [message]);
+
+  const style = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  if (!message) return <View style={{ height: 28 }} />;
+  return (
+    <Animated.View style={[styles.nudgePill, style]}>
+      <Text style={styles.nudgeText}>{message}</Text>
+    </Animated.View>
+  );
+}
+
+// ─── Particle (confetti burst) ────────────────────────────────────────────────
+
+function Particle({ color, angle, trigger }: { color: string; angle: number; trigger: boolean }) {
+  const x = useSharedValue(0);
+  const y = useSharedValue(0);
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    if (trigger) {
+      x.value = 0;
+      y.value = 0;
+      opacity.value = 0;
+      const dist = 30;
+      x.value = withTiming(Math.cos(angle) * dist, { duration: 550 });
+      y.value = withTiming(Math.sin(angle) * dist, { duration: 550 });
+      opacity.value = withSequence(
+        withTiming(1, { duration: 80 }),
+        withDelay(250, withTiming(0, { duration: 350 }))
+      );
+    }
+  }, [trigger]);
+
+  const style = useAnimatedStyle(() => ({
+    transform: [{ translateX: x.value }, { translateY: y.value }],
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Animated.View style={[styles.particle, style]}>
+      <View style={[styles.particleDot, { backgroundColor: color }]} />
+    </Animated.View>
+  );
+}
+
+function ConfettiBurst({ trigger }: { trigger: boolean }) {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      {PARTICLE_ANGLES.map((angle, i) => (
+        <Particle key={i} color={PARTICLE_COLORS[i]} angle={angle} trigger={trigger} />
+      ))}
+    </View>
+  );
+}
+
 // ─── DatePill ─────────────────────────────────────────────────────────────────
 
 function DatePill({
@@ -86,7 +241,7 @@ function DatePill({
   const selected = index === selectedIndex;
   const flashBg = useSharedValue(0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isFlashing) {
       flashBg.value = withSequence(
         withTiming(1, { duration: 50 }),
@@ -96,9 +251,7 @@ function DatePill({
   }, [isFlashing]);
 
   const flashStyle = useAnimatedStyle(() => ({
-    backgroundColor: isFlashing || selected
-      ? COZY_GREEN
-      : "#FFFFFF",
+    backgroundColor: isFlashing || selected ? COZY_GREEN : "#FFFFFF",
   }));
 
   return (
@@ -143,6 +296,18 @@ function ChoreCard({
   const roomColor = ROOM_COLORS[chore.room].icon;
   const done = chore.completed;
 
+  const [burst, setBurst] = useState(false);
+  const prevDone = useRef(done);
+
+  useEffect(() => {
+    if (done && !prevDone.current) {
+      setBurst(true);
+      const t = setTimeout(() => setBurst(false), 700);
+      return () => clearTimeout(t);
+    }
+    prevDone.current = done;
+  }, [done]);
+
   return (
     <View style={styles.choreRow}>
       {/* Timeline column */}
@@ -158,25 +323,37 @@ function ChoreCard({
           styles.card,
           { borderLeftColor: roomColor },
           isPickedUp && styles.cardPickedUp,
+          done && styles.cardDone,
           isLast && { marginBottom: 0 },
         ]}
       >
+        <ConfettiBurst trigger={burst} />
         <View style={styles.cardContent}>
           {/* Left: room + title */}
           <View style={styles.cardLeft}>
             <Text style={styles.roomLabel}>{chore.room}</Text>
-            <Text style={styles.choreName} numberOfLines={1}>{chore.title}</Text>
+            <Text
+              style={[styles.choreName, done && styles.choreNameDone]}
+              numberOfLines={1}
+            >
+              {chore.title}
+            </Text>
           </View>
 
-          {/* Badges */}
-          {chore.time ? (
+          {/* Badges — hide when done */}
+          {!done && chore.time ? (
             <View style={[styles.badge, { backgroundColor: roomColor }]}>
               <Text style={styles.badgeTextLight}>{formatTime(chore.time)}</Text>
             </View>
           ) : null}
-          {chore.duration ? (
+          {!done && chore.duration ? (
             <View style={[styles.badge, { backgroundColor: CREAM }]}>
               <Text style={styles.badgeTextDark}>{chore.duration}</Text>
+            </View>
+          ) : null}
+          {done ? (
+            <View style={[styles.badge, { backgroundColor: "#E8F7EF" }]}>
+              <Text style={[styles.badgeTextDark, { color: "#27AE60" }]}>Done 🌿</Text>
             </View>
           ) : null}
 
@@ -247,6 +424,10 @@ export default function HomeTab() {
   const selectedDateStr = dateStr(selectedDay);
   const dayChores = getChoresByDate(selectedDateStr).sort(sortByTime);
 
+  const done = dayChores.filter((c) => c.completed).length;
+  const total = dayChores.length;
+  const nudge = getNudge(done, total);
+
   const morning = dayChores.filter((c) => getSection(c.time) === "morning");
   const afternoon = dayChores.filter((c) => getSection(c.time) === "afternoon");
   const evening = dayChores.filter((c) => getSection(c.time) === "evening");
@@ -291,10 +472,19 @@ export default function HomeTab() {
 
   return (
     <Pressable style={[styles.container, { backgroundColor: bg }]} onPress={pickedUpId ? cancelPickUp : undefined}>
-      {/* Header */}
+      {/* Header: title + progress ring */}
       <View style={[styles.header, { paddingTop: topPad + 12 }]}>
-        <Text style={[styles.appName, { color: isDark ? "#E8F4F3" : "#1A1A1A" }]}>Cozy</Text>
+        <View>
+          <Text style={[styles.appName, { color: isDark ? "#E8F4F3" : "#1A1A1A" }]}>Cozy</Text>
+          <Text style={[styles.dayHeadingSmall, { color: isDark ? "#7BB3B1" : "#999" }]}>
+            {FULL_DAYS[selectedDay.getDay()]}, {MONTHS[selectedDay.getMonth()]} {selectedDay.getDate()}
+          </Text>
+        </View>
+        <ProgressRing done={done} total={total} isDark={isDark} />
       </View>
+
+      {/* Nudge message */}
+      <NudgeMessage message={nudge} />
 
       {/* Date strip */}
       <ScrollView
@@ -319,11 +509,6 @@ export default function HomeTab() {
       {pickedUpId ? (
         <Text style={styles.hint}>Tap a day above to move this chore</Text>
       ) : null}
-
-      {/* Day heading */}
-      <Text style={[styles.dayHeading, { color: isDark ? "#E8F4F3" : "#1A1A1A" }]}>
-        {FULL_DAYS[selectedDay.getDay()]}, {MONTHS[selectedDay.getMonth()]} {selectedDay.getDate()}
-      </Text>
 
       {/* Chore list */}
       <ScrollView
@@ -354,14 +539,55 @@ export default function HomeTab() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
 
+  // Header
   header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
-    paddingBottom: 12,
+    paddingBottom: 4,
   },
   appName: {
     fontFamily: "Inter_700Bold",
     fontSize: 28,
     letterSpacing: -0.5,
+  },
+  dayHeadingSmall: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 13,
+    marginTop: 2,
+  },
+
+  // Progress ring
+  ringContainer: {
+    width: RING_SIZE,
+    height: RING_SIZE,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  ringCenter: {
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  ringText: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 11,
+  },
+
+  // Nudge
+  nudgePill: {
+    alignSelf: "center",
+    backgroundColor: "#EEF8F2",
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    marginBottom: 8,
+  },
+  nudgeText: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 13,
+    color: "#27AE60",
   },
 
   // Date strip
@@ -393,22 +619,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#999",
     textAlign: "center",
-    marginTop: 8,
+    marginTop: 6,
     marginBottom: 2,
-  },
-
-  // Day heading
-  dayHeading: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 22,
-    marginTop: 16,
-    marginBottom: 4,
-    paddingHorizontal: 20,
   },
 
   // List
   listScroll: { flex: 1 },
-  listContent: { paddingTop: 8 },
+  listContent: { paddingTop: 12 },
 
   // Section
   section: { marginBottom: 20 },
@@ -427,7 +644,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "stretch",
     paddingHorizontal: 12,
-    marginBottom: 0,
   },
 
   // Timeline
@@ -470,6 +686,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 12,
     elevation: 2,
+    overflow: "hidden",
   },
   cardPickedUp: {
     transform: [{ scale: 1.04 }],
@@ -477,6 +694,9 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     opacity: 0.85,
     elevation: 8,
+  },
+  cardDone: {
+    opacity: 0.65,
   },
   cardContent: {
     flexDirection: "row",
@@ -497,6 +717,10 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
     fontSize: 15,
     color: "#1A1A1A",
+  },
+  choreNameDone: {
+    textDecorationLine: "line-through",
+    color: "#999",
   },
 
   // Badges
@@ -529,6 +753,18 @@ const styles = StyleSheet.create({
     height: 1.5,
     backgroundColor: LINE_COLOR,
     borderRadius: 1,
+  },
+
+  // Confetti particles
+  particle: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+  },
+  particleDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
 
   // Empty state
