@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import { Chore, DEFAULT_CHORES, Room } from "@/types";
-import { loadChores, saveChores } from "@/utils/storage";
+import { loadChores, saveChores, loadUser } from "@/utils/storage";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -24,6 +24,7 @@ interface ChoresContextValue {
   reorderChores: (reordered: Chore[]) => void;
   scheduleChore: (id: string, date: string | undefined) => void;
   getChoresByRoom: (room: Room) => Chore[];
+  getChoresByDate: (date: string) => Chore[];
   getRoomStats: (room: Room) => { total: number; completed: number };
 }
 
@@ -33,8 +34,24 @@ function generateId(): string {
   return Date.now().toString() + Math.random().toString(36).substr(2, 9);
 }
 
-function seedDefaultChores(): Chore[] {
-  return DEFAULT_CHORES.map((c) => ({ ...c, id: generateId() }));
+function toDateString(offsetDays: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+function seedDefaultChores(selectedRooms?: string[]): Chore[] {
+  const source =
+    selectedRooms?.length
+      ? DEFAULT_CHORES.filter((c) => selectedRooms.includes(c.room))
+      : DEFAULT_CHORES;
+
+  // Distribute chores across 7 days: 2 per day, cycling through
+  return source.map((c, i) => ({
+    ...c,
+    id: generateId(),
+    scheduledDate: toDateString(Math.floor(i / 2) % 7),
+  }));
 }
 
 // ─── Context ─────────────────────────────────────────────────────────────────
@@ -57,7 +74,8 @@ export function ChoresProvider({ children }: { children: React.ReactNode }) {
       if (saved !== null && Array.isArray(saved)) {
         setChores(saved);
       } else {
-        const defaults = seedDefaultChores();
+        const user = await loadUser().catch(() => null);
+        const defaults = seedDefaultChores(user?.selectedRooms);
         setChores(defaults);
         await saveChores(defaults);
       }
@@ -187,6 +205,11 @@ export function ChoresProvider({ children }: { children: React.ReactNode }) {
     [chores]
   );
 
+  const getChoresByDate = useCallback(
+    (date: string) => chores.filter((c) => c.scheduledDate === date),
+    [chores]
+  );
+
   const getRoomStats = useCallback(
     (room: Room) => {
       const roomChores = chores.filter((c) => c.room === room);
@@ -213,6 +236,7 @@ export function ChoresProvider({ children }: { children: React.ReactNode }) {
         reorderChores,
         scheduleChore,
         getChoresByRoom,
+        getChoresByDate,
         getRoomStats,
       }}
     >

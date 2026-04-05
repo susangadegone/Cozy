@@ -36,6 +36,8 @@ export interface Chore {
   sortOrder?: number;
   scheduledDate?: string; // YYYY-MM-DD override — chore only appears on this date
   assignedTo?: string;   // name of the household member responsible
+  time?: string;         // HH:MM 24-hour format
+  duration?: string;     // e.g. "15 min"
 }
 
 export type Room =
@@ -80,125 +82,18 @@ export const FREQUENCY_COLORS: Record<Frequency, { bg: string; text: string; dar
 };
 
 export const DEFAULT_CHORES: Omit<Chore, "id">[] = [
-  {
-    title: "Wash dishes",
-    room: "Kitchen",
-    frequency: "Daily",
-    completed: false,
-    estimatedTime: 15,
-    subTasks: [
-      { id: "st1", title: "Scrub pots and pans", completed: false },
-      { id: "st2", title: "Rinse and dry", completed: false },
-    ],
-  },
-  {
-    title: "Wipe counters",
-    room: "Kitchen",
-    frequency: "Daily",
-    completed: false,
-    estimatedTime: 5,
-    subTasks: [],
-  },
-  {
-    title: "Vacuum floors",
-    room: "Living Room",
-    frequency: "Weekly",
-    completed: false,
-    estimatedTime: 20,
-    subTasks: [
-      { id: "st3", title: "Move furniture slightly", completed: false },
-      { id: "st4", title: "Vacuum under cushions", completed: false },
-    ],
-  },
-  {
-    title: "Dust surfaces",
-    room: "Living Room",
-    frequency: "Weekly",
-    completed: false,
-    estimatedTime: 10,
-    subTasks: [],
-  },
-  {
-    title: "Make bed",
-    room: "Bedroom",
-    frequency: "Daily",
-    completed: false,
-    estimatedTime: 5,
-    subTasks: [],
-  },
-  {
-    title: "Change sheets",
-    room: "Bedroom",
-    frequency: "Weekly",
-    completed: false,
-    estimatedTime: 15,
-    subTasks: [
-      { id: "st5", title: "Remove old sheets", completed: false },
-      { id: "st6", title: "Put on fresh sheets", completed: false },
-      { id: "st7", title: "Fluff pillows", completed: false },
-    ],
-  },
-  {
-    title: "Scrub toilet",
-    room: "Bathroom",
-    frequency: "Weekly",
-    completed: false,
-    estimatedTime: 10,
-    subTasks: [],
-  },
-  {
-    title: "Clean sink & mirror",
-    room: "Bathroom",
-    frequency: "Weekly",
-    completed: false,
-    estimatedTime: 10,
-    subTasks: [],
-  },
-  {
-    title: "Deep clean shower",
-    room: "Bathroom",
-    frequency: "Monthly",
-    completed: false,
-    estimatedTime: 25,
-    subTasks: [
-      { id: "st8", title: "Scrub grout", completed: false },
-      { id: "st9", title: "Clean showerhead", completed: false },
-    ],
-  },
-  {
-    title: "Organize desk",
-    room: "Office",
-    frequency: "Weekly",
-    completed: false,
-    estimatedTime: 10,
-    subTasks: [],
-  },
-  {
-    title: "Wipe monitor",
-    room: "Office",
-    frequency: "Monthly",
-    completed: false,
-    estimatedTime: 5,
-    subTasks: [],
-  },
-  {
-    title: "Do laundry",
-    room: "Laundry",
-    frequency: "Weekly",
-    completed: false,
-    estimatedTime: 60,
-    subTasks: [
-      { id: "st10", title: "Separate colors", completed: false },
-      { id: "st11", title: "Wash cycle", completed: false },
-      { id: "st12", title: "Dry and fold", completed: false },
-    ],
-  },
-  {
-    title: "Clean washing machine",
-    room: "Laundry",
-    frequency: "Monthly",
-    completed: false,
-    estimatedTime: 15,
-    subTasks: [],
-  },
+  { title: "Wash dishes",        room: "Kitchen",     frequency: "Daily",   completed: false, estimatedTime: 15, subTasks: [], time: "07:00", duration: "15 min" },
+  { title: "Wipe counters",      room: "Kitchen",     frequency: "Daily",   completed: false, estimatedTime: 10, subTasks: [], time: "08:30", duration: "10 min" },
+  { title: "Take out trash",     room: "Kitchen",     frequency: "Weekly",  completed: false, estimatedTime: 5,  subTasks: [], time: "19:00", duration: "5 min"  },
+  { title: "Clean toilet",       room: "Bathroom",    frequency: "Weekly",  completed: false, estimatedTime: 10, subTasks: [], time: "09:00", duration: "10 min" },
+  { title: "Wipe mirrors",       room: "Bathroom",    frequency: "Daily",   completed: false, estimatedTime: 5,  subTasks: [], time: "08:00", duration: "5 min"  },
+  { title: "Scrub shower",       room: "Bathroom",    frequency: "Weekly",  completed: false, estimatedTime: 15, subTasks: [], time: "10:00", duration: "15 min" },
+  { title: "Make bed",           room: "Bedroom",     frequency: "Daily",   completed: false, estimatedTime: 5,  subTasks: [], time: "07:30", duration: "5 min"  },
+  { title: "Change sheets",      room: "Bedroom",     frequency: "Weekly",  completed: false, estimatedTime: 15, subTasks: [], time: "10:00", duration: "15 min" },
+  { title: "Vacuum living room", room: "Living Room", frequency: "Weekly",  completed: false, estimatedTime: 20, subTasks: [], time: "13:00", duration: "20 min" },
+  { title: "Sweep floors",       room: "Living Room", frequency: "Weekly",  completed: false, estimatedTime: 10, subTasks: [], time: "16:00", duration: "10 min" },
+  { title: "Do laundry",         room: "Laundry",     frequency: "Weekly",  completed: false, estimatedTime: 45, subTasks: [], time: "10:00", duration: "45 min" },
+  { title: "Fold clothes",       room: "Laundry",     frequency: "Weekly",  completed: false, estimatedTime: 20, subTasks: [], time: "17:00", duration: "20 min" },
+  { title: "Clear desk",         room: "Office",      frequency: "Weekly",  completed: false, estimatedTime: 10, subTasks: [], time: "09:00", duration: "10 min" },
+  { title: "Dust shelves",       room: "Office",      frequency: "Monthly", completed: false, estimatedTime: 10, subTasks: [], time: "14:00", duration: "10 min" },
 ];
