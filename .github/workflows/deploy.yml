@@ -37,7 +37,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --filter "@workspace/mobile"
+        run: pnpm install --filter "@workspace/mobile" --no-frozen-lockfile
 
       - name: Export web build
         working-directory: artifacts/mobile
