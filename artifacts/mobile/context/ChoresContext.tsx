@@ -222,10 +222,21 @@ export function ChoresProvider({ children }: { children: React.ReactNode }) {
     [chores]
   );
 
-  // Loads fresh default chores into memory for demo mode — no AsyncStorage touch
+  // Loads fresh default chores for demo — one per room on today, rest across next 2 days
   const loadDemoChores = useCallback(() => {
-    const defaults = seedDefaultChores();
-    setChores(defaults);
+    const dayMap: Record<number, number[]> = {
+      0: [0, 4, 6, 8, 10, 12],  // Wash dishes, Wipe mirrors, Make bed, Vacuum, Do laundry, Clear desk
+      1: [1, 3, 7, 11],          // Wipe counters, Clean toilet, Change sheets, Fold clothes
+      2: [2, 5, 9, 13],          // Take out trash, Scrub shower, Sweep floors, Dust shelves
+    };
+    const chores: Chore[] = [];
+    for (const [day, indices] of Object.entries(dayMap)) {
+      for (const idx of indices) {
+        const src = DEFAULT_CHORES[idx];
+        if (src) chores.push({ ...src, id: generateId(), scheduledDate: toDateString(Number(day)) });
+      }
+    }
+    setChores(chores);
     setLoading(false);
     setError(null);
   }, []);
