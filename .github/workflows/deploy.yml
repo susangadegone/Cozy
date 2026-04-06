@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -43,13 +43,27 @@ jobs:
         working-directory: artifacts/mobile
         run: npx expo export --platform web
 
+      - name: Copy build to /docs and add .nojekyll
+        run: |
+          rm -rf docs
+          cp -r artifacts/mobile/dist docs
+          touch docs/.nojekyll
+
+      - name: Commit /docs to master
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          git diff --cached --quiet || git commit -m "chore: update /docs web build [skip ci]"
+          git push origin master
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: artifacts/mobile/dist
+          path: docs
 
       - name: Deploy to GitHub Pages
         id: deployment
