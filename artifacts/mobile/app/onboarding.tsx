@@ -1,1023 +1,468 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   Pressable,
-  ScrollView,
   Platform,
-  ActivityIndicator,
-  useColorScheme,
   Dimensions,
-  TextInput,
+  ScrollView,
 } from "react-native";
 import { router } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withTiming,
   withSpring,
-  Easing,
+  withTiming,
   runOnJS,
+  Easing,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { useAuth } from "@/context/AuthContext";
-import Colors from "@/constants/colors";
+import { useChores } from "@/context/ChoresContext";
 import { ROOMS, Room } from "@/types";
 
-const { width: SCREEN_W } = Dimensions.get("window");
-const SLIDE_W = Math.min(SCREEN_W, 500);
+// ─── Palette ─────────────────────────────────────────────────────────────────
 
-const TOTAL_STEPS = 10;
-
-// ─── Step content config ────────────────────────────────────────────────────
-
-const LIVING_OPTIONS = [
-  { label: "Solo", icon: "person-outline" as const, desc: "Living independently" },
-  { label: "Partner", icon: "heart-outline" as const, desc: "With a significant other" },
-  { label: "Roommates", icon: "people-outline" as const, desc: "Shared living space" },
-  { label: "Family", icon: "home-outline" as const, desc: "With family members" },
-];
-
-const FREQUENCY_OPTIONS = [
-  { label: "Daily", icon: "sunny-outline" as const, desc: "Stay on top of things every day" },
-  { label: "Weekly", icon: "calendar-outline" as const, desc: "A solid weekly cleaning routine" },
-  { label: "Bit of both", icon: "git-merge-outline" as const, desc: "Mix of daily and weekly" },
-  { label: "As needed", icon: "leaf-outline" as const, desc: "Flexible, whenever it feels right" },
-];
-
-const TIME_OPTIONS = [
-  { label: "Morning", icon: "sunny-outline" as const, desc: "Early bird cleaning sessions" },
-  { label: "Afternoon", icon: "partly-sunny-outline" as const, desc: "Post-lunch productivity" },
-  { label: "Evening", icon: "moon-outline" as const, desc: "Wind down with chores" },
-  { label: "Whenever", icon: "shuffle-outline" as const, desc: "No fixed schedule" },
-];
-
-const SESSION_OPTIONS = [
-  { label: "Under 15 min", icon: "flash-outline" as const, desc: "Quick power cleans" },
-  { label: "15–30 min", icon: "time-outline" as const, desc: "Short but focused sessions" },
-  { label: "30–60 min", icon: "hourglass-outline" as const, desc: "Thorough cleaning rounds" },
-  { label: "1 hour+", icon: "infinite-outline" as const, desc: "Deep-clean everything" },
-];
-
-const CHALLENGE_OPTIONS = [
-  { label: "Finding time", icon: "timer-outline" as const, desc: "Life gets busy quickly" },
-  { label: "Staying motivated", icon: "battery-dead-outline" as const, desc: "Starting is the hardest part" },
-  { label: "Where to start", icon: "help-circle-outline" as const, desc: "Overwhelmed by the list" },
-  { label: "Remembering", icon: "notifications-off-outline" as const, desc: "Out of sight, out of mind" },
-];
-
-const MOTIVATION_OPTIONS = [
-  { label: "Streaks", icon: "flame-outline" as const, desc: "Consistency builds habits" },
-  { label: "Stats & progress", icon: "bar-chart-outline" as const, desc: "Track and improve over time" },
-  { label: "Visual results", icon: "eye-outline" as const, desc: "Seeing a clean space" },
-  { label: "Just done", icon: "checkmark-done-outline" as const, desc: "Satisfaction of completing" },
-];
-
-const ROOM_ICONS: Record<Room, string> = {
-  Kitchen: "restaurant-outline",
-  "Living Room": "tv-outline",
-  Bedroom: "bed-outline",
-  Bathroom: "water-outline",
-  Office: "desktop-outline",
-  Laundry: "shirt-outline",
+const C = {
+  cream:      "#FDF6E3",
+  orange:     "#E8891A",
+  yellow:     "#F5C842",
+  terracotta: "#D9522A",
+  brown:      "#3D2C1E",
+  brownMuted: "#8C6A4F",
+  white:      "#FFFFFF",
+  cardBorder: "#EAD9BE",
 };
 
-// ─── Component ───────────────────────────────────────────────────────────────
+const { width: W } = Dimensions.get("window");
+const SLIDE_W = Math.min(W, 480);
+
+// ─── Room config ─────────────────────────────────────────────────────────────
+
+const ROOM_ICONS: Record<Room, string> = {
+  Kitchen:      "restaurant-outline",
+  "Living Room":"tv-outline",
+  Bedroom:      "bed-outline",
+  Bathroom:     "water-outline",
+  Office:       "desktop-outline",
+  Laundry:      "shirt-outline",
+};
+
+const FREQ_OPTIONS = [
+  { label: "Daily",              desc: "Stay on top of things every day",     icon: "sunny-outline"    },
+  { label: "A few times a week", desc: "Regular sessions without burnout",     icon: "calendar-outline" },
+  { label: "Weekly",             desc: "One solid deep-clean per week",        icon: "refresh-outline"  },
+];
+
+// ─── Logo ─────────────────────────────────────────────────────────────────────
+
+function CozyLogo() {
+  return (
+    <View style={logo.row}>
+      <View style={logo.badge}>
+        <Ionicons name="home" size={20} color={C.orange} />
+      </View>
+      <Text style={logo.name}>My Cozy Space</Text>
+    </View>
+  );
+}
+
+const logo = StyleSheet.create({
+  row:   { flexDirection: "row", alignItems: "center", gap: 8 },
+  badge: {
+    width: 36, height: 36, borderRadius: 10,
+    backgroundColor: "#FEF0DA",
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 1.5, borderColor: "#F5C842",
+  },
+  name:  { fontFamily: "Inter_700Bold", fontSize: 17, color: C.brown },
+});
+
+// ─── Slide 1 — Room Picker ────────────────────────────────────────────────────
+
+function SlideRooms({ selected, onToggle }: { selected: Room[]; onToggle: (r: Room) => void }) {
+  return (
+    <View style={s.slideInner}>
+      <Text style={s.slideTitle}>Welcome to{"\n"}My Cozy Space 🏡</Text>
+      <Text style={s.slideSubtitle}>Pick the rooms you want to keep cozy</Text>
+      <View style={s.pillGrid}>
+        {(ROOMS as Room[]).map((room) => {
+          const active = selected.includes(room);
+          return (
+            <Pressable
+              key={room}
+              onPress={() => {
+                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onToggle(room);
+              }}
+              style={[s.pill, active ? s.pillActive : s.pillInactive]}
+            >
+              <Ionicons
+                name={ROOM_ICONS[room] as any}
+                size={16}
+                color={active ? C.white : C.brownMuted}
+              />
+              <Text style={[s.pillText, { color: active ? C.white : C.brown }]}>{room}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      {selected.length > 0 && (
+        <Text style={s.selectionHint}>{selected.length} room{selected.length !== 1 ? "s" : ""} selected</Text>
+      )}
+    </View>
+  );
+}
+
+// ─── Slide 2 — Frequency ─────────────────────────────────────────────────────
+
+function SlideFrequency({ selected, onSelect }: { selected: string; onSelect: (f: string) => void }) {
+  return (
+    <View style={s.slideInner}>
+      <Text style={s.slideTitle}>How often do{"\n"}you clean? 🧹</Text>
+      <Text style={s.slideSubtitle}>We'll build your schedule around this</Text>
+      <View style={s.freqList}>
+        {FREQ_OPTIONS.map((opt) => {
+          const active = selected === opt.label;
+          return (
+            <Pressable
+              key={opt.label}
+              onPress={() => {
+                if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onSelect(opt.label);
+              }}
+              style={[s.freqCard, active ? s.freqCardActive : s.freqCardInactive]}
+            >
+              <View style={[s.freqIcon, { backgroundColor: active ? "rgba(255,255,255,0.25)" : "#FEF0DA" }]}>
+                <Ionicons name={opt.icon as any} size={20} color={active ? C.white : C.orange} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[s.freqLabel, { color: active ? C.white : C.brown }]}>{opt.label}</Text>
+                <Text style={[s.freqDesc,  { color: active ? "rgba(255,255,255,0.8)" : C.brownMuted }]}>{opt.desc}</Text>
+              </View>
+              {active && <Ionicons name="checkmark-circle" size={22} color={C.white} />}
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+// ─── Slide 3 — Summary ───────────────────────────────────────────────────────
+
+function SlideSummary({
+  rooms,
+  frequency,
+  onFinish,
+  loading,
+}: {
+  rooms: Room[];
+  frequency: string;
+  onFinish: () => void;
+  loading: boolean;
+}) {
+  const displayRooms = rooms.length ? rooms : (ROOMS as Room[]);
+  const displayFreq  = frequency  || "A few times a week";
+
+  return (
+    <View style={s.slideInner}>
+      <Text style={s.slideTitle}>You're all set! ✨</Text>
+      <Text style={s.slideSubtitle}>Here's what we'll set up for you</Text>
+
+      <View style={s.summaryCard}>
+        <View style={s.summaryRow}>
+          <Ionicons name="home-outline" size={18} color={C.orange} />
+          <Text style={s.summaryLabel}>Rooms</Text>
+        </View>
+        <Text style={s.summaryValue}>{displayRooms.join(", ")}</Text>
+      </View>
+
+      <View style={s.summaryCard}>
+        <View style={s.summaryRow}>
+          <Ionicons name="calendar-outline" size={18} color={C.orange} />
+          <Text style={s.summaryLabel}>Cleaning frequency</Text>
+        </View>
+        <Text style={s.summaryValue}>{displayFreq}</Text>
+      </View>
+
+      <Pressable
+        onPress={onFinish}
+        disabled={loading}
+        style={[s.finishBtn, { opacity: loading ? 0.7 : 1 }]}
+      >
+        <Text style={s.finishBtnText}>
+          {loading ? "Setting up…" : "Let's get cozy →"}
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
-  const isDark = useColorScheme() === "dark";
-  const colors = isDark ? Colors.dark : Colors.light;
-  const { user, completeOnboarding } = useAuth();
-
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const topPad    = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
-  const [step, setStep] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const { completeOnboarding } = useAuth();
+  const { seedChoresForRooms } = useChores();
 
-  // Answers
-  const [livingSituation, setLivingSituation] = useState("");
-  const [memberNames, setMemberNames] = useState<string[]>(["", ""]);
-  const [selectedRooms, setSelectedRooms] = useState<Room[]>([]);
-  const [frequency, setFrequency] = useState("");
-  const [preferredTime, setPreferredTime] = useState("");
-  const [sessionLength, setSessionLength] = useState("");
-  const [hasPets, setHasPets] = useState<boolean | null>(null);
-  const [challenge, setChallenge] = useState("");
-  const [motivation, setMotivation] = useState("");
+  const [step, setStep]               = useState(0);
+  const [selectedRooms, setRooms]     = useState<Room[]>([]);
+  const [frequency, setFrequency]     = useState("");
+  const [loading, setLoading]         = useState(false);
 
-  // ── Slide animation ──────────────────────────────────────────────
   const translateX = useSharedValue(0);
-  const opacity = useSharedValue(1);
+  const opacity    = useSharedValue(1);
 
-  const contentStyle = useAnimatedStyle(() => ({
+  const slideStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
     opacity: opacity.value,
   }));
 
-  function goToStep(next: number, direction: "forward" | "back" = "forward") {
-    if (Platform.OS !== "web")
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  function goTo(next: number, dir: "fwd" | "back" = "fwd") {
+    if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const out = dir === "fwd" ? -SLIDE_W * 0.35 : SLIDE_W * 0.35;
+    const inn = dir === "fwd" ?  SLIDE_W * 0.35 : -SLIDE_W * 0.35;
 
-    const outX = direction === "forward" ? -SLIDE_W * 0.3 : SLIDE_W * 0.3;
-    const inX = direction === "forward" ? SLIDE_W * 0.3 : -SLIDE_W * 0.3;
-
-    opacity.value = withTiming(0, {
-      duration: 150,
-      easing: Easing.in(Easing.ease),
+    opacity.value    = withTiming(0, { duration: 140, easing: Easing.in(Easing.ease) });
+    translateX.value = withTiming(out, { duration: 160, easing: Easing.in(Easing.ease) }, () => {
+      runOnJS(setStep)(next);
+      translateX.value = inn;
+      opacity.value    = withTiming(1, { duration: 200, easing: Easing.out(Easing.ease) });
+      translateX.value = withSpring(0, { damping: 18, stiffness: 220 });
     });
-    translateX.value = withTiming(
-      outX,
-      { duration: 180, easing: Easing.in(Easing.ease) },
-      () => {
-        runOnJS(setStep)(next);
-        translateX.value = inX;
-        opacity.value = 0;
-        translateX.value = withSpring(0, { damping: 20, stiffness: 220 });
-        opacity.value = withTiming(1, {
-          duration: 200,
-          easing: Easing.out(Easing.ease),
-        });
-      }
+  }
+
+  function toggleRoom(room: Room) {
+    setRooms((prev) =>
+      prev.includes(room) ? prev.filter((r) => r !== room) : [...prev, room]
     );
   }
 
   async function handleFinish() {
-    if (Platform.OS !== "web")
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setLoading(true);
     try {
-      const filledNames = memberNames.filter((n) => n.trim().length > 0);
-      await completeOnboarding({
-        selectedRooms: selectedRooms.length ? selectedRooms : ["Kitchen", "Living Room", "Bedroom"],
-        frequency: frequency || "Bit of both",
-        livingSituation: livingSituation || undefined,
-        preferredTime: preferredTime || undefined,
-        sessionLength: sessionLength || undefined,
-        hasPets: hasPets ?? undefined,
-        motivation: motivation || undefined,
-        householdMembers: filledNames.length > 0 ? filledNames : undefined,
-      });
+      const rooms = selectedRooms.length ? selectedRooms : (ROOMS as Room[]);
+      const freq  = frequency || "A few times a week";
+      await completeOnboarding({ selectedRooms: rooms, frequency: freq });
+      seedChoresForRooms(rooms);
       router.replace("/(tabs)/");
     } finally {
       setLoading(false);
     }
   }
 
-  const canProceed =
-    step === 0 ||
-    step === 1 ||
-    (step === 2 && selectedRooms.length > 0) ||
-    (step === 3 && frequency !== "") ||
-    step === 4 ||
-    step === 5 ||
-    step === 6 ||
-    step === 7 ||
-    step === 8 ||
-    step === 9;
-
-  const isLastStep = step === TOTAL_STEPS - 1;
-
-  // ── Option card helper ───────────────────────────────────────────
-  function OptionCard({
-    label,
-    icon,
-    desc,
-    selected,
-    onPress,
-    multiLine,
-  }: {
-    label: string;
-    icon: string;
-    desc: string;
-    selected: boolean;
-    onPress: () => void;
-    multiLine?: boolean;
-  }) {
-    return (
-      <Pressable
-        onPress={onPress}
-        style={({ pressed }) => [
-          styles.optCard,
-          {
-            backgroundColor: selected ? colors.tintLight : colors.surface,
-            borderColor: selected ? colors.tint : colors.cardBorder,
-            borderWidth: selected ? 2 : 1.5,
-            opacity: pressed ? 0.85 : 1,
-          },
-        ]}
-      >
-        <View
-          style={[
-            styles.optIcon,
-            { backgroundColor: selected ? colors.tint : colors.surfaceSecondary },
-          ]}
-        >
-          <Ionicons
-            name={icon as any}
-            size={20}
-            color={selected ? "#fff" : colors.tint}
-          />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.optLabel, { color: colors.text }]}>{label}</Text>
-          {!multiLine && (
-            <Text style={[styles.optDesc, { color: colors.textSecondary }]}>
-              {desc}
-            </Text>
-          )}
-        </View>
-        <View
-          style={[
-            styles.radio,
-            {
-              borderColor: selected ? colors.tint : colors.cardBorder,
-              backgroundColor: selected ? colors.tint : "transparent",
-            },
-          ]}
-        >
-          {selected && <Ionicons name="checkmark" size={12} color="#fff" />}
-        </View>
-      </Pressable>
-    );
+  function handleSkip() {
+    handleFinish();
   }
 
+  const canNext =
+    step === 0 ? true :               // rooms optional
+    step === 1 ? frequency !== "" :    // must pick frequency
+    true;
+
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* ── Top bar ──────────────────────────────────────────────── */}
-      <View style={[styles.topBar, { paddingTop: topPad + 8 }]}>
-        {step > 0 ? (
-          <Pressable
-            onPress={() => goToStep(step - 1, "back")}
-            style={styles.topBtn}
-          >
-            <Ionicons name="arrow-back" size={22} color={colors.tint} />
-          </Pressable>
-        ) : (
-          <View style={styles.topBtn} />
-        )}
-
-        {/* Progress bar */}
-        <View
-          style={[styles.progressTrack, { backgroundColor: colors.cardBorder }]}
-        >
-          <View
-            style={[
-              styles.progressFill,
-              {
-                backgroundColor: colors.tint,
-                width: `${((step + 1) / TOTAL_STEPS) * 100}%`,
-              },
-            ]}
-          />
-        </View>
-
-        <Text style={[styles.stepCounter, { color: colors.textSecondary }]}>
-          {step + 1}/{TOTAL_STEPS}
-        </Text>
+    <View style={[s.root, { paddingTop: topPad, paddingBottom: bottomPad }]}>
+      {/* Top bar */}
+      <View style={s.topBar}>
+        <CozyLogo />
+        <Pressable onPress={handleSkip} style={s.skipBtn}>
+          <Text style={s.skipText}>Skip</Text>
+        </Pressable>
       </View>
 
-      {/* Skip (only show on optional steps, not on rooms/freq/final) */}
-      {step !== 2 && step !== 3 && step !== 9 && (
-        <Pressable
-          onPress={() => {
-            if (Platform.OS !== "web")
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            if (step < TOTAL_STEPS - 1) {
-              goToStep(step + 1);
-            } else {
-              handleFinish();
-            }
-          }}
-          style={styles.skipBtn}
-        >
-          <Text style={[styles.skipText, { color: colors.textSecondary }]}>
-            Skip
-          </Text>
-        </Pressable>
-      )}
-
-      {/* ── Animated content ─────────────────────────────────────── */}
+      {/* Slides */}
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: bottomPad + 90 }]}
+        contentContainerStyle={s.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <Animated.View style={contentStyle}>
-
-          {/* ── Step 0: Welcome ─────────────────────────────────── */}
+        <Animated.View style={[{ width: SLIDE_W, alignSelf: "center" }, slideStyle]}>
           {step === 0 && (
-            <View style={styles.stepWrap}>
-              <LinearGradient
-                colors={["#2B7A78", "#3AAFA9"]}
-                style={styles.heroBadge}
-              >
-                <Ionicons name="sparkles" size={44} color="#fff" />
-              </LinearGradient>
-              <Text style={[styles.stepTitle, { color: colors.text }]}>
-                Hey{user?.name ? `, ${user.name.split(" ")[0]}` : ""}! 👋
-              </Text>
-              <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
-                Let's personalise your cleaning routine so Tidy Buddy works exactly
-                the way you do.
-              </Text>
-              <View style={[styles.infoCard, { backgroundColor: colors.tintLight }]}>
-                <Ionicons name="time-outline" size={18} color={colors.tint} />
-                <Text style={[styles.infoText, { color: colors.tint }]}>
-                  Takes about 60 seconds — promise.
-                </Text>
-              </View>
-              <View style={styles.featureList}>
-                {[
-                  { icon: "home-outline", text: "Room-by-room tracking" },
-                  { icon: "calendar-outline", text: "Smart scheduling" },
-                  { icon: "bar-chart-outline", text: "Progress stats" },
-                ].map(({ icon, text }) => (
-                  <View key={text} style={styles.featureRow}>
-                    <Ionicons name={icon as any} size={18} color={colors.tint} />
-                    <Text style={[styles.featureText, { color: colors.text }]}>
-                      {text}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            </View>
+            <SlideRooms selected={selectedRooms} onToggle={toggleRoom} />
           )}
-
-          {/* ── Step 1: Living situation ─────────────────────────── */}
           {step === 1 && (
-            <View style={styles.stepWrap}>
-              <Text style={[styles.stepTitle, { color: colors.text }]}>
-                Who do you live with?
-              </Text>
-              <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
-                This helps us calibrate how much cleaning to expect.
-              </Text>
-              <View style={styles.optList}>
-                {LIVING_OPTIONS.map((opt) => (
-                  <OptionCard
-                    key={opt.label}
-                    label={opt.label}
-                    icon={opt.icon}
-                    desc={opt.desc}
-                    selected={livingSituation === opt.label}
-                    onPress={() => {
-                      if (Platform.OS !== "web")
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setLivingSituation(opt.label);
-                    }}
-                  />
-                ))}
-              </View>
-
-              {livingSituation && livingSituation !== "Solo" && (
-                <View style={styles.memberNamesWrap}>
-                  <Text style={[styles.memberNamesTitle, { color: colors.textSecondary }]}>
-                    Who do you live with? (optional)
-                  </Text>
-                  {(livingSituation === "Partner"
-                    ? [0]
-                    : [0, 1, 2]
-                  ).map((i) => (
-                    <View key={i} style={[styles.memberNameRow, { borderColor: colors.border, backgroundColor: colors.card }]}>
-                      <Ionicons name="person-circle-outline" size={20} color={colors.primary} />
-                      <TextInput
-                        style={[styles.memberNameInput, { color: colors.text }]}
-                        placeholder={`Housemate ${i + 1} name…`}
-                        placeholderTextColor={colors.textSecondary}
-                        value={memberNames[i] ?? ""}
-                        onChangeText={(t) =>
-                          setMemberNames((prev) => {
-                            const next = [...prev];
-                            next[i] = t;
-                            return next;
-                          })
-                        }
-                        maxLength={30}
-                        autoCorrect={false}
-                      />
-                    </View>
-                  ))}
-                </View>
-              )}
-            </View>
+            <SlideFrequency selected={frequency} onSelect={setFrequency} />
           )}
-
-          {/* ── Step 2: Rooms ────────────────────────────────────── */}
           {step === 2 && (
-            <View style={styles.stepWrap}>
-              <Text style={[styles.stepTitle, { color: colors.text }]}>
-                Which rooms do you clean?
-              </Text>
-              <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
-                Select all that apply. You can change this any time.
-              </Text>
-              {selectedRooms.length === 0 && (
-                <Text style={[styles.hintText, { color: colors.danger }]}>
-                  Pick at least one room to continue
-                </Text>
-              )}
-              <View style={styles.roomGrid}>
-                {ROOMS.map((room) => {
-                  const selected = selectedRooms.includes(room);
-                  return (
-                    <Pressable
-                      key={room}
-                      onPress={() => {
-                        if (Platform.OS !== "web")
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setSelectedRooms((prev) =>
-                          prev.includes(room)
-                            ? prev.filter((r) => r !== room)
-                            : [...prev, room]
-                        );
-                      }}
-                      style={({ pressed }) => [
-                        styles.roomChip,
-                        {
-                          backgroundColor: selected ? colors.tint : colors.surface,
-                          borderColor: selected ? colors.tint : colors.cardBorder,
-                          borderWidth: selected ? 2 : 1.5,
-                          opacity: pressed ? 0.85 : 1,
-                        },
-                      ]}
-                    >
-                      <View
-                        style={[
-                          styles.roomIconWrap,
-                          {
-                            backgroundColor: selected
-                              ? "rgba(255,255,255,0.2)"
-                              : colors.surfaceSecondary,
-                          },
-                        ]}
-                      >
-                        <Ionicons
-                          name={ROOM_ICONS[room] as any}
-                          size={20}
-                          color={selected ? "#fff" : colors.tint}
-                        />
-                      </View>
-                      <Text
-                        style={[
-                          styles.roomChipText,
-                          { color: selected ? "#fff" : colors.text },
-                        ]}
-                      >
-                        {room}
-                      </Text>
-                      <View
-                        style={[
-                          styles.roomCheck,
-                          {
-                            backgroundColor: selected
-                              ? "rgba(255,255,255,0.3)"
-                              : "transparent",
-                            borderColor: selected
-                              ? "transparent"
-                              : colors.cardBorder,
-                          },
-                        ]}
-                      >
-                        {selected && (
-                          <Ionicons name="checkmark" size={12} color="#fff" />
-                        )}
-                      </View>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
-          )}
-
-          {/* ── Step 3: Cleaning frequency ───────────────────────── */}
-          {step === 3 && (
-            <View style={styles.stepWrap}>
-              <Text style={[styles.stepTitle, { color: colors.text }]}>
-                How often do you clean?
-              </Text>
-              <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
-                We'll tailor your chore list to match your rhythm.
-              </Text>
-              {frequency === "" && (
-                <Text style={[styles.hintText, { color: colors.danger }]}>
-                  Select an option to continue
-                </Text>
-              )}
-              <View style={styles.optList}>
-                {FREQUENCY_OPTIONS.map((opt) => (
-                  <OptionCard
-                    key={opt.label}
-                    label={opt.label}
-                    icon={opt.icon}
-                    desc={opt.desc}
-                    selected={frequency === opt.label}
-                    onPress={() => {
-                      if (Platform.OS !== "web")
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setFrequency(opt.label);
-                    }}
-                  />
-                ))}
-              </View>
-            </View>
-          )}
-
-          {/* ── Step 4: Preferred time ───────────────────────────── */}
-          {step === 4 && (
-            <View style={styles.stepWrap}>
-              <Text style={[styles.stepTitle, { color: colors.text }]}>
-                When do you prefer to clean?
-              </Text>
-              <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
-                We'll schedule reminders at the right time for you.
-              </Text>
-              <View style={styles.optList}>
-                {TIME_OPTIONS.map((opt) => (
-                  <OptionCard
-                    key={opt.label}
-                    label={opt.label}
-                    icon={opt.icon}
-                    desc={opt.desc}
-                    selected={preferredTime === opt.label}
-                    onPress={() => {
-                      if (Platform.OS !== "web")
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setPreferredTime(opt.label);
-                    }}
-                  />
-                ))}
-              </View>
-            </View>
-          )}
-
-          {/* ── Step 5: Session length ───────────────────────────── */}
-          {step === 5 && (
-            <View style={styles.stepWrap}>
-              <Text style={[styles.stepTitle, { color: colors.text }]}>
-                How long do you spend cleaning?
-              </Text>
-              <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
-                We'll group chores to fit your sessions perfectly.
-              </Text>
-              <View style={styles.optList}>
-                {SESSION_OPTIONS.map((opt) => (
-                  <OptionCard
-                    key={opt.label}
-                    label={opt.label}
-                    icon={opt.icon}
-                    desc={opt.desc}
-                    selected={sessionLength === opt.label}
-                    onPress={() => {
-                      if (Platform.OS !== "web")
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setSessionLength(opt.label);
-                    }}
-                  />
-                ))}
-              </View>
-            </View>
-          )}
-
-          {/* ── Step 6: Pets ─────────────────────────────────────── */}
-          {step === 6 && (
-            <View style={styles.stepWrap}>
-              <LinearGradient
-                colors={["#FF9800", "#F57C00"]}
-                style={styles.heroBadge}
-              >
-                <Text style={styles.petEmoji}>🐾</Text>
-              </LinearGradient>
-              <Text style={[styles.stepTitle, { color: colors.text }]}>
-                Do you have pets?
-              </Text>
-              <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
-                Pets bring extra fur and muddy paws — we'll add extra floor
-                chores if so!
-              </Text>
-              <View style={styles.petRow}>
-                {[
-                  { val: true, label: "Yes, I do! 🐶", icon: "paw-outline" as const },
-                  { val: false, label: "No pets 🙅", icon: "close-circle-outline" as const },
-                ].map(({ val, label, icon }) => {
-                  const sel = hasPets === val;
-                  return (
-                    <Pressable
-                      key={label}
-                      onPress={() => {
-                        if (Platform.OS !== "web")
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setHasPets(val);
-                      }}
-                      style={({ pressed }) => [
-                        styles.petBtn,
-                        {
-                          backgroundColor: sel ? colors.tintLight : colors.surface,
-                          borderColor: sel ? colors.tint : colors.cardBorder,
-                          borderWidth: sel ? 2 : 1.5,
-                          opacity: pressed ? 0.85 : 1,
-                        },
-                      ]}
-                    >
-                      <Ionicons
-                        name={icon}
-                        size={28}
-                        color={sel ? colors.tint : colors.textSecondary}
-                      />
-                      <Text
-                        style={[
-                          styles.petLabel,
-                          { color: sel ? colors.tint : colors.text },
-                        ]}
-                      >
-                        {label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
-          )}
-
-          {/* ── Step 7: Biggest challenge ────────────────────────── */}
-          {step === 7 && (
-            <View style={styles.stepWrap}>
-              <Text style={[styles.stepTitle, { color: colors.text }]}>
-                What's your biggest cleaning challenge?
-              </Text>
-              <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
-                We'll design your experience around it.
-              </Text>
-              <View style={styles.optList}>
-                {CHALLENGE_OPTIONS.map((opt) => (
-                  <OptionCard
-                    key={opt.label}
-                    label={opt.label}
-                    icon={opt.icon}
-                    desc={opt.desc}
-                    selected={challenge === opt.label}
-                    onPress={() => {
-                      if (Platform.OS !== "web")
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setChallenge(opt.label);
-                    }}
-                  />
-                ))}
-              </View>
-            </View>
-          )}
-
-          {/* ── Step 8: Motivation ───────────────────────────────── */}
-          {step === 8 && (
-            <View style={styles.stepWrap}>
-              <Text style={[styles.stepTitle, { color: colors.text }]}>
-                What motivates you to clean?
-              </Text>
-              <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
-                We'll highlight the things that keep you going.
-              </Text>
-              <View style={styles.optList}>
-                {MOTIVATION_OPTIONS.map((opt) => (
-                  <OptionCard
-                    key={opt.label}
-                    label={opt.label}
-                    icon={opt.icon}
-                    desc={opt.desc}
-                    selected={motivation === opt.label}
-                    onPress={() => {
-                      if (Platform.OS !== "web")
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setMotivation(opt.label);
-                    }}
-                  />
-                ))}
-              </View>
-            </View>
-          )}
-
-          {/* ── Step 9: All set! ─────────────────────────────────── */}
-          {step === 9 && (
-            <View style={[styles.stepWrap, { alignItems: "center" }]}>
-              <LinearGradient
-                colors={["#2B7A78", "#3AAFA9"]}
-                style={[styles.heroBadge, { alignSelf: "center" }]}
-              >
-                <Ionicons name="checkmark-done" size={44} color="#fff" />
-              </LinearGradient>
-              <Text
-                style={[
-                  styles.stepTitle,
-                  { color: colors.text, textAlign: "center" },
-                ]}
-              >
-                You're all set! 🎉
-              </Text>
-              <Text
-                style={[
-                  styles.stepSubtitle,
-                  { color: colors.textSecondary, textAlign: "center" },
-                ]}
-              >
-                Here's a quick summary of your preferences
-              </Text>
-
-              <View
-                style={[
-                  styles.summaryCard,
-                  {
-                    backgroundColor: colors.surface,
-                    borderColor: colors.cardBorder,
-                  },
-                ]}
-              >
-                {[
-                  { icon: "people-outline", label: "Living with", val: livingSituation || "Not specified" },
-                  {
-                    icon: "home-outline",
-                    label: "Rooms",
-                    val: selectedRooms.length
-                      ? selectedRooms.slice(0, 3).join(", ") +
-                        (selectedRooms.length > 3
-                          ? ` +${selectedRooms.length - 3}`
-                          : "")
-                      : "Kitchen, Living Room, Bedroom",
-                  },
-                  { icon: "repeat-outline", label: "Frequency", val: frequency || "Bit of both" },
-                  { icon: "time-outline", label: "Session", val: sessionLength || "Not specified" },
-                  { icon: "sunny-outline", label: "Preferred time", val: preferredTime || "Whenever" },
-                  {
-                    icon: "paw-outline",
-                    label: "Pets",
-                    val: hasPets === null ? "Not specified" : hasPets ? "Yes" : "No",
-                  },
-                  { icon: "flame-outline", label: "Motivation", val: motivation || "Not specified" },
-                ].map(({ icon, label, val }) => (
-                  <View
-                    key={label}
-                    style={[
-                      styles.summaryRow,
-                      { borderBottomColor: colors.separator },
-                    ]}
-                  >
-                    <Ionicons
-                      name={icon as any}
-                      size={16}
-                      color={colors.tint}
-                    />
-                    <Text
-                      style={[styles.summaryLabel, { color: colors.textSecondary }]}
-                    >
-                      {label}
-                    </Text>
-                    <Text
-                      style={[styles.summaryVal, { color: colors.text }]}
-                      numberOfLines={1}
-                    >
-                      {val}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            </View>
+            <SlideSummary
+              rooms={selectedRooms}
+              frequency={frequency}
+              onFinish={handleFinish}
+              loading={loading}
+            />
           )}
         </Animated.View>
       </ScrollView>
 
-      {/* ── Bottom button ────────────────────────────────────────── */}
-      <View
-        style={[
-          styles.bottomNav,
-          {
-            paddingBottom: bottomPad + 12,
-            borderTopColor: colors.separator,
-            backgroundColor: colors.background,
-          },
-        ]}
-      >
+      {/* Bottom nav */}
+      <View style={s.bottomBar}>
+        {/* Back button */}
         <Pressable
-          onPress={isLastStep ? handleFinish : () => goToStep(step + 1)}
-          disabled={!canProceed || loading}
-          style={({ pressed }) => [
-            styles.nextBtn,
-            {
-              backgroundColor: canProceed ? colors.tint : colors.cardBorder,
-              opacity: pressed || loading ? 0.8 : 1,
-            },
-          ]}
+          onPress={() => step > 0 && goTo(step - 1, "back")}
+          style={[s.navBtn, { opacity: step === 0 ? 0 : 1 }]}
         >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text
-              style={[
-                styles.nextBtnText,
-                { color: canProceed ? "#fff" : colors.textSecondary },
-              ]}
-            >
-              {isLastStep ? "Let's go! 🎉" : "Next →"}
-            </Text>
-          )}
+          <Ionicons name="arrow-back" size={20} color={C.brownMuted} />
         </Pressable>
+
+        {/* Progress dots */}
+        <View style={s.dots}>
+          {[0, 1, 2].map((i) => (
+            <View
+              key={i}
+              style={[s.dot, i === step ? s.dotActive : s.dotInactive]}
+            />
+          ))}
+        </View>
+
+        {/* Next button — hidden on last slide */}
+        {step < 2 ? (
+          <Pressable
+            onPress={() => canNext && goTo(step + 1)}
+            style={[s.navBtnPrimary, { opacity: canNext ? 1 : 0.4 }]}
+          >
+            <Ionicons name="arrow-forward" size={20} color={C.white} />
+          </Pressable>
+        ) : (
+          <View style={{ width: 44 }} />
+        )}
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
+const s = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: C.cream,
+  },
   topBar: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingBottom: 8,
-    gap: 12,
-  },
-  topBtn: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
-  progressTrack: {
-    flex: 1,
-    height: 5,
-    borderRadius: 3,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: "100%",
-    borderRadius: 3,
-  },
-  stepCounter: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 13,
-    width: 36,
-    textAlign: "right",
-  },
-  skipBtn: {
-    alignSelf: "flex-end",
-    paddingHorizontal: 20,
-    paddingVertical: 4,
-    marginBottom: 4,
-  },
-  skipText: { fontFamily: "Inter_500Medium", fontSize: 14 },
-  scroll: { paddingHorizontal: 24 },
-  stepWrap: { paddingTop: 12, paddingBottom: 16 },
-  heroBadge: {
-    width: 88,
-    height: 88,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 24,
-    alignSelf: "flex-start",
-  },
-  petEmoji: { fontSize: 40 },
-  stepTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 26,
-    marginBottom: 10,
-    lineHeight: 34,
-  },
-  stepSubtitle: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 15,
-    lineHeight: 23,
-    marginBottom: 8,
-  },
-  hintText: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    marginBottom: 8,
-    marginTop: 4,
-  },
-  infoCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    padding: 12,
-    borderRadius: 12,
-    marginTop: 16,
-    marginBottom: 12,
-  },
-  infoText: { fontFamily: "Inter_500Medium", fontSize: 13 },
-  featureList: { gap: 10, marginTop: 8 },
-  featureRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  featureText: { fontFamily: "Inter_500Medium", fontSize: 14 },
-  optList: { marginTop: 16, gap: 10 },
-  memberNamesWrap: { marginTop: 20, gap: 10 },
-  memberNamesTitle: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 13,
-    marginBottom: 4,
-  },
-  memberNameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 14,
     paddingVertical: 12,
   },
-  memberNameInput: {
-    flex: 1,
-    fontFamily: "Inter_400Regular",
-    fontSize: 15,
+  skipBtn: { paddingHorizontal: 12, paddingVertical: 6 },
+  skipText: { fontFamily: "Inter_500Medium", fontSize: 14, color: C.brownMuted },
+
+  scrollContent: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 20, paddingVertical: 12 },
+
+  slideInner: { gap: 20 },
+
+  slideTitle: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 30,
+    color: C.brown,
+    lineHeight: 38,
+    letterSpacing: -0.5,
   },
-  optCard: {
+  slideSubtitle: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 16,
+    color: C.brownMuted,
+    marginTop: -8,
+  },
+
+  // Room pills
+  pillGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  pill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 11,
+    borderRadius: 50,
+    borderWidth: 1.5,
+  },
+  pillActive:   { backgroundColor: C.orange, borderColor: C.orange },
+  pillInactive: { backgroundColor: C.white,  borderColor: C.cardBorder },
+  pillText: { fontFamily: "Inter_600SemiBold", fontSize: 14 },
+  selectionHint: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 13,
+    color: C.brownMuted,
+    marginTop: -4,
+  },
+
+  // Frequency cards
+  freqList: { gap: 12 },
+  freqCard: {
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
+    padding: 16,
     borderRadius: 16,
-    padding: 14,
-  },
-  optIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 13,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  optLabel: { fontFamily: "Inter_600SemiBold", fontSize: 15, marginBottom: 2 },
-  optDesc: { fontFamily: "Inter_400Regular", fontSize: 12 },
-  radio: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  roomGrid: { marginTop: 12, gap: 10 },
-  roomChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 13,
-  },
-  roomIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  roomChipText: { fontFamily: "Inter_500Medium", fontSize: 15, flex: 1 },
-  roomCheck: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
     borderWidth: 1.5,
-    alignItems: "center",
-    justifyContent: "center",
   },
-  petRow: { flexDirection: "row", gap: 12, marginTop: 20 },
-  petBtn: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 24,
-    borderRadius: 16,
-  },
-  petLabel: { fontFamily: "Inter_600SemiBold", fontSize: 14 },
+  freqCardActive:   { backgroundColor: C.orange,  borderColor: C.orange },
+  freqCardInactive: { backgroundColor: C.white,   borderColor: C.cardBorder },
+  freqIcon: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  freqLabel: { fontFamily: "Inter_600SemiBold", fontSize: 15 },
+  freqDesc:  { fontFamily: "Inter_400Regular",  fontSize: 13, marginTop: 2 },
+
+  // Summary
   summaryCard: {
-    borderWidth: 1,
+    backgroundColor: C.white,
     borderRadius: 16,
-    overflow: "hidden",
-    marginTop: 16,
-    width: "100%",
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: C.cardBorder,
+    gap: 6,
   },
-  summaryRow: {
+  summaryRow:  { flexDirection: "row", alignItems: "center", gap: 8 },
+  summaryLabel:{ fontFamily: "Inter_600SemiBold", fontSize: 13, color: C.brownMuted },
+  summaryValue:{ fontFamily: "Inter_500Medium",   fontSize: 15, color: C.brown, lineHeight: 22 },
+
+  // Finish button
+  finishBtn: {
+    backgroundColor: C.orange,
+    borderRadius: 16,
+    paddingVertical: 18,
+    alignItems: "center",
+    marginTop: 8,
+    shadowColor: C.orange,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  finishBtnText: { fontFamily: "Inter_700Bold", fontSize: 17, color: C.white },
+
+  // Bottom nav
+  bottomBar: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 11,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  summaryLabel: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    width: 110,
-  },
-  summaryVal: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 13,
-    flex: 1,
-  },
-  bottomNav: {
+    justifyContent: "space-between",
     paddingHorizontal: 24,
-    paddingTop: 16,
-    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingVertical: 16,
   },
-  nextBtn: {
-    height: 54,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
+  dots: { flexDirection: "row", gap: 8 },
+  dot:        { width: 8, height: 8, borderRadius: 4 },
+  dotActive:  { width: 24, backgroundColor: C.orange },
+  dotInactive:{ backgroundColor: C.cardBorder },
+  navBtn: {
+    width: 44, height: 44, borderRadius: 22,
+    alignItems: "center", justifyContent: "center",
+    backgroundColor: C.white,
+    borderWidth: 1.5, borderColor: C.cardBorder,
   },
-  nextBtnText: { fontFamily: "Inter_700Bold", fontSize: 16 },
+  navBtnPrimary: {
+    width: 44, height: 44, borderRadius: 22,
+    alignItems: "center", justifyContent: "center",
+    backgroundColor: C.orange,
+  },
 });

@@ -27,6 +27,7 @@ interface ChoresContextValue {
   getChoresByDate: (date: string) => Chore[];
   getRoomStats: (room: Room) => { total: number; completed: number };
   loadDemoChores: () => void;
+  seedChoresForRooms: (rooms: string[]) => void;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -222,6 +223,13 @@ export function ChoresProvider({ children }: { children: React.ReactNode }) {
     [chores]
   );
 
+  // Seeds chores filtered to selected rooms after onboarding completes
+  const seedChoresForRooms = useCallback((rooms: string[]) => {
+    const defaults = seedDefaultChores(rooms);
+    setChores(defaults);
+    saveChores(defaults).catch(() => {});
+  }, []);
+
   // Loads fresh default chores for demo — one per room on today, rest across next 2 days
   const loadDemoChores = useCallback(() => {
     const dayMap: Record<number, number[]> = {
@@ -259,6 +267,7 @@ export function ChoresProvider({ children }: { children: React.ReactNode }) {
         getChoresByDate,
         getRoomStats,
         loadDemoChores,
+        seedChoresForRooms,
       }}
     >
       {children}
