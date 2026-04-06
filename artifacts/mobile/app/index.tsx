@@ -24,7 +24,7 @@ export default function RootIndex() {
     );
   }
 
-  if (!user) return <Redirect href="/welcome" />;
+  if (!user) return <Redirect href={Platform.OS === "web" ? "/landing" : "/welcome"} />;
   if (!user.onboarded) return <Redirect href="/onboarding" />;
   return <Redirect href="/(tabs)/" />;
 }

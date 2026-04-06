@@ -35,10 +35,10 @@ export function Logo({ size = "md", color = "#fff", textColor = "#fff" }: LogoPr
       </View>
       <View style={{ marginLeft: s.gap }}>
         <Text style={[styles.name, { fontSize: s.font, color: textColor }]}>
-          Tidy Buddy
+          Cozy
         </Text>
         <Text style={[styles.tagline, { color: "rgba(255,255,255,0.75)" }]}>
-          Cleaning made chill
+          Home, handled.
         </Text>
       </View>
     </View>

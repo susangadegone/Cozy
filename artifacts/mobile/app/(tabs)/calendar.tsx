@@ -210,7 +210,7 @@ const ChoreRow = React.memo(function ChoreRow({
               e.nativeEvent.pageY
             )
           }
-          delayLongPress={300}
+          delayLongPress={Platform.OS === "web" ? 1 : 300}
           style={styles.dragHandle}
           hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
         >
@@ -517,6 +517,38 @@ export default function CalendarTab() {
     dragVisible.setValue(1);
     setDragChore(chore);
   }
+
+  // Web: track mouse during drag via window-level listeners.
+  // PanResponder only captures events from the element that received the
+  // initial touch, so conditional attachment to dayTabsRow never works on web.
+  useEffect(() => {
+    if (Platform.OS !== "web" || !dragChore) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      dragX.setValue(e.clientX - 80);
+      dragY.setValue(e.clientY - 30);
+      const col = Math.floor(e.clientX / DAY_COL_W);
+      setHoveredDayIdx(Math.max(0, Math.min(6, col)));
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      const col = Math.floor(e.clientX / DAY_COL_W);
+      const clampedCol = Math.max(0, Math.min(6, col));
+      const targetDate = weekDates[clampedCol];
+      scheduleChore(dragChore.id, targetDate);
+      setSelectedDate(targetDate);
+      setHoveredDayIdx(null);
+      dragVisible.setValue(0);
+      setDragChore(null);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [dragChore, weekDates]);
 
   // ── Segmented control ────────────────────────────────────────────────────
 
