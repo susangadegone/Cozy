@@ -22,8 +22,11 @@ import Animated, {
 import Svg, { Circle } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 
+import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useChores } from "@/context/ChoresContext";
 import { Chore, ROOM_COLORS } from "@/types";
+import { ChoreDetailModal } from "@/components/ChoreDetailModal";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -285,6 +288,7 @@ function ChoreCard({
   isPickedUp,
   onPickUp,
   onToggle,
+  onTap,
 }: {
   chore: Chore;
   isFirst: boolean;
@@ -292,6 +296,7 @@ function ChoreCard({
   isPickedUp: boolean;
   onPickUp: () => void;
   onToggle: () => void;
+  onTap: () => void;
 }) {
   const roomColor = ROOM_COLORS[chore.room].icon;
   const done = chore.completed;
@@ -328,6 +333,7 @@ function ChoreCard({
         ]}
       >
         <ConfettiBurst trigger={burst} />
+        <Pressable onPress={onTap} style={styles.cardTapArea}>
         <View style={styles.cardContent}>
           {/* Left: room + title */}
           <View style={styles.cardLeft}>
@@ -364,6 +370,7 @@ function ChoreCard({
             <View style={styles.handleLine} />
           </Pressable>
         </View>
+        </Pressable>
       </View>
     </View>
   );
@@ -377,12 +384,14 @@ function Section({
   pickedUpId,
   onPickUp,
   onToggle,
+  onTap,
 }: {
   label: string;
   chores: Chore[];
   pickedUpId: string | null;
   onPickUp: (id: string) => void;
   onToggle: (id: string) => void;
+  onTap: (chore: Chore) => void;
 }) {
   if (chores.length === 0) return null;
   return (
@@ -397,6 +406,7 @@ function Section({
           isPickedUp={pickedUpId === chore.id}
           onPickUp={() => onPickUp(chore.id)}
           onToggle={() => onToggle(chore.id)}
+          onTap={() => onTap(chore)}
         />
       ))}
     </View>
@@ -419,6 +429,13 @@ export default function HomeTab() {
   const [pickedUpId, setPickedUpId] = useState<string | null>(null);
   const [flashingIndex, setFlashingIndex] = useState<number | null>(null);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [selectedChore, setSelectedChore] = useState<Chore | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleChoreTap = useCallback((chore: Chore) => {
+    setSelectedChore(chore);
+    setModalVisible(true);
+  }, []);
 
   const selectedDay = DAYS[selectedIndex];
   const selectedDateStr = dateStr(selectedDay);
@@ -472,7 +489,7 @@ export default function HomeTab() {
 
   return (
     <Pressable style={[styles.container, { backgroundColor: bg }]} onPress={pickedUpId ? cancelPickUp : undefined}>
-      {/* Header: title + progress ring */}
+      {/* Header: title + progress ring + add button */}
       <View style={[styles.header, { paddingTop: topPad + 12 }]}>
         <View>
           <Text style={[styles.appName, { color: isDark ? "#E8F4F3" : "#1A1A1A" }]}>Cozy</Text>
@@ -480,7 +497,15 @@ export default function HomeTab() {
             {FULL_DAYS[selectedDay.getDay()]}, {MONTHS[selectedDay.getMonth()]} {selectedDay.getDate()}
           </Text>
         </View>
-        <ProgressRing done={done} total={total} isDark={isDark} />
+        <View style={styles.headerRight}>
+          <ProgressRing done={done} total={total} isDark={isDark} />
+          <Pressable
+            onPress={() => router.push("/add-chore")}
+            style={styles.addBtn}
+          >
+            <Ionicons name="add" size={22} color="#fff" />
+          </Pressable>
+        </View>
       </View>
 
       {/* Nudge message */}
@@ -524,12 +549,18 @@ export default function HomeTab() {
           </View>
         ) : (
           <>
-            <Section label="Morning"   chores={morning}   pickedUpId={pickedUpId} onPickUp={handlePickUp} onToggle={handleToggle} />
-            <Section label="Afternoon" chores={afternoon} pickedUpId={pickedUpId} onPickUp={handlePickUp} onToggle={handleToggle} />
-            <Section label="Evening"   chores={evening}   pickedUpId={pickedUpId} onPickUp={handlePickUp} onToggle={handleToggle} />
+            <Section label="Morning"   chores={morning}   pickedUpId={pickedUpId} onPickUp={handlePickUp} onToggle={handleToggle} onTap={handleChoreTap} />
+            <Section label="Afternoon" chores={afternoon} pickedUpId={pickedUpId} onPickUp={handlePickUp} onToggle={handleToggle} onTap={handleChoreTap} />
+            <Section label="Evening"   chores={evening}   pickedUpId={pickedUpId} onPickUp={handlePickUp} onToggle={handleToggle} onTap={handleChoreTap} />
           </>
         )}
       </ScrollView>
+
+      <ChoreDetailModal
+        chore={selectedChore}
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+      />
     </Pressable>
   );
 }
@@ -556,6 +587,29 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     fontSize: 13,
     marginTop: 2,
+  },
+
+  // Header right cluster
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  addBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "#F57C00",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#F57C00",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  cardTapArea: {
+    flex: 1,
   },
 
   // Progress ring
