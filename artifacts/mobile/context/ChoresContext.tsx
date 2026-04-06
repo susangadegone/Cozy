@@ -26,6 +26,7 @@ interface ChoresContextValue {
   getChoresByRoom: (room: Room) => Chore[];
   getChoresByDate: (date: string) => Chore[];
   getRoomStats: (room: Room) => { total: number; completed: number };
+  loadDemoChores: () => void;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -221,6 +222,14 @@ export function ChoresProvider({ children }: { children: React.ReactNode }) {
     [chores]
   );
 
+  // Loads fresh default chores into memory for demo mode — no AsyncStorage touch
+  const loadDemoChores = useCallback(() => {
+    const defaults = seedDefaultChores();
+    setChores(defaults);
+    setLoading(false);
+    setError(null);
+  }, []);
+
   return (
     <ChoresContext.Provider
       value={{
@@ -238,6 +247,7 @@ export function ChoresProvider({ children }: { children: React.ReactNode }) {
         getChoresByRoom,
         getChoresByDate,
         getRoomStats,
+        loadDemoChores,
       }}
     >
       {children}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/context/AuthContext";
+import { useChores } from "@/context/ChoresContext";
 
 function haptic() {
   if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -58,8 +59,18 @@ export default function WelcomeScreen() {
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
-  const { enterDemo } = useAuth();
+  const { enterDemo, user } = useAuth();
+  const { loadDemoChores } = useChores();
   const [demoLoading, setDemoLoading] = useState(false);
+  const demoRequested = useRef(false);
+
+  // Navigate only after user state has actually propagated
+  useEffect(() => {
+    if (demoRequested.current && user?.isDemo) {
+      demoRequested.current = false;
+      router.replace("/(tabs)/");
+    }
+  }, [user]);
 
   // ── Entrance animations ───────────────────────────────────────────
   const logoY = useSharedValue(-60);
@@ -97,8 +108,9 @@ export default function WelcomeScreen() {
   function handleDemo() {
     if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setDemoLoading(true);
-    enterDemo();
-    router.replace("/(tabs)/");
+    loadDemoChores();      // seed fresh default chores, bypasses AsyncStorage
+    demoRequested.current = true;
+    enterDemo();           // sets demo user in auth state — useEffect above navigates after
   }
 
   return (
