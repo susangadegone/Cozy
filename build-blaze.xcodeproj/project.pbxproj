@@ -18,6 +18,8 @@
 		713DE738FB02B3C17497E78B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26FFE62BD5F0BD2F57F06C68 /* LaunchScreen.storyboard */; };
 		77EC1793DF4839C0AD849754 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 836B66BE8B59A7D6F03625DF /* Assets.xcassets */; };
 		7C6801A83D46059DE447EC26 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FC79458A977E9944CDD94A /* RootView.swift */; };
+		7C96683A4322BE7FBB22103D /* MonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A046E6BBC40F5BAC0FA3A73D /* MonthView.swift */; };
+		7FC3235E46E7D7EC634938F3 /* FloatingDragChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42FF094DF171BF6B1259A7B9 /* FloatingDragChip.swift */; };
 		7FE4F965DD4A66C5648EDA3A /* OnboardingStep2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04DBDCF44043CBC064FE715 /* OnboardingStep2.swift */; };
 		8305E648FB209FD426752A0C /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F87AEF74FF54B7396B20572F /* AuthManager.swift */; };
 		8ED3D4366DD17C987C558A5F /* ConfettiOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DB60902994953AABD065346 /* ConfettiOverlay.swift */; };
@@ -27,6 +29,7 @@
 		B96094F7ECE7134845366EC2 /* ChoreTrayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCD068F57C435148A951059D /* ChoreTrayView.swift */; };
 		C4C9988B44F3B897D26FDC88 /* AddChoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B1F1DBA01DD8AC9D687E233 /* AddChoreView.swift */; };
 		C62F45B236A0FF52CE7F140B /* OnboardingStep3.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC1EB55418D0C9B8EA47609 /* OnboardingStep3.swift */; };
+		CED87F4CFAA95D032457D13E /* DragDropManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB12BFBC5AE888775C7CB79 /* DragDropManager.swift */; };
 		D3E792FF17ECCEFC4D1A757D /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B8823290C14F2C471FB708 /* Models.swift */; };
 		D6D1292384B4479B907FA298 /* OnboardingStep4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F4EA0AE1E81B146158C3943 /* OnboardingStep4.swift */; };
 		DD5AB954691B93D969C4398E /* CozyTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D0618554E59A586FF1AD6A /* CozyTheme.swift */; };
@@ -46,6 +49,7 @@
 		3365055E6397DB02633A86F6 /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseConfig.swift; sourceTree = "<group>"; };
 		33944CF98230C47938FB4F2D /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		39681800AC3FDDB337CBA8F9 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		42FF094DF171BF6B1259A7B9 /* FloatingDragChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingDragChip.swift; sourceTree = "<group>"; };
 		49D0618554E59A586FF1AD6A /* CozyTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyTheme.swift; sourceTree = "<group>"; };
 		583C360C5726698EEB65E762 /* build-blaze.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "build-blaze.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F410B1C5516482EFE0083B9 /* OnboardingStep1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep1.swift; sourceTree = "<group>"; };
@@ -57,7 +61,9 @@
 		94B8823290C14F2C471FB708 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		9B1F1DBA01DD8AC9D687E233 /* AddChoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddChoreView.swift; sourceTree = "<group>"; };
 		9DB60902994953AABD065346 /* ConfettiOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiOverlay.swift; sourceTree = "<group>"; };
+		A046E6BBC40F5BAC0FA3A73D /* MonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthView.swift; sourceTree = "<group>"; };
 		AAC1EB55418D0C9B8EA47609 /* OnboardingStep3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep3.swift; sourceTree = "<group>"; };
+		ABB12BFBC5AE888775C7CB79 /* DragDropManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragDropManager.swift; sourceTree = "<group>"; };
 		B04DBDCF44043CBC064FE715 /* OnboardingStep2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep2.swift; sourceTree = "<group>"; };
 		BCD068F57C435148A951059D /* ChoreTrayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoreTrayView.swift; sourceTree = "<group>"; };
 		BF8C4F11C49053EB265D881D /* OnboardingFinale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFinale.swift; sourceTree = "<group>"; };
@@ -149,7 +155,10 @@
 				9B1F1DBA01DD8AC9D687E233 /* AddChoreView.swift */,
 				BCD068F57C435148A951059D /* ChoreTrayView.swift */,
 				9DB60902994953AABD065346 /* ConfettiOverlay.swift */,
+				ABB12BFBC5AE888775C7CB79 /* DragDropManager.swift */,
+				42FF094DF171BF6B1259A7B9 /* FloatingDragChip.swift */,
 				39681800AC3FDDB337CBA8F9 /* HomeView.swift */,
+				A046E6BBC40F5BAC0FA3A73D /* MonthView.swift */,
 				056E2E7BA78B19C5DBB361DC /* WeekStripView.swift */,
 			);
 			path = Home;
@@ -276,8 +285,11 @@
 				24FE28A911ED40E1B946D071 /* CozyApp.swift in Sources */,
 				DD5AB954691B93D969C4398E /* CozyTheme.swift in Sources */,
 				E68D45471D39562B36D9D6C3 /* DataService.swift in Sources */,
+				CED87F4CFAA95D032457D13E /* DragDropManager.swift in Sources */,
+				7FC3235E46E7D7EC634938F3 /* FloatingDragChip.swift in Sources */,
 				F468DEAA413B208EA6FB8E4F /* HomeView.swift in Sources */,
 				D3E792FF17ECCEFC4D1A757D /* Models.swift in Sources */,
+				7C96683A4322BE7FBB22103D /* MonthView.swift in Sources */,
 				9B219AA42B0A22048C40B8CC /* OnboardingFinale.swift in Sources */,
 				623B3D578B37B25F5559BED8 /* OnboardingStep1.swift in Sources */,
 				7FE4F965DD4A66C5648EDA3A /* OnboardingStep2.swift in Sources */,
