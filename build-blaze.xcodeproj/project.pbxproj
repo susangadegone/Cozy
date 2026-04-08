@@ -1,0 +1,389 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		099DE8C2BDF57B37EC0F4BC8 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 44F5572648553A4DB7D6FC6A /* Auth */; };
+		24FE28A911ED40E1B946D071 /* CozyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCC6778727CD97977A844CA3 /* CozyApp.swift */; };
+		27D50BEBC4295B7FC50B6D7E /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = 473B972F6D580F5513544A48 /* PostgREST */; };
+		2843F2EC1F3465304DCD256E /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3365055E6397DB02633A86F6 /* SupabaseConfig.swift */; };
+		3806205B0A9B9C5F95F3E3EF /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72825EA23FF470FAC054949A /* WelcomeView.swift */; };
+		59B21AB85FD07430BDEAE3C3 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = FC7665A5AFD7212EA406282A /* Supabase */; };
+		713DE738FB02B3C17497E78B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26FFE62BD5F0BD2F57F06C68 /* LaunchScreen.storyboard */; };
+		77EC1793DF4839C0AD849754 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 836B66BE8B59A7D6F03625DF /* Assets.xcassets */; };
+		7C6801A83D46059DE447EC26 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FC79458A977E9944CDD94A /* RootView.swift */; };
+		8305E648FB209FD426752A0C /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F87AEF74FF54B7396B20572F /* AuthManager.swift */; };
+		8ED3D4366DD17C987C558A5F /* ConfettiOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DB60902994953AABD065346 /* ConfettiOverlay.swift */; };
+		A3DF74EDFF5FD54DE79B293E /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33944CF98230C47938FB4F2D /* AppState.swift */; };
+		A4CA1899FF6C8CDBBDE79FED /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4DAA4D684A6564851BA2B01 /* SplashView.swift */; };
+		B96094F7ECE7134845366EC2 /* ChoreTrayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCD068F57C435148A951059D /* ChoreTrayView.swift */; };
+		C4C9988B44F3B897D26FDC88 /* AddChoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B1F1DBA01DD8AC9D687E233 /* AddChoreView.swift */; };
+		D3E792FF17ECCEFC4D1A757D /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B8823290C14F2C471FB708 /* Models.swift */; };
+		DD5AB954691B93D969C4398E /* CozyTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D0618554E59A586FF1AD6A /* CozyTheme.swift */; };
+		E68D45471D39562B36D9D6C3 /* DataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010AEB07EBF7A2DECB3CC5AA /* DataService.swift */; };
+		EC998EA22F88601367718B24 /* AuthFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 928C1EDBD3BEF852394FEC1D /* AuthFormView.swift */; };
+		F468DEAA413B208EA6FB8E4F /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39681800AC3FDDB337CBA8F9 /* HomeView.swift */; };
+		F876D121C1448E78778F263A /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F03A4B78D8E58D436ABF04F /* OnboardingView.swift */; };
+		FBBA93B10F3179F020A55FC9 /* WeekStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 056E2E7BA78B19C5DBB361DC /* WeekStripView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		010AEB07EBF7A2DECB3CC5AA /* DataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataService.swift; sourceTree = "<group>"; };
+		056E2E7BA78B19C5DBB361DC /* WeekStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekStripView.swift; sourceTree = "<group>"; };
+		13FC79458A977E9944CDD94A /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		3365055E6397DB02633A86F6 /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseConfig.swift; sourceTree = "<group>"; };
+		33944CF98230C47938FB4F2D /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		39681800AC3FDDB337CBA8F9 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		49D0618554E59A586FF1AD6A /* CozyTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyTheme.swift; sourceTree = "<group>"; };
+		583C360C5726698EEB65E762 /* build-blaze.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "build-blaze.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		607B0EBEB9D0A064512B7109 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		6F03A4B78D8E58D436ABF04F /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		72825EA23FF470FAC054949A /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		836B66BE8B59A7D6F03625DF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		928C1EDBD3BEF852394FEC1D /* AuthFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthFormView.swift; sourceTree = "<group>"; };
+		94B8823290C14F2C471FB708 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		9B1F1DBA01DD8AC9D687E233 /* AddChoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddChoreView.swift; sourceTree = "<group>"; };
+		9DB60902994953AABD065346 /* ConfettiOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiOverlay.swift; sourceTree = "<group>"; };
+		BCD068F57C435148A951059D /* ChoreTrayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoreTrayView.swift; sourceTree = "<group>"; };
+		CBAF2F413227F65B18F82C8E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		D4DAA4D684A6564851BA2B01 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		DCC6778727CD97977A844CA3 /* CozyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyApp.swift; sourceTree = "<group>"; };
+		F87AEF74FF54B7396B20572F /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4DBDAC979182F6D66A236146 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				099DE8C2BDF57B37EC0F4BC8 /* Auth in Frameworks */,
+				27D50BEBC4295B7FC50B6D7E /* PostgREST in Frameworks */,
+				59B21AB85FD07430BDEAE3C3 /* Supabase in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		34627770ABE167875B11395E /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				94B8823290C14F2C471FB708 /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		3ED46BE33A86402A064332BB /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				13FC79458A977E9944CDD94A /* RootView.swift */,
+				D4DAA4D684A6564851BA2B01 /* SplashView.swift */,
+				5F97E631267C63271002CF08 /* Auth */,
+				B6B83D39AE9A714346983937 /* Home */,
+				B953C035098B3B51C06D58C9 /* Onboarding */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		5F97E631267C63271002CF08 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				928C1EDBD3BEF852394FEC1D /* AuthFormView.swift */,
+				72825EA23FF470FAC054949A /* WelcomeView.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		657EB4D4719A5F31DCC6D485 = {
+			isa = PBXGroup;
+			children = (
+				D110F9E138110DDDDB622711 /* build-blaze */,
+				7C0F2F179E9F5ED433BF0367 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		66DD67C987E52E0E3915B162 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				F87AEF74FF54B7396B20572F /* AuthManager.swift */,
+				010AEB07EBF7A2DECB3CC5AA /* DataService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		7597068D8FE8C00CE085BDB6 /* State */ = {
+			isa = PBXGroup;
+			children = (
+				33944CF98230C47938FB4F2D /* AppState.swift */,
+			);
+			path = State;
+			sourceTree = "<group>";
+		};
+		7C0F2F179E9F5ED433BF0367 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				583C360C5726698EEB65E762 /* build-blaze.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B6B83D39AE9A714346983937 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				9B1F1DBA01DD8AC9D687E233 /* AddChoreView.swift */,
+				BCD068F57C435148A951059D /* ChoreTrayView.swift */,
+				9DB60902994953AABD065346 /* ConfettiOverlay.swift */,
+				39681800AC3FDDB337CBA8F9 /* HomeView.swift */,
+				056E2E7BA78B19C5DBB361DC /* WeekStripView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		B953C035098B3B51C06D58C9 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				6F03A4B78D8E58D436ABF04F /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		D110F9E138110DDDDB622711 /* build-blaze */ = {
+			isa = PBXGroup;
+			children = (
+				836B66BE8B59A7D6F03625DF /* Assets.xcassets */,
+				DCC6778727CD97977A844CA3 /* CozyApp.swift */,
+				CBAF2F413227F65B18F82C8E /* Info.plist */,
+				26FFE62BD5F0BD2F57F06C68 /* LaunchScreen.storyboard */,
+				F9E5A53DE474052CB03E00FA /* Config */,
+				34627770ABE167875B11395E /* Models */,
+				66DD67C987E52E0E3915B162 /* Services */,
+				7597068D8FE8C00CE085BDB6 /* State */,
+				3ED46BE33A86402A064332BB /* Views */,
+			);
+			path = "build-blaze";
+			sourceTree = "<group>";
+		};
+		F9E5A53DE474052CB03E00FA /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				49D0618554E59A586FF1AD6A /* CozyTheme.swift */,
+				3365055E6397DB02633A86F6 /* SupabaseConfig.swift */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C797E95DAF90009004B14B14 /* build-blaze */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6E5499B234DA3FB709A8DF84 /* Build configuration list for PBXNativeTarget "build-blaze" */;
+			buildPhases = (
+				691664D396995DE904A2DB53 /* Sources */,
+				D47D8F982F6636C512F12FC5 /* Resources */,
+				4DBDAC979182F6D66A236146 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "build-blaze";
+			packageProductDependencies = (
+				44F5572648553A4DB7D6FC6A /* Auth */,
+				473B972F6D580F5513544A48 /* PostgREST */,
+				FC7665A5AFD7212EA406282A /* Supabase */,
+			);
+			productName = "build-blaze";
+			productReference = 583C360C5726698EEB65E762 /* build-blaze.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		CF2BE349DE683147DF8A583C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+			};
+			buildConfigurationList = 2A7C1E9C3DAF5290EC3C7DB0 /* Build configuration list for PBXProject "build-blaze" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 657EB4D4719A5F31DCC6D485;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1F7D27B0E5426CC5A73EA8D9 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C797E95DAF90009004B14B14 /* build-blaze */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D47D8F982F6636C512F12FC5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				77EC1793DF4839C0AD849754 /* Assets.xcassets in Resources */,
+				713DE738FB02B3C17497E78B /* LaunchScreen.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		691664D396995DE904A2DB53 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C4C9988B44F3B897D26FDC88 /* AddChoreView.swift in Sources */,
+				A3DF74EDFF5FD54DE79B293E /* AppState.swift in Sources */,
+				EC998EA22F88601367718B24 /* AuthFormView.swift in Sources */,
+				8305E648FB209FD426752A0C /* AuthManager.swift in Sources */,
+				B96094F7ECE7134845366EC2 /* ChoreTrayView.swift in Sources */,
+				8ED3D4366DD17C987C558A5F /* ConfettiOverlay.swift in Sources */,
+				24FE28A911ED40E1B946D071 /* CozyApp.swift in Sources */,
+				DD5AB954691B93D969C4398E /* CozyTheme.swift in Sources */,
+				E68D45471D39562B36D9D6C3 /* DataService.swift in Sources */,
+				F468DEAA413B208EA6FB8E4F /* HomeView.swift in Sources */,
+				D3E792FF17ECCEFC4D1A757D /* Models.swift in Sources */,
+				F876D121C1448E78778F263A /* OnboardingView.swift in Sources */,
+				7C6801A83D46059DE447EC26 /* RootView.swift in Sources */,
+				A4CA1899FF6C8CDBBDE79FED /* SplashView.swift in Sources */,
+				2843F2EC1F3465304DCD256E /* SupabaseConfig.swift in Sources */,
+				FBBA93B10F3179F020A55FC9 /* WeekStripView.swift in Sources */,
+				3806205B0A9B9C5F95F3E3EF /* WelcomeView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		26FFE62BD5F0BD2F57F06C68 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				607B0EBEB9D0A064512B7109 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		2C2C338B4D290F896160B014 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.buildblaze;
+				PRODUCT_NAME = "build-blaze";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		7882B61660701B04BC44B719 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.buildblaze;
+				PRODUCT_NAME = "build-blaze";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		824603090C7A375557D5322C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = "build-blaze/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Debug;
+		};
+		D54F6A651897FD54E12E4305 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = "build-blaze/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2A7C1E9C3DAF5290EC3C7DB0 /* Build configuration list for PBXProject "build-blaze" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2C2C338B4D290F896160B014 /* Debug */,
+				7882B61660701B04BC44B719 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6E5499B234DA3FB709A8DF84 /* Build configuration list for PBXNativeTarget "build-blaze" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				824603090C7A375557D5322C /* Debug */,
+				D54F6A651897FD54E12E4305 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1F7D27B0E5426CC5A73EA8D9 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		44F5572648553A4DB7D6FC6A /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F7D27B0E5426CC5A73EA8D9 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		473B972F6D580F5513544A48 /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F7D27B0E5426CC5A73EA8D9 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+		FC7665A5AFD7212EA406282A /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F7D27B0E5426CC5A73EA8D9 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = CF2BE349DE683147DF8A583C /* Project object */;
+}
