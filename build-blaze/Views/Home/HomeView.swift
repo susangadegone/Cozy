@@ -10,6 +10,7 @@ struct HomeView: View {
     @State private var showConfetti = false
     @State private var toastMessage: String?
     @State private var weekOffset: Int = 0
+    @State private var fabPressed = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -19,6 +20,7 @@ struct HomeView: View {
             FloatingDragChip().environmentObject(dragManager)
             if showConfetti { ConfettiOverlay() }
             if let msg = toastMessage { toastBanner(msg) }
+            fabButton
         }
         .sheet(isPresented: $showAddChore) {
             AddChoreView()
@@ -33,6 +35,39 @@ struct HomeView: View {
         }
         .task { await appState.loadData() }
         .gesture(globalDragGesture)
+    }
+
+    // MARK: - FAB
+    private var fabButton: some View {
+        VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                Button {
+                    showAddChore = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 56, height: 56)
+                        .background(Color(hex: "#5C3D2E"))
+                        .clipShape(Circle())
+                        .shadow(color: Color(red: 92/255, green: 61/255, blue: 46/255).opacity(0.3),
+                                radius: 16, x: 0, y: 4)
+                        .scaleEffect(fabPressed ? 0.92 : 1.0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: fabPressed)
+                }
+                .buttonStyle(.plain)
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { _ in fabPressed = true }
+                        .onEnded { _ in fabPressed = false }
+                )
+                .padding(.trailing, 20)
+                .padding(.bottom, 20)
+                .safeAreaPadding(.bottom)
+            }
+        }
     }
 
     // MARK: - Main Layout
