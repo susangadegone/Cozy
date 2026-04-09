@@ -77,17 +77,13 @@ struct HomeView: View {
             weekStripSection
             Divider().opacity(0.2)
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    progressBanner
-                    ChoreTrayView(
-                        onComplete: fireConfetti,
-                        onAddChore: { showAddChore = true }
-                    )
-                    .environmentObject(appState)
-                    .environmentObject(dragManager)
-                    .padding(.top, 16)
-                }
-                .padding(.bottom, 120)
+                DashboardView(
+                    onChoreComplete: fireConfetti,
+                    onAddChore: { showAddChore = true },
+                    onCalendarTap: { showMonthView = true }
+                )
+                .environmentObject(appState)
+                .environmentObject(dragManager)
             }
         }
     }
@@ -132,39 +128,6 @@ struct HomeView: View {
         .padding(.horizontal, 16)
         .padding(.top, 8)
         .padding(.bottom, 10)
-    }
-
-    // MARK: - Progress Banner
-    @ViewBuilder
-    private var progressBanner: some View {
-        let done = appState.completedToday
-        let total = appState.totalToday
-        let progress: Double = total > 0 ? Double(done) / Double(total) : 0
-        HStack(spacing: 14) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(done == total && total > 0 ? "All done! 🎉" : "\(done)/\(total) done today")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(CozyTheme.primary)
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(CozyTheme.border).frame(height: 6)
-                        Capsule().fill(CozyTheme.accent)
-                            .frame(width: geo.size.width * progress, height: 6)
-                            .animation(.spring(response: 0.5), value: progress)
-                    }
-                }
-                .frame(height: 6)
-            }
-            Text("\(Int(progress * 100))%")
-                .font(.system(size: 22, weight: .bold, design: .serif))
-                .foregroundColor(CozyTheme.accent)
-        }
-        .padding(.horizontal, 20).padding(.vertical, 14)
-        .background(CozyTheme.card)
-        .cornerRadius(16)
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(CozyTheme.border, lineWidth: 1))
-        .padding(.horizontal, 16)
-        .padding(.top, 14)
     }
 
     // MARK: - Global Drag Gesture (tracks position + handles drop)

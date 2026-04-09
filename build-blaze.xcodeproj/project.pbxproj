@@ -22,6 +22,7 @@
 		7FC3235E46E7D7EC634938F3 /* FloatingDragChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42FF094DF171BF6B1259A7B9 /* FloatingDragChip.swift */; };
 		7FE4F965DD4A66C5648EDA3A /* OnboardingStep2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B04DBDCF44043CBC064FE715 /* OnboardingStep2.swift */; };
 		8305E648FB209FD426752A0C /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F87AEF74FF54B7396B20572F /* AuthManager.swift */; };
+		86B7A3F4AFCE46818AC18519 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A57AD92BB28DFB8D33AE416 /* DashboardView.swift */; };
 		8ED3D4366DD17C987C558A5F /* ConfettiOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DB60902994953AABD065346 /* ConfettiOverlay.swift */; };
 		9B219AA42B0A22048C40B8CC /* OnboardingFinale.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF8C4F11C49053EB265D881D /* OnboardingFinale.swift */; };
 		A3DF74EDFF5FD54DE79B293E /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33944CF98230C47938FB4F2D /* AppState.swift */; };
@@ -44,6 +45,7 @@
 		010AEB07EBF7A2DECB3CC5AA /* DataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataService.swift; sourceTree = "<group>"; };
 		056E2E7BA78B19C5DBB361DC /* WeekStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekStripView.swift; sourceTree = "<group>"; };
 		13FC79458A977E9944CDD94A /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		1A57AD92BB28DFB8D33AE416 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		213572944D23AFCF87F74635 /* OnboardingStep5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep5.swift; sourceTree = "<group>"; };
 		2F4EA0AE1E81B146158C3943 /* OnboardingStep4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep4.swift; sourceTree = "<group>"; };
 		3365055E6397DB02633A86F6 /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseConfig.swift; sourceTree = "<group>"; };
@@ -155,6 +157,7 @@
 				9B1F1DBA01DD8AC9D687E233 /* AddChoreView.swift */,
 				BCD068F57C435148A951059D /* ChoreTrayView.swift */,
 				9DB60902994953AABD065346 /* ConfettiOverlay.swift */,
+				1A57AD92BB28DFB8D33AE416 /* DashboardView.swift */,
 				ABB12BFBC5AE888775C7CB79 /* DragDropManager.swift */,
 				42FF094DF171BF6B1259A7B9 /* FloatingDragChip.swift */,
 				39681800AC3FDDB337CBA8F9 /* HomeView.swift */,
@@ -284,6 +287,7 @@
 				8ED3D4366DD17C987C558A5F /* ConfettiOverlay.swift in Sources */,
 				24FE28A911ED40E1B946D071 /* CozyApp.swift in Sources */,
 				DD5AB954691B93D969C4398E /* CozyTheme.swift in Sources */,
+				86B7A3F4AFCE46818AC18519 /* DashboardView.swift in Sources */,
 				E68D45471D39562B36D9D6C3 /* DataService.swift in Sources */,
 				CED87F4CFAA95D032457D13E /* DragDropManager.swift in Sources */,
 				7FC3235E46E7D7EC634938F3 /* FloatingDragChip.swift in Sources */,

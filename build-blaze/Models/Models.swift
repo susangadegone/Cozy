@@ -49,6 +49,19 @@ struct Chore: Codable, Identifiable {
     }
 }
 
+// MARK: - ActivityLog
+struct ActivityLog: Identifiable {
+    let id: UUID
+    let type: ActivityType
+    let text: String
+    let timestamp: Date
+    let userId: String
+
+    enum ActivityType {
+        case choreAdded, choreDone, streakMilestone
+    }
+}
+
 // MARK: - Room
 struct Room: Identifiable, Hashable {
     let id: String
