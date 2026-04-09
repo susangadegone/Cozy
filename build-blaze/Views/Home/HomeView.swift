@@ -6,18 +6,14 @@ struct HomeView: View {
     @StateObject private var dragManager = DragDropManager()
 
     @State private var showAddChore = false
-    @State private var showMonthView = false
     @State private var showConfetti = false
     @State private var toastMessage: String?
-    @State private var weekOffset: Int = 0
     @State private var fabPressed = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
             CozyTheme.background.ignoresSafeArea()
             mainLayout
-            if dragManager.isDragging { TrashDropZone().environmentObject(dragManager) }
-            FloatingDragChip().environmentObject(dragManager)
             if showConfetti { ConfettiOverlay() }
             if let msg = toastMessage { toastBanner(msg) }
             fabButton
@@ -27,14 +23,7 @@ struct HomeView: View {
                 .presentationDetents([.fraction(0.85)])
                 .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $showMonthView) {
-            MonthView(isPresented: $showMonthView)
-                .environmentObject(appState)
-                .presentationDetents([.fraction(0.65)])
-                .presentationDragIndicator(.visible)
-        }
         .task { await appState.loadData() }
-        .gesture(globalDragGesture)
     }
 
     // MARK: - FAB
@@ -43,17 +32,14 @@ struct HomeView: View {
             Spacer()
             HStack {
                 Spacer()
-                Button {
-                    showAddChore = true
-                } label: {
+                Button { showAddChore = true } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 24, weight: .semibold))
                         .foregroundColor(.white)
                         .frame(width: 56, height: 56)
-                        .background(Color(hex: "#5C3D2E"))
+                        .background(CozyTheme.accent)
                         .clipShape(Circle())
-                        .shadow(color: Color(red: 92/255, green: 61/255, blue: 46/255).opacity(0.3),
-                                radius: 16, x: 0, y: 4)
+                        .shadow(color: CozyTheme.accent.opacity(0.35), radius: 16, x: 0, y: 4)
                         .scaleEffect(fabPressed ? 0.92 : 1.0)
                         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: fabPressed)
                 }
@@ -74,24 +60,16 @@ struct HomeView: View {
     private var mainLayout: some View {
         VStack(spacing: 0) {
             headerBar
-            weekStripSection
             Divider().opacity(0.2)
             ScrollView(showsIndicators: false) {
                 DashboardView(
                     onChoreComplete: fireConfetti,
-                    onAddChore: { showAddChore = true },
-                    onCalendarTap: { showMonthView = true }
+                    onAddChore: { showAddChore = true }
                 )
                 .environmentObject(appState)
                 .environmentObject(dragManager)
             }
         }
-    }
-
-    private var weekStripSection: some View {
-        WeekStripView(weekOffset: $weekOffset)
-            .environmentObject(appState)
-            .environmentObject(dragManager)
     }
 
     // MARK: - Header
@@ -106,15 +84,6 @@ struct HomeView: View {
                     .foregroundColor(CozyTheme.mutedText)
             }
             Spacer()
-            Button { showMonthView.toggle() } label: {
-                Image(systemName: "calendar")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(CozyTheme.primary)
-                    .frame(width: 36, height: 36)
-                    .background(CozyTheme.card)
-                    .cornerRadius(10)
-                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(CozyTheme.border, lineWidth: 1))
-            }
             Menu {
                 Button("Sign Out", role: .destructive) {
                     Task { try? await authManager.signOut() }
@@ -128,42 +97,6 @@ struct HomeView: View {
         .padding(.horizontal, 16)
         .padding(.top, 8)
         .padding(.bottom, 10)
-    }
-
-    // MARK: - Global Drag Gesture (tracks position + handles drop)
-    private var globalDragGesture: some Gesture {
-        DragGesture(minimumDistance: 0, coordinateSpace: .global)
-            .onChanged { value in
-                if dragManager.isDragging {
-                    dragManager.updateLocation(value.location)
-                }
-            }
-            .onEnded { _ in
-                guard dragManager.isDragging else { return }
-                let result = dragManager.commitDrop(appState: appState)
-                handleDropResult(result)
-            }
-    }
-
-    private func handleDropResult(_ result: DropResult) {
-        switch result {
-        case .rescheduled(let chore, let date):
-            Task {
-                await appState.rescheduleChore(chore, to: date)
-                showToast("Moved to \(shortDate(date)) 📅")
-                let gen = UINotificationFeedbackGenerator()
-                gen.notificationOccurred(.success)
-            }
-        case .trash(let chore):
-            Task {
-                await appState.deleteChore(chore)
-                showToast("Chore removed 🗑️")
-                let gen = UINotificationFeedbackGenerator()
-                gen.notificationOccurred(.warning)
-            }
-        case .cancelled:
-            break
-        }
     }
 
     // MARK: - Toast & Confetti
@@ -192,7 +125,7 @@ struct HomeView: View {
                 .background(CozyTheme.primary.opacity(0.92))
                 .cornerRadius(25)
                 .shadow(color: CozyTheme.primary.opacity(0.2), radius: 8, y: 4)
-                .padding(.bottom, dragManager.isDragging ? 90 : 30)
+                .padding(.bottom, 30)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         }
     }
@@ -201,10 +134,5 @@ struct HomeView: View {
     private var greetingLine: String {
         let name = appState.profile?.displayName ?? "Friend"
         return "Hey \(name)! 👋"
-    }
-
-    private func shortDate(_ date: Date) -> String {
-        let fmt = DateFormatter(); fmt.dateFormat = "EEE, MMM d"
-        return fmt.string(from: date)
     }
 }

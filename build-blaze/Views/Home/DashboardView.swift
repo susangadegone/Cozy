@@ -6,7 +6,6 @@ struct DashboardView: View {
     @EnvironmentObject var dragManager: DragDropManager
     var onChoreComplete: () -> Void
     var onAddChore: () -> Void
-    var onCalendarTap: () -> Void
 
     var body: some View {
         VStack(spacing: 16) {
@@ -14,7 +13,6 @@ struct DashboardView: View {
             weekProgressCard
             todaySection
             if !appState.memberBreakdown.isEmpty { householdSection }
-            miniCalendarCard
             activityFeedCard
         }
         .padding(.horizontal, 16)
@@ -122,28 +120,6 @@ struct DashboardView: View {
             ForEach(appState.memberBreakdown, id: \.name) { m in
                 MemberRow(emoji: m.emoji, name: m.name, done: m.done, total: m.total)
             }
-        }
-        .padding(14)
-        .cardStyle()
-    }
-
-    // MARK: Mini Calendar
-    private var miniCalendarCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("This Month")
-                    .font(.system(size: 14, weight: .semibold, design: .serif))
-                    .foregroundColor(CozyTheme.primary)
-                Spacer()
-                Button("Full view") { onCalendarTap() }
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(CozyTheme.accent)
-            }
-            MiniCalendarGrid(onDayTap: { date in
-                appState.selectedDate = date
-                onCalendarTap()
-            })
-            .environmentObject(appState)
         }
         .padding(14)
         .cardStyle()
@@ -295,80 +271,6 @@ struct MemberRow: View {
             }
         }
         .padding(.vertical, 2)
-    }
-}
-
-// MARK: - Mini Calendar
-struct MiniCalendarGrid: View {
-    @EnvironmentObject var appState: AppState
-    var onDayTap: (Date) -> Void
-    private let cal = Calendar.current
-    private let letters = ["S", "M", "T", "W", "T", "F", "S"]
-
-    private var today: Date { cal.startOfDay(for: Date()) }
-
-    private var monthDays: [Date?] {
-        let comps = cal.dateComponents([.year, .month], from: today)
-        guard let first = cal.date(from: comps),
-              let range = cal.range(of: .day, in: .month, for: first) else { return [] }
-        let offset = cal.component(.weekday, from: first) - 1
-        var days: [Date?] = Array(repeating: nil, count: offset)
-        for d in range { days.append(cal.date(byAdding: .day, value: d - 1, to: first)) }
-        return days
-    }
-
-    private func dots(for date: Date) -> [Color] {
-        let ds = appState.dateString(from: date)
-        return appState.chores.filter { $0.scheduledDate == ds }.prefix(3).compactMap { chore -> Color? in
-            guard let room = Room.defaults.first(where: { $0.id == chore.roomId }) else { return nil }
-            return Color(hex: room.color)
-        }
-    }
-
-    var body: some View {
-        VStack(spacing: 4) {
-            HStack {
-                ForEach(letters, id: \.self) { l in
-                    Text(l).font(.system(size: 10, weight: .semibold))
-                        .foregroundColor(CozyTheme.mutedText).frame(maxWidth: .infinity)
-                }
-            }
-            let cols = Array(repeating: GridItem(.flexible(), spacing: 2), count: 7)
-            LazyVGrid(columns: cols, spacing: 4) {
-                ForEach(0..<monthDays.count, id: \.self) { i in
-                    if let date = monthDays[i] {
-                        calDayCell(date: date)
-                    } else {
-                        Color.clear.frame(height: 36)
-                    }
-                }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func calDayCell(date: Date) -> some View {
-        let isToday = cal.isDate(date, inSameDayAs: today)
-        let isSelected = cal.isDate(date, inSameDayAs: appState.selectedDate)
-        let dotColors = dots(for: date)
-        Button { onDayTap(date) } label: {
-            VStack(spacing: 2) {
-                Text("\(cal.component(.day, from: date))")
-                    .font(.system(size: 12, weight: isToday ? .bold : .regular))
-                    .foregroundColor(isSelected ? .white : isToday ? CozyTheme.accent : CozyTheme.primary)
-                    .frame(width: 26, height: 26)
-                    .background(
-                        Circle().fill(isSelected ? CozyTheme.primary : isToday ? CozyTheme.accent.opacity(0.15) : Color.clear)
-                    )
-                HStack(spacing: 2) {
-                    ForEach(0..<dotColors.count, id: \.self) { di in
-                        Circle().fill(dotColors[di]).frame(width: 4, height: 4)
-                    }
-                }
-                .frame(height: 5)
-            }
-        }
-        .buttonStyle(.plain)
     }
 }
 
