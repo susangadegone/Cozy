@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -51,7 +51,7 @@
 		39681800AC3FDDB337CBA8F9 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		42FF094DF171BF6B1259A7B9 /* FloatingDragChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingDragChip.swift; sourceTree = "<group>"; };
 		49D0618554E59A586FF1AD6A /* CozyTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyTheme.swift; sourceTree = "<group>"; };
-		583C360C5726698EEB65E762 /* build-blaze.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "build-blaze.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		583C360C5726698EEB65E762 /* build-blaze.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "build-blaze.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F410B1C5516482EFE0083B9 /* OnboardingStep1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep1.swift; sourceTree = "<group>"; };
 		607B0EBEB9D0A064512B7109 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		6F03A4B78D8E58D436ABF04F /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
@@ -250,7 +250,6 @@
 			packageReferences = (
 				1F7D27B0E5426CC5A73EA8D9 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 			);
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -356,6 +355,7 @@
 		824603090C7A375557D5322C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEVELOPMENT_TEAM = 2CTVFL4VPB;
 				INFOPLIST_FILE = "build-blaze/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 			};
@@ -364,6 +364,7 @@
 		D54F6A651897FD54E12E4305 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEVELOPMENT_TEAM = 2CTVFL4VPB;
 				INFOPLIST_FILE = "build-blaze/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 			};
