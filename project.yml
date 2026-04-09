@@ -1,10 +1,10 @@
 name: build-blaze
 options:
-  bundleIdPrefix: com.example
+  bundleIdPrefix: com.aki
   developmentLanguage: en
 settings:
   base:
-    PRODUCT_BUNDLE_IDENTIFIER: com.example.buildblaze
+    PRODUCT_BUNDLE_IDENTIFIER: com.aki.buildblaze
     PRODUCT_NAME: build-blaze
     SWIFT_VERSION: 5
     MARKETING_VERSION: 1
