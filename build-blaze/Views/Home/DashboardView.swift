@@ -5,7 +5,6 @@ struct DashboardView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var dragManager: DragDropManager
     var onChoreComplete: () -> Void
-    var onAddChore: () -> Void
 
     var body: some View {
         VStack(spacing: 16) {
@@ -61,20 +60,9 @@ struct DashboardView: View {
     // MARK: Today
     private var todaySection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("Today's Chores")
-                    .font(.system(size: 14, weight: .semibold, design: .serif))
-                    .foregroundColor(CozyTheme.primary)
-                Spacer()
-                Button(action: onAddChore) {
-                    Label("Add", systemImage: "plus")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(CozyTheme.accent)
-                        .padding(.horizontal, 10).padding(.vertical, 5)
-                        .background(CozyTheme.accent.opacity(0.12))
-                        .cornerRadius(20)
-                }
-            }
+            Text("Today's Chores")
+                .font(.system(size: 14, weight: .semibold, design: .serif))
+                .foregroundColor(CozyTheme.primary)
             let sorted = appState.todayChores.sorted { !$0.isDone && $1.isDone }
             if sorted.isEmpty {
                 emptyTodayState

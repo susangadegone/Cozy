@@ -93,8 +93,7 @@ struct HomeView: View {
             Divider().opacity(0.2)
             ScrollView(showsIndicators: false) {
                 DashboardView(
-                    onChoreComplete: { fireConfetti(.choreDone) },
-                    onAddChore: { showAddChore = true }
+                    onChoreComplete: { fireConfetti(.choreDone) }
                 )
                 .environmentObject(appState)
                 .environmentObject(dragManager)
