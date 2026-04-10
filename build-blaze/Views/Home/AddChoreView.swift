@@ -10,6 +10,11 @@ struct AddChoreView: View {
     @State private var selectedDate: Date = Date()
     @State private var assignedTo: String = ""
 
+    // Pre-populate assignedTo with current user's name
+    private func defaultAssignedTo() -> String {
+        appState.profile?.displayName ?? "Me"
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -138,8 +143,9 @@ struct AddChoreView: View {
                 .datePickerStyle(.graphical)
                 .tint(CozyTheme.accent)
             Button {
+                // Always pre-select the current user when advancing to assign step
                 if assignedTo.isEmpty {
-                    assignedTo = appState.profile?.displayName ?? "Me"
+                    assignedTo = defaultAssignedTo()
                 }
                 withAnimation { step = 3 }
             } label: {
@@ -156,25 +162,29 @@ struct AddChoreView: View {
     private var memberPicker: some View {
         let myName = appState.profile?.displayName ?? "Me"
         let myEmoji = appState.profile?.avatarEmoji ?? "🙋"
-        let members = appState.profile?.members ?? []
+        let householdMembers = appState.profile?.members ?? []
+        let currentAssigned = assignedTo.isEmpty ? myName : assignedTo
         return VStack(alignment: .leading, spacing: 16) {
             Text("Assign to")
                 .font(.system(size: 22, weight: .bold, design: .serif))
                 .foregroundColor(CozyTheme.primary)
-            assignOption(name: myName, emoji: myEmoji, isSelf: true)
-            ForEach(members) { member in
-                assignOption(name: member.name, emoji: member.emoji, isSelf: false)
+            assignOption(name: myName, displayLabel: "\(myName) (Me)", emoji: myEmoji, currentValue: currentAssigned)
+            ForEach(householdMembers) { member in
+                assignOption(name: member.name, displayLabel: member.name, emoji: member.emoji, currentValue: currentAssigned)
             }
+        }
+        .onAppear {
+            // Ensure user is pre-selected when this step appears
+            if assignedTo.isEmpty { assignedTo = myName }
         }
     }
 
-    private func assignOption(name: String, emoji: String, isSelf: Bool) -> some View {
-        let isOn = assignedTo == name
-        let displayName = isSelf ? "\(name) (Me)" : name
+    private func assignOption(name: String, displayLabel: String, emoji: String, currentValue: String) -> some View {
+        let isOn = currentValue == name
         return Button { assignedTo = name } label: {
             HStack(spacing: 12) {
                 Text(emoji).font(.system(size: 24))
-                Text(displayName)
+                Text(displayLabel)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(CozyTheme.primary)
                 Spacer()
@@ -211,7 +221,7 @@ struct AddChoreView: View {
     }
 
     private var canSave: Bool {
-        !selectedRoom.isEmpty && !selectedChore.isEmpty && !assignedTo.isEmpty
+        !selectedRoom.isEmpty && !selectedChore.isEmpty
     }
 
     private func saveChore() {
@@ -220,13 +230,14 @@ struct AddChoreView: View {
         fmt.dateFormat = "yyyy-MM-dd"
         let dayFmt = DateFormatter()
         dayFmt.dateFormat = "EEEE"
+        let finalAssignedTo = assignedTo.isEmpty ? defaultAssignedTo() : assignedTo
         let chore = Chore(
             id: UUID(),
             userId: userId,
             roomId: selectedRoom,
             choreName: selectedChore,
             dayOfWeek: dayFmt.string(from: selectedDate),
-            assignedTo: assignedTo,
+            assignedTo: finalAssignedTo,
             isDone: false,
             scheduledDate: fmt.string(from: selectedDate)
         )

@@ -109,10 +109,9 @@ struct ProfileView: View {
                 ForEach(avatarOptions, id: \.self) { emoji in
                     let isSelected = appState.profile?.avatarEmoji == emoji
                     Button {
-                        guard var p = appState.profile else { return }
-                        p.avatarEmoji = emoji
-                        appState.profile = p
-                        Task { try? await DataService.shared.updateProfile(p) }
+                        Task {
+                            await appState.updateAvatarEmoji(emoji)
+                        }
                         withAnimation { showAvatarPicker = false }
                     } label: {
                         Text(emoji)

@@ -101,6 +101,8 @@ struct OnboardingStep3: View {
                 )
                 .cornerRadius(CozyTheme.cornerRadius)
                 .autocorrectionDisabled()
+                .submitLabel(.done)
+                .onSubmit { addMember() }
 
             Button(action: addMember) {
                 Image(systemName: "plus")
@@ -110,6 +112,7 @@ struct OnboardingStep3: View {
                     .background(newName.trimmingCharacters(in: .whitespaces).isEmpty ? CozyTheme.border : CozyTheme.accent)
                     .cornerRadius(14)
             }
+            .buttonStyle(.plain)
             .disabled(newName.trimmingCharacters(in: .whitespaces).isEmpty)
         }
     }
@@ -117,6 +120,7 @@ struct OnboardingStep3: View {
     private func addMember() {
         let trimmed = newName.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty, members.count < 6 else { return }
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
             members.append(HouseholdMember(name: trimmed, emoji: selectedEmoji))
         }

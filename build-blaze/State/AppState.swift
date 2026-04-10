@@ -163,6 +163,25 @@ final class AppState: ObservableObject {
         catch { NSLog("Error updating name: \(error)") }
     }
 
+    func updateAvatarEmoji(_ emoji: String) async {
+        guard var p = profile else { return }
+        p.avatarEmoji = emoji
+        objectWillChange.send()
+        profile = p
+        do { try await dataService.updateProfile(p) }
+        catch { NSLog("Error updating avatar: \(error)") }
+    }
+
+    func addHouseholdMember(_ member: HouseholdMember) async {
+        guard var p = profile else { return }
+        guard !p.members.contains(where: { $0.name == member.name }) else { return }
+        p.members.append(member)
+        objectWillChange.send()
+        profile = p
+        do { try await dataService.updateProfile(p) }
+        catch { NSLog("Error adding member: \(error)") }
+    }
+
     func removeMember(_ member: HouseholdMember) async {
         guard var p = profile, p.isAdmin else { return }
         p.members.removeAll { $0.name == member.name }

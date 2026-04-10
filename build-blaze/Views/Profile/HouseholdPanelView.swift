@@ -101,6 +101,8 @@ struct HouseholdPanelView: View {
                     .cornerRadius(10)
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(CozyTheme.border, lineWidth: 1))
                     .autocorrectionDisabled()
+                    .submitLabel(.done)
+                    .onSubmit { saveMember() }
                 Button(action: saveMember) {
                     Image(systemName: "plus")
                         .font(.system(size: 16, weight: .semibold))
@@ -118,11 +120,9 @@ struct HouseholdPanelView: View {
 
     private func saveMember() {
         let trimmed = newMemberName.trimmingCharacters(in: .whitespaces)
-        guard !trimmed.isEmpty, var p = appState.profile else { return }
+        guard !trimmed.isEmpty else { return }
         let member = HouseholdMember(name: trimmed, emoji: newMemberEmoji)
-        p.members.append(member)
-        appState.profile = p
-        Task { try? await DataService.shared.updateProfile(p) }
+        Task { await appState.addHouseholdMember(member) }
         newMemberName = ""
         newMemberEmoji = avatarEmojis.randomElement() ?? "😊"
         withAnimation { showAddMember = false }
