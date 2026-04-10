@@ -138,6 +138,10 @@ struct AddChoreView: View {
                 .datePickerStyle(.graphical)
                 .tint(CozyTheme.accent)
             Button {
+                // Pre-select current user so "Add Chore" is immediately enabled
+                if assignedTo.isEmpty {
+                    assignedTo = appState.profile?.displayName ?? "Me"
+                }
                 withAnimation { step = 3 }
             } label: {
                 Text("Continue")
@@ -151,24 +155,34 @@ struct AddChoreView: View {
     }
 
     private var memberPicker: some View {
+        let myName = appState.profile?.displayName ?? "Me"
         let members = appState.profile?.members ?? []
         return VStack(alignment: .leading, spacing: 16) {
             Text("Assign to")
                 .font(.system(size: 22, weight: .bold, design: .serif))
                 .foregroundColor(CozyTheme.primary)
-            assignOption(name: "Me", emoji: "🙋")
+            assignOption(name: myName, emoji: "🙋", label: "Me")
             ForEach(members) { member in
-                assignOption(name: member.name, emoji: member.emoji)
+                assignOption(name: member.name, emoji: member.emoji, label: nil)
+            }
+            if members.isEmpty {
+                Text("No household members added yet.\nYou can add them in Profile → Household.")
+                    .font(.system(size: 14))
+                    .foregroundColor(CozyTheme.mutedText)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 8)
             }
         }
     }
 
-    private func assignOption(name: String, emoji: String) -> some View {
+    private func assignOption(name: String, emoji: String, label: String?) -> some View {
         let isOn = assignedTo == name
+        let displayName = label != nil ? "\(name) (\(label!))" : name
         return Button { assignedTo = name } label: {
             HStack(spacing: 12) {
                 Text(emoji).font(.system(size: 24))
-                Text(name)
+                Text(displayName)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(CozyTheme.primary)
                 Spacer()
