@@ -4,6 +4,12 @@ struct HouseholdPanelView: View {
     @EnvironmentObject var appState: AppState
     @State private var inviteCode: String = ""
     @State private var showInviteSheet = false
+    @State private var showAddMember = false
+    @State private var newMemberName = ""
+    @State private var newMemberEmoji = "😊"
+
+    private let avatarEmojis = ["😊","😄","🥰","😎","🤗","😇","🧑","👩","👨","🧒","👧","👦",
+                                "🐶","🐱","🐼","🦊","🐸","🦄","🌸","⭐","🎸","🎨","🍕","🌿"]
 
     private var members: [HouseholdMember] { appState.profile?.members ?? [] }
     private var isAdmin: Bool { appState.profile?.isAdmin == true }
@@ -11,22 +17,115 @@ struct HouseholdPanelView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ForEach(Array(members.enumerated()), id: \.element.name) { idx, member in
-                memberRow(member)
-                if idx < members.count - 1 {
-                    Divider().opacity(0.3).padding(.leading, 52)
+            if members.isEmpty && !showAddMember {
+                emptyState
+            } else {
+                ForEach(Array(members.enumerated()), id: \.element.name) { idx, member in
+                    memberRow(member)
+                    if idx < members.count - 1 {
+                        Divider().opacity(0.3).padding(.leading, 52)
+                    }
                 }
             }
-            if isAdmin {
+            if showAddMember {
                 Divider().opacity(0.3)
-                inviteRow
+                addMemberForm
             }
+            Divider().opacity(0.3)
+            addMemberButton
         }
         .sheet(isPresented: $showInviteSheet) {
             InviteSheetView(code: inviteCode)
                 .presentationDetents([.fraction(0.45)])
                 .presentationDragIndicator(.visible)
         }
+    }
+
+    private var emptyState: some View {
+        Text("No members yet. Tap + Add Member below.")
+            .font(.system(size: 13))
+            .foregroundColor(CozyTheme.mutedText)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+    }
+
+    private var addMemberButton: some View {
+        Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                showAddMember.toggle()
+                if !showAddMember { newMemberName = ""; newMemberEmoji = "😊" }
+            }
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: showAddMember ? "xmark" : "person.badge.plus")
+                Text(showAddMember ? "Cancel" : (atMax ? "Max 6 members" : "Add Member"))
+            }
+            .font(.system(size: 15, weight: .medium))
+            .foregroundColor(showAddMember ? CozyTheme.mutedText : CozyTheme.accent)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .background((showAddMember ? CozyTheme.mutedText : CozyTheme.accent).opacity(0.08))
+            .cornerRadius(12)
+        }
+        .buttonStyle(.plain)
+        .disabled(atMax && !showAddMember)
+        .padding(.top, 8)
+    }
+
+    @ViewBuilder
+    private var addMemberForm: some View {
+        VStack(spacing: 12) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(avatarEmojis, id: \.self) { emoji in
+                        Button { newMemberEmoji = emoji } label: {
+                            Text(emoji)
+                                .font(.system(size: 24))
+                                .frame(width: 40, height: 40)
+                                .background(newMemberEmoji == emoji ? CozyTheme.accent.opacity(0.2) : CozyTheme.background)
+                                .overlay(RoundedRectangle(cornerRadius: 8)
+                                    .stroke(newMemberEmoji == emoji ? CozyTheme.accent : CozyTheme.border, lineWidth: 1.5))
+                                .cornerRadius(8)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+            HStack(spacing: 10) {
+                TextField("Member's name", text: $newMemberName)
+                    .font(.system(size: 15))
+                    .foregroundColor(CozyTheme.primary)
+                    .padding(.horizontal, 12).padding(.vertical, 10)
+                    .background(CozyTheme.background)
+                    .cornerRadius(10)
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(CozyTheme.border, lineWidth: 1))
+                    .autocorrectionDisabled()
+                Button(action: saveMember) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 40, height: 40)
+                        .background(newMemberName.trimmingCharacters(in: .whitespaces).isEmpty ? CozyTheme.border : CozyTheme.accent)
+                        .cornerRadius(10)
+                }
+                .buttonStyle(.plain)
+                .disabled(newMemberName.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+        }
+        .padding(.vertical, 12)
+    }
+
+    private func saveMember() {
+        let trimmed = newMemberName.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty, var p = appState.profile else { return }
+        let member = HouseholdMember(name: trimmed, emoji: newMemberEmoji)
+        p.members.append(member)
+        appState.profile = p
+        Task { try? await DataService.shared.updateProfile(p) }
+        newMemberName = ""
+        newMemberEmoji = avatarEmojis.randomElement() ?? "😊"
+        withAnimation { showAddMember = false }
     }
 
     private func memberRow(_ member: HouseholdMember) -> some View {
@@ -59,29 +158,6 @@ struct HouseholdPanelView: View {
             }
         }
         .padding(.vertical, 8)
-    }
-
-    private var inviteRow: some View {
-        VStack(spacing: 6) {
-            Button {
-                inviteCode = generateInviteCode()
-                showInviteSheet = true
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "person.badge.plus")
-                    Text(atMax ? "Max 6 members reached" : "Invite Someone")
-                }
-                .font(.system(size: 15, weight: .medium))
-                .foregroundColor(atMax ? CozyTheme.mutedText : CozyTheme.accent)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .background((atMax ? CozyTheme.mutedText : CozyTheme.accent).opacity(0.1))
-                .cornerRadius(12)
-            }
-            .buttonStyle(.plain)
-            .disabled(atMax)
-            .padding(.top, 8)
-        }
     }
 
     private func generateInviteCode() -> String {

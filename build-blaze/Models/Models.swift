@@ -31,6 +31,7 @@ struct Profile: Codable, Identifiable {
     var earnedBadgeIds: [String]?
     var preferences: UserPreferences?
     var inviteCode: String?
+    var avatarEmoji: String?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -44,6 +45,7 @@ struct Profile: Codable, Identifiable {
         case earnedBadgeIds = "earned_badge_ids"
         case preferences
         case inviteCode = "invite_code"
+        case avatarEmoji = "avatar_emoji"
     }
 
     var isAdmin: Bool { role == "admin" || role == nil }

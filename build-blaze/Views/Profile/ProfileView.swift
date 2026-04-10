@@ -7,6 +7,10 @@ struct ProfileView: View {
     @State private var editedName = ""
     @State private var showAllHistory = false
     @State private var showBadgeToast = false
+    @State private var showAvatarPicker = false
+
+    private let avatarOptions = ["🧑","👩","👨","🧒","👧","👦","🧔","👩‍🦰","👩‍🦱","👩‍🦳","🧓","🧕",
+                                  "😊","😎","🥰","🤗","😇","🐶","🐱","🐼","🦊","🦄","🌸","⭐"]
 
     var body: some View {
         NavigationView {
@@ -49,22 +53,8 @@ struct ProfileView: View {
     // MARK: - Header
     private var headerSection: some View {
         VStack(spacing: 14) {
-            // Avatar
-            ZStack {
-                Circle()
-                    .fill(LinearGradient(
-                        colors: [CozyTheme.accent, CozyTheme.primary],
-                        startPoint: .topLeading, endPoint: .bottomTrailing
-                    ))
-                    .frame(width: 86, height: 86)
-                Text(appState.profile?.initials ?? "??")
-                    .font(.system(size: 30, weight: .bold))
-                    .foregroundColor(.white)
-            }
-            .shadow(color: CozyTheme.accent.opacity(0.3), radius: 10, y: 4)
-            .padding(.top, 20)
-
-            // Name row
+            avatarCircle.padding(.top, 20)
+            if showAvatarPicker { avatarPickerRow }
             if isEditingName {
                 nameEditRow
             } else {
@@ -75,12 +65,82 @@ struct ProfileView: View {
                     roleBadgeRow
                 }
             }
+            editButtons
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.bottom, 4)
+    }
 
+    private var avatarCircle: some View {
+        Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                showAvatarPicker.toggle()
+            }
+        } label: {
+            ZStack {
+                Circle()
+                    .fill(LinearGradient(
+                        colors: [CozyTheme.accent, CozyTheme.primary],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    ))
+                    .frame(width: 86, height: 86)
+                if let emoji = appState.profile?.avatarEmoji {
+                    Text(emoji).font(.system(size: 42))
+                } else {
+                    Text(appState.profile?.initials ?? "??")
+                        .font(.system(size: 30, weight: .bold))
+                        .foregroundColor(.white)
+                }
+                // camera badge
+                Circle()
+                    .fill(CozyTheme.accent)
+                    .frame(width: 26, height: 26)
+                    .overlay(Image(systemName: "pencil").font(.system(size: 11, weight: .semibold)).foregroundColor(.white))
+                    .offset(x: 28, y: 28)
+            }
+        }
+        .buttonStyle(.plain)
+        .shadow(color: CozyTheme.accent.opacity(0.3), radius: 10, y: 4)
+    }
+
+    private var avatarPickerRow: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                ForEach(avatarOptions, id: \.self) { emoji in
+                    let isSelected = appState.profile?.avatarEmoji == emoji
+                    Button {
+                        guard var p = appState.profile else { return }
+                        p.avatarEmoji = emoji
+                        appState.profile = p
+                        Task { try? await DataService.shared.updateProfile(p) }
+                        withAnimation { showAvatarPicker = false }
+                    } label: {
+                        Text(emoji)
+                            .font(.system(size: 28))
+                            .frame(width: 46, height: 46)
+                            .background(isSelected ? CozyTheme.accent.opacity(0.2) : CozyTheme.card)
+                            .overlay(RoundedRectangle(cornerRadius: 12)
+                                .stroke(isSelected ? CozyTheme.accent : CozyTheme.border, lineWidth: isSelected ? 2 : 1))
+                            .cornerRadius(12)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 4)
+        }
+    }
+
+    private var editButtons: some View {
+        HStack(spacing: 10) {
             Button {
                 editedName = appState.profile?.displayName ?? ""
-                withAnimation(.easeInOut(duration: 0.2)) { isEditingName.toggle() }
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isEditingName.toggle()
+                    showAvatarPicker = false
+                }
             } label: {
-                Label(isEditingName ? "Cancel" : "Edit Profile",
+                Label(isEditingName ? "Cancel" : "Edit Name",
                       systemImage: isEditingName ? "xmark" : "pencil")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(CozyTheme.mutedText)
@@ -90,8 +150,6 @@ struct ProfileView: View {
             }
             .buttonStyle(.plain)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.bottom, 4)
     }
 
     private var nameEditRow: some View {

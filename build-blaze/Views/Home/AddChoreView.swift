@@ -138,7 +138,6 @@ struct AddChoreView: View {
                 .datePickerStyle(.graphical)
                 .tint(CozyTheme.accent)
             Button {
-                // Pre-select current user so "Add Chore" is immediately enabled
                 if assignedTo.isEmpty {
                     assignedTo = appState.profile?.displayName ?? "Me"
                 }
@@ -156,29 +155,22 @@ struct AddChoreView: View {
 
     private var memberPicker: some View {
         let myName = appState.profile?.displayName ?? "Me"
+        let myEmoji = appState.profile?.avatarEmoji ?? "🙋"
         let members = appState.profile?.members ?? []
         return VStack(alignment: .leading, spacing: 16) {
             Text("Assign to")
                 .font(.system(size: 22, weight: .bold, design: .serif))
                 .foregroundColor(CozyTheme.primary)
-            assignOption(name: myName, emoji: "🙋", label: "Me")
+            assignOption(name: myName, emoji: myEmoji, isSelf: true)
             ForEach(members) { member in
-                assignOption(name: member.name, emoji: member.emoji, label: nil)
-            }
-            if members.isEmpty {
-                Text("No household members added yet.\nYou can add them in Profile → Household.")
-                    .font(.system(size: 14))
-                    .foregroundColor(CozyTheme.mutedText)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 8)
+                assignOption(name: member.name, emoji: member.emoji, isSelf: false)
             }
         }
     }
 
-    private func assignOption(name: String, emoji: String, label: String?) -> some View {
+    private func assignOption(name: String, emoji: String, isSelf: Bool) -> some View {
         let isOn = assignedTo == name
-        let displayName = label != nil ? "\(name) (\(label!))" : name
+        let displayName = isSelf ? "\(name) (Me)" : name
         return Button { assignedTo = name } label: {
             HStack(spacing: 12) {
                 Text(emoji).font(.system(size: 24))
