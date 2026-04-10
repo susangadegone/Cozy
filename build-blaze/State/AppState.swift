@@ -10,6 +10,7 @@ final class AppState: ObservableObject {
     @Published var activityLog: [ActivityLog] = []
     @Published var newlyEarnedBadge: BadgeDefinition?
     @Published var preferences: UserPreferences = UserPreferences()
+    @Published var pendingConfettiEvent: ConfettiEvent? = nil
 
     private let dataService = DataService.shared
     private let prefsKey = "userPreferences_v1"
@@ -45,14 +46,15 @@ final class AppState: ObservableObject {
     var weekProgress: Double { weekTotal > 0 ? Double(weekDone) / Double(weekTotal) : 0 }
 
     // MARK: - Streak
+    // Spec: at least 1 chore completed on a day counts for that day's streak
     var currentStreak: Int {
         let cal = Calendar.current
         var streak = 0
         var check = cal.startOfDay(for: Date())
         while true {
             let ds = dateString(from: check)
-            let day = chores.filter { $0.scheduledDate == ds }
-            guard !day.isEmpty, day.allSatisfy(\.isDone) else { break }
+            let hasAnyDone = chores.contains { $0.scheduledDate == ds && $0.isDone }
+            guard hasAnyDone else { break }
             streak += 1
             guard let prev = cal.date(byAdding: .day, value: -1, to: check) else { break }
             check = prev
@@ -106,6 +108,7 @@ final class AppState: ObservableObject {
             logActivity(.choreDone, "✅ \(chore.choreName) marked done")
             let s = currentStreak
             if s > 0 && s % 7 == 0 { logActivity(.streakMilestone, "🔥 \(s)-day streak!") }
+            pendingConfettiEvent = .choreDone
             checkBadges()
         } else {
             chores[i].completedAt = nil
@@ -124,6 +127,7 @@ final class AppState: ObservableObject {
             try await dataService.addChore(chore)
             chores.append(chore)
             logActivity(.choreAdded, "➕ \(chore.choreName) added")
+            pendingConfettiEvent = .choreAdded
         } catch {
             NSLog("Error adding chore: \(error)")
         }
@@ -187,6 +191,7 @@ final class AppState: ObservableObject {
         updated.earnedBadgeIds = ids
         profile = updated
         newlyEarnedBadge = newBadges.first
+        pendingConfettiEvent = .badgeUnlock
         logActivity(.badgeEarned, "🏅 \(newBadges.first!.name) earned!")
         Task { try? await dataService.updateProfile(updated) }
     }

@@ -2,20 +2,20 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var appState: AppState
-
     @StateObject private var dragManager = DragDropManager()
 
     @State private var showAddChore = false
-    @State private var showConfetti = false
+    @State private var activeConfetti: ConfettiEvent? = nil
     @State private var toastMessage: String?
+    @State private var toastIcon: String?
     @State private var fabPressed = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
             CozyTheme.background.ignoresSafeArea()
             mainLayout
-            if showConfetti { ConfettiOverlay() }
-            if let msg = toastMessage { toastBanner(msg) }
+            confettiLayer
+            toastLayer
             fabButton
         }
         .sheet(isPresented: $showAddChore) {
@@ -24,6 +24,36 @@ struct HomeView: View {
                 .presentationDragIndicator(.visible)
         }
         .task { await appState.loadData() }
+        .onChange(of: appState.pendingConfettiEvent) { event in
+            guard let event else { return }
+            appState.pendingConfettiEvent = nil
+            fireConfetti(event)
+        }
+        .onChange(of: appState.newlyEarnedBadge) { badge in
+            guard let badge else { return }
+            showBadgeToast(badge)
+        }
+    }
+
+    // MARK: - Confetti Layer
+    @ViewBuilder
+    private var confettiLayer: some View {
+        if let event = activeConfetti {
+            ConfettiOverlay(event: event)
+                .ignoresSafeArea()
+                .transition(.opacity)
+        }
+    }
+
+    // MARK: - Toast Layer
+    @ViewBuilder
+    private var toastLayer: some View {
+        if let msg = toastMessage {
+            VStack {
+                Spacer()
+                toastBanner(msg, icon: toastIcon)
+            }
+        }
     }
 
     // MARK: - FAB
@@ -63,7 +93,7 @@ struct HomeView: View {
             Divider().opacity(0.2)
             ScrollView(showsIndicators: false) {
                 DashboardView(
-                    onChoreComplete: fireConfetti,
+                    onChoreComplete: { fireConfetti(.choreDone) },
                     onAddChore: { showAddChore = true }
                 )
                 .environmentObject(appState)
@@ -102,38 +132,45 @@ struct HomeView: View {
         .padding(.bottom, 10)
     }
 
-    // MARK: - Toast & Confetti
-    private func fireConfetti() {
-        showConfetti = true
-        showToast("Nice work! 🎉")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            withAnimation { showConfetti = false }
-        }
-    }
-
-    private func showToast(_ message: String) {
-        withAnimation(.spring()) { toastMessage = message }
+    // MARK: - Confetti & Toast helpers
+    private func fireConfetti(_ event: ConfettiEvent) {
+        withAnimation { activeConfetti = event }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
-            withAnimation { toastMessage = nil }
+            withAnimation { activeConfetti = nil }
         }
     }
 
-    private func toastBanner(_ message: String) -> some View {
-        VStack {
-            Spacer()
+    private func showBadgeToast(_ badge: BadgeDefinition) {
+        withAnimation(.spring()) {
+            toastIcon = badge.icon
+            toastMessage = "\(badge.name) unlocked!"
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            withAnimation {
+                toastMessage = nil
+                toastIcon = nil
+                appState.newlyEarnedBadge = nil
+            }
+        }
+    }
+
+    private func toastBanner(_ message: String, icon: String?) -> some View {
+        HStack(spacing: 8) {
+            if let icon {
+                Text(icon).font(.system(size: 20))
+            }
             Text(message)
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(.white)
-                .padding(.horizontal, 20).padding(.vertical, 12)
-                .background(CozyTheme.primary.opacity(0.92))
-                .cornerRadius(25)
-                .shadow(color: CozyTheme.primary.opacity(0.2), radius: 8, y: 4)
-                .padding(.bottom, 30)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
         }
+        .padding(.horizontal, 20).padding(.vertical, 12)
+        .background(Color(hex: "5C3D2E").opacity(0.94))
+        .cornerRadius(25)
+        .shadow(color: Color(hex: "5C3D2E").opacity(0.25), radius: 10, y: 4)
+        .padding(.bottom, 100)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 
-    // MARK: - Helpers
     private var greetingLine: String {
         let name = appState.profile?.displayName ?? "Friend"
         return "Hey \(name)! 👋"

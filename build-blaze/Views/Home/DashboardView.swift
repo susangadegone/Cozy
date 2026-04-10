@@ -81,11 +81,7 @@ struct DashboardView: View {
             } else {
                 ForEach(sorted) { chore in
                     DashChoreRow(chore: chore) {
-                        Task {
-                            let wasDone = chore.isDone
-                            await appState.toggleChore(chore)
-                            if !wasDone { onChoreComplete() }
-                        }
+                        Task { await appState.toggleChore(chore) }
                     }
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) { Task { await appState.deleteChore(chore) } }
