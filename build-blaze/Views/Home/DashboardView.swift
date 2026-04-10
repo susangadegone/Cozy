@@ -262,20 +262,12 @@ struct MemberRow: View {
 struct ActivityFeedRow: View {
     let entry: ActivityLog
 
-    private var icon: String {
+    private var trailingEmoji: String {
         switch entry.type {
-        case .choreDone: return "checkmark.circle.fill"
-        case .choreAdded: return "plus.circle.fill"
-        case .streakMilestone: return "flame.fill"
-        case .badgeEarned: return "rosette"
-        }
-    }
-    private var iconColor: Color {
-        switch entry.type {
-        case .choreDone: return Color(hex: "4CAF82")
-        case .choreAdded: return CozyTheme.accent
-        case .streakMilestone: return Color(hex: "E07B5A")
-        case .badgeEarned: return Color(hex: "C47C3E")
+        case .choreDone: return "✅"
+        case .choreAdded: return "➕"
+        case .streakMilestone: return "🔥"
+        case .badgeEarned: return "🏅"
         }
     }
     private var timeAgo: String {
@@ -286,9 +278,10 @@ struct ActivityFeedRow: View {
     }
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: icon).font(.system(size: 15)).foregroundColor(iconColor).frame(width: 22)
-            Text(entry.text).font(.system(size: 13)).foregroundColor(CozyTheme.primary)
+        HStack(spacing: 6) {
+            Text("\(entry.text) \(trailingEmoji)")
+                .font(.system(size: 13))
+                .foregroundColor(CozyTheme.primary)
             Spacer()
             Text(timeAgo).font(.system(size: 11)).foregroundColor(CozyTheme.mutedText)
         }
