@@ -105,9 +105,9 @@ final class AppState: ObservableObject {
         if nowDone {
             let fmt = ISO8601DateFormatter()
             chores[i].completedAt = fmt.string(from: Date())
-            logActivity(.choreDone, "✅ \(chore.choreName) marked done")
+            logActivity(.choreDone, "\(chore.choreName) marked done")
             let s = currentStreak
-            if s > 0 && s % 7 == 0 { logActivity(.streakMilestone, "🔥 \(s)-day streak!") }
+            if s > 0 && s % 7 == 0 { logActivity(.streakMilestone, "\(s)-day streak!") }
             pendingConfettiEvent = .choreDone
             checkBadges()
         } else {
@@ -126,7 +126,7 @@ final class AppState: ObservableObject {
         do {
             try await dataService.addChore(chore)
             chores.append(chore)
-            logActivity(.choreAdded, "➕ \(chore.choreName) added")
+            logActivity(.choreAdded, "\(chore.choreName) added")
             pendingConfettiEvent = .choreAdded
         } catch {
             NSLog("Error adding chore: \(error)")
@@ -192,7 +192,7 @@ final class AppState: ObservableObject {
         profile = updated
         newlyEarnedBadge = newBadges.first
         pendingConfettiEvent = .badgeUnlock
-        logActivity(.badgeEarned, "🏅 \(newBadges.first!.name) earned!")
+        logActivity(.badgeEarned, "\(newBadges.first!.name) earned!")
         Task { try? await dataService.updateProfile(updated) }
     }
 

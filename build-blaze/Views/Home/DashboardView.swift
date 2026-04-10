@@ -278,10 +278,12 @@ struct ActivityFeedRow: View {
     }
 
     var body: some View {
-        HStack(spacing: 6) {
-            Text("\(entry.text) \(trailingEmoji)")
+        HStack(spacing: 4) {
+            Text(entry.text)
                 .font(.system(size: 13))
                 .foregroundColor(CozyTheme.primary)
+            Text(trailingEmoji)
+                .font(.system(size: 13))
             Spacer()
             Text(timeAgo).font(.system(size: 11)).foregroundColor(CozyTheme.mutedText)
         }
