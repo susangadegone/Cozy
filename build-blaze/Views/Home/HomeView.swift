@@ -2,7 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var appState: AppState
-    @EnvironmentObject var authManager: AuthManager
+
     @StateObject private var dragManager = DragDropManager()
 
     @State private var showAddChore = false
@@ -84,14 +84,17 @@ struct HomeView: View {
                     .foregroundColor(CozyTheme.mutedText)
             }
             Spacer()
-            Menu {
-                Button("Sign Out", role: .destructive) {
-                    Task { try? await authManager.signOut() }
+            if appState.currentStreak > 0 {
+                HStack(spacing: 4) {
+                    Text("🔥")
+                        .font(.system(size: 14))
+                    Text("\(appState.currentStreak)")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(CozyTheme.accent)
                 }
-            } label: {
-                Image(systemName: "person.circle.fill")
-                    .font(.system(size: 28))
-                    .foregroundColor(CozyTheme.primary)
+                .padding(.horizontal, 10).padding(.vertical, 5)
+                .background(CozyTheme.accent.opacity(0.1))
+                .cornerRadius(20)
             }
         }
         .padding(.horizontal, 16)

@@ -8,8 +8,13 @@ final class AppState: ObservableObject {
     @Published var needsOnboarding = false
     @Published var isLoadingData = false
     @Published var activityLog: [ActivityLog] = []
+    @Published var newlyEarnedBadge: BadgeDefinition?
+    @Published var preferences: UserPreferences = UserPreferences()
 
     private let dataService = DataService.shared
+    private let prefsKey = "userPreferences_v1"
+
+    init() { loadLocalPreferences() }
 
     // MARK: - Date helpers
     func dateString(from date: Date) -> String {
@@ -64,6 +69,17 @@ final class AppState: ObservableObject {
         }
     }
 
+    // MARK: - Chore history (completed, sorted by completedAt desc)
+    var choreHistory: [Chore] {
+        chores.filter(\.isDone).sorted {
+            let a = $0.completedAt ?? $0.scheduledDate
+            let b = $1.completedAt ?? $1.scheduledDate
+            return a > b
+        }
+    }
+
+    var totalDone: Int { chores.filter(\.isDone).count }
+
     // MARK: - Load
     func loadData() async {
         guard let userId = AuthManager.shared.currentUserId else { return }
@@ -72,8 +88,9 @@ final class AppState: ObservableObject {
             profile = try await dataService.fetchProfile(userId: userId)
             chores = try await dataService.fetchChores(userId: userId)
             needsOnboarding = !(profile?.onboardingCompleted ?? false)
+            if let p = profile?.preferences { preferences = p }
         } catch {
-            NSLog("Error loading data: \(error)")
+            NSLog("AppState loadData error: \(error)")
         }
         isLoadingData = false
     }
@@ -84,14 +101,20 @@ final class AppState: ObservableObject {
         chores[i].isDone.toggle()
         let nowDone = chores[i].isDone
         if nowDone {
+            let fmt = ISO8601DateFormatter()
+            chores[i].completedAt = fmt.string(from: Date())
             logActivity(.choreDone, "✅ \(chore.choreName) marked done")
             let s = currentStreak
-            if s > 0 && s % 7 == 0 { logActivity(.streakMilestone, "🔥 \(s)-day streak achieved!") }
+            if s > 0 && s % 7 == 0 { logActivity(.streakMilestone, "🔥 \(s)-day streak!") }
+            checkBadges()
+        } else {
+            chores[i].completedAt = nil
         }
         do {
             try await dataService.updateChore(chores[i])
         } catch {
             chores[i].isDone.toggle()
+            chores[i].completedAt = nil
             NSLog("Error toggling chore: \(error)")
         }
     }
@@ -128,6 +151,58 @@ final class AppState: ObservableObject {
         }
     }
 
+    func updateProfileName(_ name: String) async {
+        guard var p = profile else { return }
+        p.displayName = name
+        profile = p
+        do { try await dataService.updateProfile(p) }
+        catch { NSLog("Error updating name: \(error)") }
+    }
+
+    func removeMember(_ member: HouseholdMember) async {
+        guard var p = profile, p.isAdmin else { return }
+        p.members.removeAll { $0.name == member.name }
+        profile = p
+        do { try await dataService.updateProfile(p) }
+        catch { NSLog("Error removing member: \(error)") }
+    }
+
+    func savePreferences() async {
+        saveLocalPreferences()
+        guard var p = profile else { return }
+        p.preferences = preferences
+        profile = p
+        do { try await dataService.updateProfile(p) }
+        catch { NSLog("Error saving preferences: \(error)") }
+    }
+
+    // MARK: - Badge Check
+    func checkBadges() {
+        guard let p = profile else { return }
+        let newBadges = BadgeService.evaluateNewlyEarned(profile: p, chores: chores, streak: currentStreak)
+        guard !newBadges.isEmpty else { return }
+        var updated = p
+        var ids = updated.earnedBadgeIds ?? []
+        newBadges.forEach { ids.append($0.id) }
+        updated.earnedBadgeIds = ids
+        profile = updated
+        newlyEarnedBadge = newBadges.first
+        logActivity(.badgeEarned, "🏅 \(newBadges.first!.name) earned!")
+        Task { try? await dataService.updateProfile(updated) }
+    }
+
+    // MARK: - Local Preferences
+    private func saveLocalPreferences() {
+        if let data = try? JSONEncoder().encode(preferences) {
+            UserDefaults.standard.set(data, forKey: prefsKey)
+        }
+    }
+    private func loadLocalPreferences() {
+        guard let data = UserDefaults.standard.data(forKey: prefsKey),
+              let prefs = try? JSONDecoder().decode(UserPreferences.self, from: data) else { return }
+        preferences = prefs
+    }
+
     // MARK: - Activity log
     func logActivity(_ type: ActivityLog.ActivityType, _ text: String) {
         let entry = ActivityLog(
@@ -135,6 +210,6 @@ final class AppState: ObservableObject {
             userId: AuthManager.shared.currentUserId?.uuidString ?? ""
         )
         activityLog.insert(entry, at: 0)
-        if activityLog.count > 10 { activityLog = Array(activityLog.prefix(10)) }
+        if activityLog.count > 20 { activityLog = Array(activityLog.prefix(20)) }
     }
 }

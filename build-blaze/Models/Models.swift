@@ -1,5 +1,22 @@
 import Foundation
 
+// MARK: - UserPreferences
+struct UserPreferences: Codable {
+    var dailyReminders: Bool = true
+    var overdueAlerts: Bool = true
+    var partnerActivity: Bool = false
+    var streakReminders: Bool = true
+    var weekStartsOnSunday: Bool = true
+
+    enum CodingKeys: String, CodingKey {
+        case dailyReminders = "daily_reminders"
+        case overdueAlerts = "overdue_alerts"
+        case partnerActivity = "partner_activity"
+        case streakReminders = "streak_reminders"
+        case weekStartsOnSunday = "week_starts_sunday"
+    }
+}
+
 // MARK: - Profile
 struct Profile: Codable, Identifiable {
     let id: UUID
@@ -9,6 +26,11 @@ struct Profile: Codable, Identifiable {
     var rooms: [String]
     var notificationPreference: String
     var onboardingCompleted: Bool
+    var role: String?
+    var joinedAt: String?
+    var earnedBadgeIds: [String]?
+    var preferences: UserPreferences?
+    var inviteCode: String?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -17,13 +39,30 @@ struct Profile: Codable, Identifiable {
         case members, rooms
         case notificationPreference = "notification_preference"
         case onboardingCompleted = "onboarding_completed"
+        case role
+        case joinedAt = "joined_at"
+        case earnedBadgeIds = "earned_badge_ids"
+        case preferences
+        case inviteCode = "invite_code"
+    }
+
+    var isAdmin: Bool { role == "admin" || role == nil }
+
+    var initials: String {
+        let parts = displayName.split(separator: " ")
+        if parts.count >= 2 {
+            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
+        }
+        return String(displayName.prefix(2)).uppercased()
     }
 }
 
+// MARK: - HouseholdMember
 struct HouseholdMember: Codable, Identifiable, Hashable {
     var id: String { name }
     let name: String
     let emoji: String
+    var role: String?
 }
 
 // MARK: - Chore
@@ -36,6 +75,7 @@ struct Chore: Codable, Identifiable {
     var assignedTo: String
     var isDone: Bool
     var scheduledDate: String
+    var completedAt: String?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -46,6 +86,7 @@ struct Chore: Codable, Identifiable {
         case assignedTo = "assigned_to"
         case isDone = "is_done"
         case scheduledDate = "scheduled_date"
+        case completedAt = "completed_at"
     }
 }
 
@@ -58,7 +99,7 @@ struct ActivityLog: Identifiable {
     let userId: String
 
     enum ActivityType {
-        case choreAdded, choreDone, streakMilestone
+        case choreAdded, choreDone, streakMilestone, badgeEarned
     }
 }
 

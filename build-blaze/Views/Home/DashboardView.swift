@@ -283,6 +283,7 @@ struct ActivityFeedRow: View {
         case .choreDone: return "checkmark.circle.fill"
         case .choreAdded: return "plus.circle.fill"
         case .streakMilestone: return "flame.fill"
+        case .badgeEarned: return "rosette"
         }
     }
     private var iconColor: Color {
@@ -290,6 +291,7 @@ struct ActivityFeedRow: View {
         case .choreDone: return Color(hex: "4CAF82")
         case .choreAdded: return CozyTheme.accent
         case .streakMilestone: return Color(hex: "E07B5A")
+        case .badgeEarned: return Color(hex: "C47C3E")
         }
     }
     private var timeAgo: String {
