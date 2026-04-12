@@ -1,7 +1,13 @@
 import Foundation
 import Supabase
 
-// MARK: - Partial update structs (only fields we update, all snake_case)
+// MARK: - Partial update structs (snake_case keys match Supabase column names)
+
+private struct HouseholdMemberPayload: Encodable {
+    var name: String
+    var emoji: String
+    var role: String?
+}
 
 private struct ProfileCoreUpdate: Encodable {
     var display_name: String
@@ -15,22 +21,24 @@ private struct ProfileCoreUpdate: Encodable {
     var preferences: UserPreferences?
 }
 
-private struct HouseholdMemberPayload: Encodable {
-    var name: String
-    var emoji: String
-    var role: String?
-}
-
-private struct MembersUpdate: Encodable {
+private struct MembersOnlyUpdate: Encodable {
     var members: [HouseholdMemberPayload]
 }
 
-private struct AvatarUpdate: Encodable {
+private struct AvatarOnlyUpdate: Encodable {
     var avatar_emoji: String
 }
 
-private struct DisplayNameUpdate: Encodable {
+private struct NameOnlyUpdate: Encodable {
     var display_name: String
+}
+
+private struct BadgesOnlyUpdate: Encodable {
+    var earned_badge_ids: [String]
+}
+
+private struct PrefsOnlyUpdate: Encodable {
+    var preferences: UserPreferences?
 }
 
 // MARK: - DataService
@@ -51,6 +59,7 @@ final class DataService: ObservableObject {
         return response.first
     }
 
+    /// Full profile update — all fields sent as explicit snake_case keys
     func updateProfile(_ profile: Profile) async throws {
         let memberPayloads = profile.members.map {
             HouseholdMemberPayload(name: $0.name, emoji: $0.emoji, role: $0.role)
@@ -73,12 +82,10 @@ final class DataService: ObservableObject {
             .execute()
     }
 
-    /// Targeted update for just the members array (avoids touching other fields)
+    /// Targeted update for just the members array
     func updateMembers(profileId: UUID, members: [HouseholdMember]) async throws {
-        let payloads = members.map {
-            HouseholdMemberPayload(name: $0.name, emoji: $0.emoji, role: $0.role)
-        }
-        let update = MembersUpdate(members: payloads)
+        let payloads = members.map { HouseholdMemberPayload(name: $0.name, emoji: $0.emoji, role: $0.role) }
+        let update = MembersOnlyUpdate(members: payloads)
         try await client
             .from("profiles")
             .update(update)
@@ -88,8 +95,7 @@ final class DataService: ObservableObject {
 
     /// Targeted update for avatar emoji only
     func updateAvatarEmoji(profileId: UUID, emoji: String) async throws {
-        // Use a plain dictionary to guarantee correct JSON encoding for Supabase PATCH
-        let update: [String: String] = ["avatar_emoji": emoji]
+        let update = AvatarOnlyUpdate(avatar_emoji: emoji)
         try await client
             .from("profiles")
             .update(update)
@@ -99,7 +105,17 @@ final class DataService: ObservableObject {
 
     /// Targeted update for display name only
     func updateDisplayName(profileId: UUID, name: String) async throws {
-        let update = DisplayNameUpdate(display_name: name)
+        let update = NameOnlyUpdate(display_name: name)
+        try await client
+            .from("profiles")
+            .update(update)
+            .eq("id", value: profileId.uuidString)
+            .execute()
+    }
+
+    /// Targeted update for earned badges only
+    func updateBadges(profileId: UUID, badgeIds: [String]) async throws {
+        let update = BadgesOnlyUpdate(earned_badge_ids: badgeIds)
         try await client
             .from("profiles")
             .update(update)

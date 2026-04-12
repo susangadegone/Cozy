@@ -166,40 +166,43 @@ final class AppState: ObservableObject {
     func updateAvatarEmoji(_ emoji: String) async {
         guard var p = profile else { return }
         p.avatarEmoji = emoji
-        profile = p          // update immediately so UI reacts — do NOT re-fetch (it would overwrite)
+        profile = p   // update immediately so UI reacts
+        NSLog("updateAvatarEmoji: setting emoji \(emoji) for profile \(p.id)")
         do {
             try await dataService.updateAvatarEmoji(profileId: p.id, emoji: emoji)
+            NSLog("updateAvatarEmoji: DB update succeeded")
         } catch {
-            NSLog("Error updating avatar: \(error)")
+            NSLog("updateAvatarEmoji ERROR: \(error)")
         }
     }
 
     func addHouseholdMember(_ member: HouseholdMember) async {
         guard var p = profile else {
-            NSLog("addHouseholdMember: profile is nil, cannot add member")
+            NSLog("addHouseholdMember: profile is nil")
             return
         }
         guard !p.members.contains(where: { $0.name.lowercased() == member.name.lowercased() }) else {
-            NSLog("addHouseholdMember: duplicate member name \(member.name)")
+            NSLog("addHouseholdMember: duplicate \(member.name)")
             return
         }
         p.members.append(member)
-        profile = p   // update local state immediately so UI reacts
-        NSLog("addHouseholdMember: added \(member.name), total members now \(p.members.count)")
+        profile = p   // update local state immediately
+        NSLog("addHouseholdMember: local count now \(p.members.count), saving to DB")
         do {
-            // Use full profile update — most reliable path for JSONB members column
-            try await dataService.updateProfile(p)
-            NSLog("addHouseholdMember: DB update succeeded")
+            // Use targeted members-only update — most reliable for JSONB array
+            try await dataService.updateMembers(profileId: p.id, members: p.members)
+            NSLog("addHouseholdMember: DB update succeeded, members: \(p.members.map(\.name))")
         } catch {
-            NSLog("Error adding member: \(error)")
+            NSLog("addHouseholdMember ERROR: \(error)")
         }
     }
 
     func refreshProfile() async {
         guard let userId = AuthManager.shared.currentUserId else { return }
         if let fresh = try? await dataService.fetchProfile(userId: userId) {
-            // Preserve the avatar emoji if it was just set locally and DB hasn't caught up
-            if let localEmoji = profile?.avatarEmoji, fresh.avatarEmoji == nil {
+            // Preserve locally-set avatar emoji if DB hasn't caught up yet
+            let localEmoji = profile?.avatarEmoji
+            if let localEmoji, fresh.avatarEmoji == nil {
                 var patched = fresh
                 patched.avatarEmoji = localEmoji
                 profile = patched
@@ -213,17 +216,20 @@ final class AppState: ObservableObject {
         guard var p = profile, p.isAdmin else { return }
         p.members.removeAll { $0.name == member.name }
         profile = p
-        do { try await dataService.updateProfile(p) }
-        catch { NSLog("Error removing member: \(error)") }
+        do {
+            try await dataService.updateMembers(profileId: p.id, members: p.members)
+        } catch {
+            NSLog("removeMember ERROR: \(error)")
+        }
     }
 
     func savePreferences() async {
         saveLocalPreferences()
-        guard var p = profile else { return }
-        p.preferences = preferences
-        profile = p
-        do { try await dataService.updateProfile(p) }
-        catch { NSLog("Error saving preferences: \(error)") }
+        guard let p = profile else { return }
+        do {
+            // Save preferences as part of full profile (preferences is a jsonb column)
+            try await dataService.updateProfile(p)
+        } catch { NSLog("savePreferences ERROR: \(error)") }
     }
 
     // MARK: - Badge Check
@@ -239,7 +245,7 @@ final class AppState: ObservableObject {
         newlyEarnedBadge = newBadges.first
         pendingConfettiEvent = .badgeUnlock
         logActivity(.badgeEarned, "\(newBadges.first!.name) earned!")
-        Task { try? await dataService.updateProfile(updated) }
+        Task { try? await dataService.updateBadges(profileId: p.id, badgeIds: ids) }
     }
 
     // MARK: - Local Preferences

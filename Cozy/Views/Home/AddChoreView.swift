@@ -160,14 +160,15 @@ struct AddChoreView: View {
     }
 
     private var memberPicker: some View {
+        // Resolve a clean display name — never "Me" or empty
         let rawName = appState.profile?.displayName ?? ""
-        let myName = rawName.trimmingCharacters(in: .whitespaces).isEmpty ? "You" : rawName
+        let trimmed = rawName.trimmingCharacters(in: .whitespaces)
+        let myName = (trimmed.isEmpty || trimmed.lowercased() == "me") ? "You" : trimmed
         let myEmoji = appState.profile?.avatarEmoji ?? "🙋"
         let householdMembers = appState.profile?.members ?? []
         let currentAssigned = assignedTo.isEmpty ? myName : assignedTo
-        // Build label: never show "Me (Me)" — use actual name + "(Me)" tag
-        let baseName = myName.lowercased() == "me" ? "You" : myName
-        let myLabel = "\(baseName) (Me)"
+        // Label shows real name + "(Me)" so it's always clear who "Me" is
+        let myLabel = "\(myName) (Me)"
         return VStack(alignment: .leading, spacing: 16) {
             Text("Assign to")
                 .font(.system(size: 22, weight: .bold, design: .serif))
