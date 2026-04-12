@@ -122,10 +122,12 @@ struct HouseholdPanelView: View {
         let trimmed = newMemberName.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
         let member = HouseholdMember(name: trimmed, emoji: newMemberEmoji)
-        Task { await appState.addHouseholdMember(member) }
         newMemberName = ""
         newMemberEmoji = avatarEmojis.randomElement() ?? "😊"
         withAnimation { showAddMember = false }
+        Task {
+            await appState.addHouseholdMember(member)
+        }
     }
 
     private func memberRow(_ member: HouseholdMember) -> some View {

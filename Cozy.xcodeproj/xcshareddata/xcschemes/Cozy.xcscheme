@@ -15,10 +15,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "C797E95DAF90009004B14B14"
-               BuildableName = "build-blaze.app"
-               BlueprintName = "build-blaze"
-               ReferencedContainer = "container:build-blaze.xcodeproj">
+               BlueprintIdentifier = "10A2943F2A732AEACF1C3B05"
+               BuildableName = "Cozy.app"
+               BlueprintName = "Cozy"
+               ReferencedContainer = "container:Cozy.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C797E95DAF90009004B14B14"
-            BuildableName = "build-blaze.app"
-            BlueprintName = "build-blaze"
-            ReferencedContainer = "container:build-blaze.xcodeproj">
+            BlueprintIdentifier = "10A2943F2A732AEACF1C3B05"
+            BuildableName = "Cozy.app"
+            BlueprintName = "Cozy"
+            ReferencedContainer = "container:Cozy.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
@@ -55,10 +55,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C797E95DAF90009004B14B14"
-            BuildableName = "build-blaze.app"
-            BlueprintName = "build-blaze"
-            ReferencedContainer = "container:build-blaze.xcodeproj">
+            BlueprintIdentifier = "10A2943F2A732AEACF1C3B05"
+            BuildableName = "Cozy.app"
+            BlueprintName = "Cozy"
+            ReferencedContainer = "container:Cozy.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
@@ -74,10 +74,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "C797E95DAF90009004B14B14"
-            BuildableName = "build-blaze.app"
-            BlueprintName = "build-blaze"
-            ReferencedContainer = "container:build-blaze.xcodeproj">
+            BlueprintIdentifier = "10A2943F2A732AEACF1C3B05"
+            BuildableName = "Cozy.app"
+            BlueprintName = "Cozy"
+            ReferencedContainer = "container:Cozy.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

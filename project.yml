@@ -1,11 +1,11 @@
-name: build-blaze
+name: Cozy
 options:
   bundleIdPrefix: com.aki
   developmentLanguage: en
 settings:
   base:
-    PRODUCT_BUNDLE_IDENTIFIER: com.aki.buildblaze
-    PRODUCT_NAME: build-blaze
+    PRODUCT_BUNDLE_IDENTIFIER: com.aki.cozy
+    PRODUCT_NAME: Cozy
     SWIFT_VERSION: 5
     MARKETING_VERSION: 1
     CURRENT_PROJECT_VERSION: 1
@@ -15,14 +15,14 @@ settings:
     ALWAYS_SEARCH_USER_PATHS: 'NO'
     ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
 targets:
-  build-blaze:
+  Cozy:
     type: application
     platform: iOS
     deploymentTarget: '17.0'
     sources:
-      - path: build-blaze
+      - path: Cozy
     info:
-      path: build-blaze/Info.plist
+      path: Cozy/Info.plist
       properties:
         CFBundleDevelopmentRegion: $(DEVELOPMENT_LANGUAGE)
         CFBundleDisplayName: $(PRODUCT_NAME)
@@ -57,10 +57,10 @@ targets:
       - package: supabase-swift
         product: Supabase
 schemes:
-  build-blaze:
+  Cozy:
     build:
       targets:
-        build-blaze: all
+        Cozy: all
     run:
       config: Debug
     archive:

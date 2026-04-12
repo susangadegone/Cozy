@@ -159,27 +159,54 @@ final class AppState: ObservableObject {
         guard var p = profile else { return }
         p.displayName = name
         profile = p
-        do { try await dataService.updateProfile(p) }
+        do { try await dataService.updateDisplayName(profileId: p.id, name: name) }
         catch { NSLog("Error updating name: \(error)") }
     }
 
     func updateAvatarEmoji(_ emoji: String) async {
         guard var p = profile else { return }
         p.avatarEmoji = emoji
-        objectWillChange.send()
-        profile = p
-        do { try await dataService.updateProfile(p) }
-        catch { NSLog("Error updating avatar: \(error)") }
+        profile = p          // update immediately so UI reacts — do NOT re-fetch (it would overwrite)
+        do {
+            try await dataService.updateAvatarEmoji(profileId: p.id, emoji: emoji)
+        } catch {
+            NSLog("Error updating avatar: \(error)")
+        }
     }
 
     func addHouseholdMember(_ member: HouseholdMember) async {
-        guard var p = profile else { return }
-        guard !p.members.contains(where: { $0.name == member.name }) else { return }
+        guard var p = profile else {
+            NSLog("addHouseholdMember: profile is nil, cannot add member")
+            return
+        }
+        guard !p.members.contains(where: { $0.name.lowercased() == member.name.lowercased() }) else {
+            NSLog("addHouseholdMember: duplicate member name \(member.name)")
+            return
+        }
         p.members.append(member)
-        objectWillChange.send()
-        profile = p
-        do { try await dataService.updateProfile(p) }
-        catch { NSLog("Error adding member: \(error)") }
+        profile = p   // update local state immediately so UI reacts
+        NSLog("addHouseholdMember: added \(member.name), total members now \(p.members.count)")
+        do {
+            // Use full profile update — most reliable path for JSONB members column
+            try await dataService.updateProfile(p)
+            NSLog("addHouseholdMember: DB update succeeded")
+        } catch {
+            NSLog("Error adding member: \(error)")
+        }
+    }
+
+    func refreshProfile() async {
+        guard let userId = AuthManager.shared.currentUserId else { return }
+        if let fresh = try? await dataService.fetchProfile(userId: userId) {
+            // Preserve the avatar emoji if it was just set locally and DB hasn't caught up
+            if let localEmoji = profile?.avatarEmoji, fresh.avatarEmoji == nil {
+                var patched = fresh
+                patched.avatarEmoji = localEmoji
+                profile = patched
+            } else {
+                profile = fresh
+            }
+        }
     }
 
     func removeMember(_ member: HouseholdMember) async {

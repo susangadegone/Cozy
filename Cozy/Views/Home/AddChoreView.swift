@@ -160,21 +160,31 @@ struct AddChoreView: View {
     }
 
     private var memberPicker: some View {
-        let myName = appState.profile?.displayName ?? "Me"
+        let rawName = appState.profile?.displayName ?? ""
+        let myName = rawName.trimmingCharacters(in: .whitespaces).isEmpty ? "You" : rawName
         let myEmoji = appState.profile?.avatarEmoji ?? "🙋"
         let householdMembers = appState.profile?.members ?? []
         let currentAssigned = assignedTo.isEmpty ? myName : assignedTo
+        // Build label: never show "Me (Me)" — use actual name + "(Me)" tag
+        let baseName = myName.lowercased() == "me" ? "You" : myName
+        let myLabel = "\(baseName) (Me)"
         return VStack(alignment: .leading, spacing: 16) {
             Text("Assign to")
                 .font(.system(size: 22, weight: .bold, design: .serif))
                 .foregroundColor(CozyTheme.primary)
-            assignOption(name: myName, displayLabel: "\(myName) (Me)", emoji: myEmoji, currentValue: currentAssigned)
+            assignOption(name: myName, displayLabel: myLabel, emoji: myEmoji, currentValue: currentAssigned)
             ForEach(householdMembers) { member in
                 assignOption(name: member.name, displayLabel: member.name, emoji: member.emoji, currentValue: currentAssigned)
             }
+            if householdMembers.isEmpty {
+                Text("Add household members in Profile → Household to assign chores to others.")
+                    .font(.system(size: 13))
+                    .foregroundColor(CozyTheme.mutedText)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 4)
+            }
         }
         .onAppear {
-            // Ensure user is pre-selected when this step appears
             if assignedTo.isEmpty { assignedTo = myName }
         }
     }

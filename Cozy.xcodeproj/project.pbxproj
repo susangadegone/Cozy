@@ -1,0 +1,461 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		076439CB047C7A002FED14B3 /* MonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EC5A77FBE93BD5AB344AE77 /* MonthView.swift */; };
+		105496B3BC6B758BF7C17B56 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = C31EDEB58DB1711DFF025955 /* Auth */; };
+		1CAB5A32C3B766544D4ABDFC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 27385DA6A8091A3B53DD9474 /* LaunchScreen.storyboard */; };
+		1D8162A9B651E8049A3BCE4C /* ConfettiOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E026455FA8CB87877B7FB00 /* ConfettiOverlay.swift */; };
+		26701BD811E88E5F283B8AD8 /* FloatingDragChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2714606E01035824B61B8E /* FloatingDragChip.swift */; };
+		2B2C274159D8D8F382E6351D /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F748F412D2AB9A2EA205B2C /* DashboardView.swift */; };
+		2B2DF18A2BA51DDCC0964E94 /* NotificationPrefsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51A9AB9CCC9FBE8CFB9F0A23 /* NotificationPrefsView.swift */; };
+		343CD85CBBD54BDFCDBDA0FC /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = F7077727A885187B1D6A2A2B /* PostgREST */; };
+		3AF9A8E7555857F001B769C8 /* DragDropManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5740F17F6A570A318B64D3 /* DragDropManager.swift */; };
+		503331955FBB1C032FE294F1 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D3895B1461A128909ADA42D /* SplashView.swift */; };
+		5864AED484F4398CDE7092EC /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D279CE06BA349D3086F948A /* HomeView.swift */; };
+		5B95BE7E3A05CEC14ED07957 /* ChoreTrayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEA7142AF91D5CBAE6C81D6 /* ChoreTrayView.swift */; };
+		5F2C930980429932F256E13F /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F72CD998737E99C59F15A4C9 /* SupabaseConfig.swift */; };
+		68362E21237049111F1D9C90 /* OnboardingFinale.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26DCE7F72815D4D734B4126 /* OnboardingFinale.swift */; };
+		6898E2F45C0C7DFEE2F53B51 /* BadgeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9501FBEDA9BEFDDD17CE1D7 /* BadgeService.swift */; };
+		6DE14890CCB6A436DD901920 /* OnboardingStep4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3328C29606F144AC5DC5EE98 /* OnboardingStep4.swift */; };
+		76169137FD2D4B18AFF823D6 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAA9EA36A6984ACCACA3C7C /* RootView.swift */; };
+		8B0D8D1E2A202696F99F5B58 /* AuthFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2137E0C63B37D3B3E93B7CBF /* AuthFormView.swift */; };
+		90D01C3CECCD81D633C9FA21 /* OnboardingStep2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8293F2BF25E38C4D35EF3493 /* OnboardingStep2.swift */; };
+		9EB96C99A24EEA97CB740584 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 616C9B61556E6F41E912D812 /* WelcomeView.swift */; };
+		9F09307CF720B101FA76829B /* HouseholdPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED2D9F725A479E126A5990E /* HouseholdPanelView.swift */; };
+		A2F28210A24361EFD4FBEC24 /* AddChoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEAF991B7E5BE6BDD153B61D /* AddChoreView.swift */; };
+		A55194DBB8E69D62C75425A0 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87F09F579827D7305F63B7B /* OnboardingView.swift */; };
+		ABD228A423639A2E4FD83250 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9071A204A6DFD1DD0D005916 /* Assets.xcassets */; };
+		AC0813DD4AB7B7266DB26080 /* CozyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 612F00D5A618CDE804A96CDC /* CozyApp.swift */; };
+		B68D1E896F1DF06E42E0C5A1 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F0C390C1673B21023FAFD /* AppState.swift */; };
+		B6B347E48D89CC9963361AB1 /* WeekStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78C0776E7767DC8F5484E49A /* WeekStripView.swift */; };
+		BAECA3174FDEA96C4392A6D3 /* OnboardingStep1.swift in Sources */ = {isa = PBXBuildFile; fileRef = F826DEC4C80D8F813CF980AE /* OnboardingStep1.swift */; };
+		BFE951B32418ABC233291736 /* DataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7F888FC5F7F45390693E254 /* DataService.swift */; };
+		C05F7D9E5A074C795530AF04 /* OnboardingStep3.swift in Sources */ = {isa = PBXBuildFile; fileRef = A04DCD7141588AFEAD32864A /* OnboardingStep3.swift */; };
+		CC67EC560804A1F31673C556 /* ChoreHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EF8F802A1AEB90F78016D2 /* ChoreHistoryView.swift */; };
+		D5F32BBCA8AFAB14477DBEF1 /* CozyTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 819737D6BB603362F0AC4AF6 /* CozyTheme.swift */; };
+		D78BC9CF6C4C8ABF32B595EA /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55467CD7AAA96BBBAF6C956 /* AuthManager.swift */; };
+		D9FB39CC93745FCC86A58D9F /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4A1D4E01A7B9FE6D132BE1 /* Models.swift */; };
+		DA6246FBFB66C4E26FCDAB99 /* BadgeGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09D9F7C7ABD764041E0C51B2 /* BadgeGridView.swift */; };
+		DA78B3B67F82835BA2E5B590 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C03D8179A77DA4367A00E492 /* ProfileView.swift */; };
+		DC8545F459BAF19887AE373B /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = EAF6C221C06125222A791AD1 /* Supabase */; };
+		E2D1CE6FE89C599A01F9C234 /* OnboardingStep5.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0B2E525114F96C2DA2996F /* OnboardingStep5.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		00EF8F802A1AEB90F78016D2 /* ChoreHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoreHistoryView.swift; sourceTree = "<group>"; };
+		09D9F7C7ABD764041E0C51B2 /* BadgeGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeGridView.swift; sourceTree = "<group>"; };
+		1B0B2E525114F96C2DA2996F /* OnboardingStep5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep5.swift; sourceTree = "<group>"; };
+		1EC5A77FBE93BD5AB344AE77 /* MonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthView.swift; sourceTree = "<group>"; };
+		2137E0C63B37D3B3E93B7CBF /* AuthFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthFormView.swift; sourceTree = "<group>"; };
+		2CAA9EA36A6984ACCACA3C7C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		3328C29606F144AC5DC5EE98 /* OnboardingStep4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep4.swift; sourceTree = "<group>"; };
+		3D279CE06BA349D3086F948A /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		3D3895B1461A128909ADA42D /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		3EEA7142AF91D5CBAE6C81D6 /* ChoreTrayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoreTrayView.swift; sourceTree = "<group>"; };
+		415D986C78A01A4B4A3B3B7A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		51A9AB9CCC9FBE8CFB9F0A23 /* NotificationPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPrefsView.swift; sourceTree = "<group>"; };
+		5E026455FA8CB87877B7FB00 /* ConfettiOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiOverlay.swift; sourceTree = "<group>"; };
+		612F00D5A618CDE804A96CDC /* CozyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyApp.swift; sourceTree = "<group>"; };
+		616C9B61556E6F41E912D812 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		78C0776E7767DC8F5484E49A /* WeekStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekStripView.swift; sourceTree = "<group>"; };
+		819737D6BB603362F0AC4AF6 /* CozyTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyTheme.swift; sourceTree = "<group>"; };
+		8293F2BF25E38C4D35EF3493 /* OnboardingStep2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep2.swift; sourceTree = "<group>"; };
+		8E5740F17F6A570A318B64D3 /* DragDropManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragDropManager.swift; sourceTree = "<group>"; };
+		8ED2D9F725A479E126A5990E /* HouseholdPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseholdPanelView.swift; sourceTree = "<group>"; };
+		9071A204A6DFD1DD0D005916 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		9F748F412D2AB9A2EA205B2C /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		A04DCD7141588AFEAD32864A /* OnboardingStep3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep3.swift; sourceTree = "<group>"; };
+		A7F888FC5F7F45390693E254 /* DataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataService.swift; sourceTree = "<group>"; };
+		AF4A1D4E01A7B9FE6D132BE1 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		C03D8179A77DA4367A00E492 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		C9501FBEDA9BEFDDD17CE1D7 /* BadgeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeService.swift; sourceTree = "<group>"; };
+		D33F0C390C1673B21023FAFD /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		D87F09F579827D7305F63B7B /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		DEAF991B7E5BE6BDD153B61D /* AddChoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddChoreView.swift; sourceTree = "<group>"; };
+		E3162A133E5D9D87D907AA2C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		EE2714606E01035824B61B8E /* FloatingDragChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingDragChip.swift; sourceTree = "<group>"; };
+		F26DCE7F72815D4D734B4126 /* OnboardingFinale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFinale.swift; sourceTree = "<group>"; };
+		F55467CD7AAA96BBBAF6C956 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		F72CD998737E99C59F15A4C9 /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseConfig.swift; sourceTree = "<group>"; };
+		F826DEC4C80D8F813CF980AE /* OnboardingStep1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep1.swift; sourceTree = "<group>"; };
+		FB09075B93D1EAE9FC91D4F6 /* Cozy.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Cozy.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A6DEE49C22C6726B312291B3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				105496B3BC6B758BF7C17B56 /* Auth in Frameworks */,
+				343CD85CBBD54BDFCDBDA0FC /* PostgREST in Frameworks */,
+				DC8545F459BAF19887AE373B /* Supabase in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0D971DB72A73EBF06EA86580 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AF4A1D4E01A7B9FE6D132BE1 /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		2382B7F34FBD7D3E71EA3BF1 /* Cozy */ = {
+			isa = PBXGroup;
+			children = (
+				9071A204A6DFD1DD0D005916 /* Assets.xcassets */,
+				612F00D5A618CDE804A96CDC /* CozyApp.swift */,
+				E3162A133E5D9D87D907AA2C /* Info.plist */,
+				27385DA6A8091A3B53DD9474 /* LaunchScreen.storyboard */,
+				960E6D804387200C9363D1DC /* Config */,
+				0D971DB72A73EBF06EA86580 /* Models */,
+				CB8D2793EF8A30FC1FCAADDF /* Services */,
+				EF4674D29592D0A668DF7AFA /* State */,
+				9E75BC42376F6493AD674824 /* Views */,
+			);
+			path = Cozy;
+			sourceTree = "<group>";
+		};
+		2FA38CFD079C782F5BA0936E /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				2137E0C63B37D3B3E93B7CBF /* AuthFormView.swift */,
+				616C9B61556E6F41E912D812 /* WelcomeView.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		49F581916C03157F9244A970 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				09D9F7C7ABD764041E0C51B2 /* BadgeGridView.swift */,
+				00EF8F802A1AEB90F78016D2 /* ChoreHistoryView.swift */,
+				8ED2D9F725A479E126A5990E /* HouseholdPanelView.swift */,
+				51A9AB9CCC9FBE8CFB9F0A23 /* NotificationPrefsView.swift */,
+				C03D8179A77DA4367A00E492 /* ProfileView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		7296CA6D5F0109FBA416F471 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				F26DCE7F72815D4D734B4126 /* OnboardingFinale.swift */,
+				F826DEC4C80D8F813CF980AE /* OnboardingStep1.swift */,
+				8293F2BF25E38C4D35EF3493 /* OnboardingStep2.swift */,
+				A04DCD7141588AFEAD32864A /* OnboardingStep3.swift */,
+				3328C29606F144AC5DC5EE98 /* OnboardingStep4.swift */,
+				1B0B2E525114F96C2DA2996F /* OnboardingStep5.swift */,
+				D87F09F579827D7305F63B7B /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		8AE942FD4FBFD46118EC72F0 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				DEAF991B7E5BE6BDD153B61D /* AddChoreView.swift */,
+				3EEA7142AF91D5CBAE6C81D6 /* ChoreTrayView.swift */,
+				5E026455FA8CB87877B7FB00 /* ConfettiOverlay.swift */,
+				9F748F412D2AB9A2EA205B2C /* DashboardView.swift */,
+				8E5740F17F6A570A318B64D3 /* DragDropManager.swift */,
+				EE2714606E01035824B61B8E /* FloatingDragChip.swift */,
+				3D279CE06BA349D3086F948A /* HomeView.swift */,
+				1EC5A77FBE93BD5AB344AE77 /* MonthView.swift */,
+				78C0776E7767DC8F5484E49A /* WeekStripView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		960E6D804387200C9363D1DC /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				819737D6BB603362F0AC4AF6 /* CozyTheme.swift */,
+				F72CD998737E99C59F15A4C9 /* SupabaseConfig.swift */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		9E75BC42376F6493AD674824 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2CAA9EA36A6984ACCACA3C7C /* RootView.swift */,
+				3D3895B1461A128909ADA42D /* SplashView.swift */,
+				2FA38CFD079C782F5BA0936E /* Auth */,
+				8AE942FD4FBFD46118EC72F0 /* Home */,
+				7296CA6D5F0109FBA416F471 /* Onboarding */,
+				49F581916C03157F9244A970 /* Profile */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A29FF41C4B357541D16F1975 = {
+			isa = PBXGroup;
+			children = (
+				2382B7F34FBD7D3E71EA3BF1 /* Cozy */,
+				F713191BBBC557F432933680 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CB8D2793EF8A30FC1FCAADDF /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				F55467CD7AAA96BBBAF6C956 /* AuthManager.swift */,
+				C9501FBEDA9BEFDDD17CE1D7 /* BadgeService.swift */,
+				A7F888FC5F7F45390693E254 /* DataService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		EF4674D29592D0A668DF7AFA /* State */ = {
+			isa = PBXGroup;
+			children = (
+				D33F0C390C1673B21023FAFD /* AppState.swift */,
+			);
+			path = State;
+			sourceTree = "<group>";
+		};
+		F713191BBBC557F432933680 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FB09075B93D1EAE9FC91D4F6 /* Cozy.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		10A2943F2A732AEACF1C3B05 /* Cozy */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DA0D5285EBAFA3A710F643B0 /* Build configuration list for PBXNativeTarget "Cozy" */;
+			buildPhases = (
+				822E96FF548A7FDCE5BE7C6A /* Sources */,
+				7DF988509A86DBAFC2F8D1BB /* Resources */,
+				A6DEE49C22C6726B312291B3 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Cozy;
+			packageProductDependencies = (
+				C31EDEB58DB1711DFF025955 /* Auth */,
+				F7077727A885187B1D6A2A2B /* PostgREST */,
+				EAF6C221C06125222A791AD1 /* Supabase */,
+			);
+			productName = Cozy;
+			productReference = FB09075B93D1EAE9FC91D4F6 /* Cozy.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3FCF6ADA8B8798641C95DA9B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+			};
+			buildConfigurationList = A7EE3415FD5B991AEA8B0C22 /* Build configuration list for PBXProject "Cozy" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = A29FF41C4B357541D16F1975;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				E69AA39EDB0E9BEE05AA6F73 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				10A2943F2A732AEACF1C3B05 /* Cozy */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7DF988509A86DBAFC2F8D1BB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ABD228A423639A2E4FD83250 /* Assets.xcassets in Resources */,
+				1CAB5A32C3B766544D4ABDFC /* LaunchScreen.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		822E96FF548A7FDCE5BE7C6A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A2F28210A24361EFD4FBEC24 /* AddChoreView.swift in Sources */,
+				B68D1E896F1DF06E42E0C5A1 /* AppState.swift in Sources */,
+				8B0D8D1E2A202696F99F5B58 /* AuthFormView.swift in Sources */,
+				D78BC9CF6C4C8ABF32B595EA /* AuthManager.swift in Sources */,
+				DA6246FBFB66C4E26FCDAB99 /* BadgeGridView.swift in Sources */,
+				6898E2F45C0C7DFEE2F53B51 /* BadgeService.swift in Sources */,
+				CC67EC560804A1F31673C556 /* ChoreHistoryView.swift in Sources */,
+				5B95BE7E3A05CEC14ED07957 /* ChoreTrayView.swift in Sources */,
+				1D8162A9B651E8049A3BCE4C /* ConfettiOverlay.swift in Sources */,
+				AC0813DD4AB7B7266DB26080 /* CozyApp.swift in Sources */,
+				D5F32BBCA8AFAB14477DBEF1 /* CozyTheme.swift in Sources */,
+				2B2C274159D8D8F382E6351D /* DashboardView.swift in Sources */,
+				BFE951B32418ABC233291736 /* DataService.swift in Sources */,
+				3AF9A8E7555857F001B769C8 /* DragDropManager.swift in Sources */,
+				26701BD811E88E5F283B8AD8 /* FloatingDragChip.swift in Sources */,
+				5864AED484F4398CDE7092EC /* HomeView.swift in Sources */,
+				9F09307CF720B101FA76829B /* HouseholdPanelView.swift in Sources */,
+				D9FB39CC93745FCC86A58D9F /* Models.swift in Sources */,
+				076439CB047C7A002FED14B3 /* MonthView.swift in Sources */,
+				2B2DF18A2BA51DDCC0964E94 /* NotificationPrefsView.swift in Sources */,
+				68362E21237049111F1D9C90 /* OnboardingFinale.swift in Sources */,
+				BAECA3174FDEA96C4392A6D3 /* OnboardingStep1.swift in Sources */,
+				90D01C3CECCD81D633C9FA21 /* OnboardingStep2.swift in Sources */,
+				C05F7D9E5A074C795530AF04 /* OnboardingStep3.swift in Sources */,
+				6DE14890CCB6A436DD901920 /* OnboardingStep4.swift in Sources */,
+				E2D1CE6FE89C599A01F9C234 /* OnboardingStep5.swift in Sources */,
+				A55194DBB8E69D62C75425A0 /* OnboardingView.swift in Sources */,
+				DA78B3B67F82835BA2E5B590 /* ProfileView.swift in Sources */,
+				76169137FD2D4B18AFF823D6 /* RootView.swift in Sources */,
+				503331955FBB1C032FE294F1 /* SplashView.swift in Sources */,
+				5F2C930980429932F256E13F /* SupabaseConfig.swift in Sources */,
+				B6B347E48D89CC9963361AB1 /* WeekStripView.swift in Sources */,
+				9EB96C99A24EEA97CB740584 /* WelcomeView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		27385DA6A8091A3B53DD9474 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				415D986C78A01A4B4A3B3B7A /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		4B46553668E6300329A15445 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aki.cozy;
+				PRODUCT_NAME = Cozy;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		57E2061EB5716855D6793225 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aki.cozy;
+				PRODUCT_NAME = Cozy;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		B246E0EB6CBADC32B069EB27 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = Cozy/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Release;
+		};
+		B83C91091F17ADFD1CB90304 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = Cozy/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A7EE3415FD5B991AEA8B0C22 /* Build configuration list for PBXProject "Cozy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				57E2061EB5716855D6793225 /* Debug */,
+				4B46553668E6300329A15445 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DA0D5285EBAFA3A710F643B0 /* Build configuration list for PBXNativeTarget "Cozy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B83C91091F17ADFD1CB90304 /* Debug */,
+				B246E0EB6CBADC32B069EB27 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E69AA39EDB0E9BEE05AA6F73 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C31EDEB58DB1711DFF025955 /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E69AA39EDB0E9BEE05AA6F73 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		EAF6C221C06125222A791AD1 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E69AA39EDB0E9BEE05AA6F73 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		F7077727A885187B1D6A2A2B /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E69AA39EDB0E9BEE05AA6F73 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 3FCF6ADA8B8798641C95DA9B /* Project object */;
+}
