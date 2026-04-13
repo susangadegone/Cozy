@@ -1,29 +1,34 @@
 import SwiftUI
 
 struct SplashView: View {
-    @State private var scale: CGFloat = 0.8
+    @EnvironmentObject var appRouter: AppRouter
     @State private var opacity: Double = 0
+    @State private var pulse: Bool = false
 
     var body: some View {
         ZStack {
-            CozyTheme.background.ignoresSafeArea()
-            VStack(spacing: 12) {
+            Color(hex: "FAF7F2").ignoresSafeArea()
+            VStack(spacing: 14) {
                 Text("🏠")
-                    .font(.system(size: 64))
+                    .font(.system(size: 72))
+                    .scaleEffect(pulse ? 1.06 : 1.0)
                 Text("Cozy")
-                    .font(.system(size: 40, weight: .bold, design: .serif))
+                    .font(.system(size: 42, weight: .bold, design: .serif))
                     .foregroundColor(CozyTheme.primary)
-                Text("Keep your home sparkling")
-                    .font(.system(size: 16, weight: .medium))
+                Text("your home, your rhythm")
+                    .font(.system(size: 16, weight: .light))
                     .foregroundColor(CozyTheme.mutedText)
+                    .italic()
             }
-            .scaleEffect(scale)
             .opacity(opacity)
         }
         .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
-                scale = 1.0
-                opacity = 1.0
+            withAnimation(.easeInOut(duration: 0.7)) { opacity = 1 }
+            withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true).delay(0.7)) {
+                pulse = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                appRouter.navigate(to: .welcome)
             }
         }
     }

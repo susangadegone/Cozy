@@ -3,50 +3,55 @@ import SwiftUI
 struct RootView: View {
     @EnvironmentObject var authManager: AuthManager
     @EnvironmentObject var appState: AppState
-    @State private var showSplash = true
-    @State private var selectedTab = 0
+    @EnvironmentObject var appRouter: AppRouter
+    @EnvironmentObject var onboardingVM: OnboardingViewModel
 
     var body: some View {
         ZStack {
             CozyTheme.background.ignoresSafeArea()
-            if showSplash {
-                SplashView()
-            } else if authManager.isLoading {
-                ProgressView().tint(CozyTheme.primary)
-            } else if !authManager.isAuthenticated {
-                WelcomeView()
-            } else if appState.needsOnboarding {
-                OnboardingView()
-            } else {
-                mainTabs
-            }
+            routedView
         }
-        .onAppear { startSplash() }
+        .animation(.easeInOut(duration: 0.35), value: appRouter.route)
+    }
+
+    @ViewBuilder
+    private var routedView: some View {
+        switch appRouter.route {
+        case .splash:
+            SplashView()
+        case .welcome:
+            WelcomeView()
+        case .signUp:
+            SignUpView()
+        case .login:
+            LoginView()
+        case .science:
+            ScienceTrustView()
+        case .onboardingQ1:
+            OnboardingQ1View()
+        case .onboardingQ2:
+            OnboardingQ2View()
+        case .onboardingQ3:
+            OnboardingQ3View()
+        case .onboardingQ4:
+            OnboardingQ4View()
+        case .onboardingQ5:
+            OnboardingQ5View()
+        case .scheduleReady:
+            ScheduleReadyView()
+        case .dashboard:
+            mainTabs
+        }
     }
 
     private var mainTabs: some View {
-        TabView(selection: $selectedTab) {
+        TabView {
             HomeView()
-                .tabItem {
-                    Label("Home", systemImage: selectedTab == 0 ? "house.fill" : "house")
-                }
-                .tag(0)
-
+                .tabItem { Label("Home", systemImage: "house.fill") }
             ProfileView()
-                .tabItem {
-                    Label("Profile", systemImage: selectedTab == 1 ? "person.fill" : "person")
-                }
-                .tag(1)
+                .tabItem { Label("Profile", systemImage: "person.fill") }
         }
         .tint(CozyTheme.accent)
-    }
-
-    private func startSplash() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            withAnimation(.easeInOut(duration: 0.5)) { showSplash = false }
-            if authManager.isAuthenticated {
-                Task { await appState.loadData() }
-            }
-        }
+        .task { await appState.loadData() }
     }
 }
