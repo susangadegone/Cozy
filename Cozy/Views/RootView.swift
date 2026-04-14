@@ -12,6 +12,11 @@ struct RootView: View {
             routedView
         }
         .animation(.easeInOut(duration: 0.35), value: appRouter.route)
+        .onChange(of: authManager.isAuthenticated) { isAuth in
+            if !isAuth && appRouter.route == .dashboard {
+                appRouter.navigate(to: .welcome)
+            }
+        }
     }
 
     @ViewBuilder

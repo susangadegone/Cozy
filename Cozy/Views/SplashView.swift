@@ -33,7 +33,7 @@ struct SplashView: View {
                 if AuthManager.shared.isAuthenticated {
                     appRouter.navigate(to: .dashboard)
                 } else {
-                    appRouter.navigate(to: .login)
+                    appRouter.navigate(to: .welcome)
                 }
             }
         }
