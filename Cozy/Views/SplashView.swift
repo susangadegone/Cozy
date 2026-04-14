@@ -27,8 +27,14 @@ struct SplashView: View {
             withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true).delay(0.7)) {
                 pulse = true
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                appRouter.navigate(to: .welcome)
+            Task {
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                await AuthManager.shared.checkSession()
+                if AuthManager.shared.isAuthenticated {
+                    appRouter.navigate(to: .dashboard)
+                } else {
+                    appRouter.navigate(to: .login)
+                }
             }
         }
     }

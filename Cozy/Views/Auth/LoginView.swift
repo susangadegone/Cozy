@@ -12,6 +12,7 @@ struct LoginView: View {
     @State private var passwordError = ""
     @State private var generalError = ""
     @State private var isLoading = false
+    @State private var forgotSent = false
 
     var body: some View {
         ZStack {
@@ -20,6 +21,7 @@ struct LoginView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     headerSection
                     fieldsSection
+                    forgotPasswordRow
                     signInButton
                     if !generalError.isEmpty {
                         Text(generalError)
@@ -33,6 +35,11 @@ struct LoginView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 56)
                 .padding(.bottom, 40)
+            }
+        }
+        .onAppear {
+            if let saved = UserDefaults.standard.string(forKey: "lastUsedEmail"), !saved.isEmpty {
+                email = saved
             }
         }
     }
@@ -85,6 +92,33 @@ struct LoginView: View {
         }
     }
 
+    private var forgotPasswordRow: some View {
+        Group {
+            if forgotSent {
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.circle.fill").foregroundColor(Color(hex: "4CAF82"))
+                    Text("Reset link sent — check your inbox.")
+                        .font(.system(size: 13))
+                        .foregroundColor(Color(hex: "4CAF82"))
+                }
+            } else {
+                Button {
+                    guard email.contains("@") else { emailError = "Enter your email first"; return }
+                    Task {
+                        try? await authManager.sendMagicLink(email: email)
+                        forgotSent = true
+                    }
+                } label: {
+                    Text("Forgot password?")
+                        .font(.system(size: 13))
+                        .foregroundColor(CozyTheme.accent)
+                        .underline()
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .trailing)
+    }
+
     private var signInButton: some View {
         Button { Task { await signIn() } } label: {
             ZStack {
@@ -121,6 +155,7 @@ struct LoginView: View {
         isLoading = true
         do {
             try await authManager.signIn(email: email, password: password)
+            UserDefaults.standard.set(email, forKey: "lastUsedEmail")
             await appState.loadData()
             appRouter.navigate(to: .dashboard)
         } catch {

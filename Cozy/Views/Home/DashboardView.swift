@@ -8,6 +8,7 @@ struct DashboardView: View {
 
     var body: some View {
         VStack(spacing: 16) {
+            greetingHeader
             statRow
             weekProgressCard
             todaySection
@@ -17,6 +18,47 @@ struct DashboardView: View {
         .padding(.horizontal, 16)
         .padding(.top, 12)
         .padding(.bottom, 120)
+    }
+
+    // MARK: Greeting Header
+    private var greetingHeader: some View {
+        let hour = Calendar.current.component(.hour, from: Date())
+        let greeting: String
+        switch hour {
+        case 0..<12: greeting = "Good morning"
+        case 12..<17: greeting = "Good afternoon"
+        default: greeting = "Good evening"
+        }
+        let name = appState.profile?.displayName.components(separatedBy: " ").first ?? "there"
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE, MMM d"
+        let dateStr = formatter.string(from: Date())
+        let streak = appState.currentStreak
+
+        return VStack(alignment: .leading, spacing: 4) {
+            Text("\(greeting), \(name) 👋")
+                .font(.system(size: 22, weight: .bold, design: .serif))
+                .foregroundColor(CozyTheme.primary)
+            HStack(spacing: 10) {
+                Text(dateStr)
+                    .font(.system(size: 13))
+                    .foregroundColor(CozyTheme.mutedText)
+                Spacer()
+                if streak > 0 {
+                    Label("\(streak)-day streak", systemImage: "flame.fill")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(Color(hex: "E07B5A"))
+                        .padding(.horizontal, 10).padding(.vertical, 4)
+                        .background(Color(hex: "E07B5A").opacity(0.12))
+                        .cornerRadius(20)
+                } else {
+                    Text("Start your streak today 🌱")
+                        .font(.system(size: 12))
+                        .foregroundColor(CozyTheme.mutedText)
+                }
+            }
+        }
+        .padding(.top, 4)
     }
 
     // MARK: Stat Row
