@@ -8,6 +8,9 @@ struct ProfileView: View {
     @State private var showAllHistory = false
     @State private var showBadgeToast = false
     @State private var showAvatarPicker = false
+    @State private var showInsights = false
+    @State private var showSettings = false
+    @State private var showInvite = false
 
     private let avatarOptions = ["🧑","👩","👨","🧒","👧","👦","🧔","👩‍🦰","👩‍🦱","👩‍🦳","🧓","🧕",
                                   "😊","😎","🥰","🤗","😇","🐶","🐱","🐼","🦊","🦄","🌸","⭐"]
@@ -20,6 +23,7 @@ struct ProfileView: View {
                     VStack(spacing: 18) {
                         headerSection
                         statsRow
+                        quickActionsRow
                         notifSection
                         prefsSection
                         householdSection
@@ -44,6 +48,15 @@ struct ProfileView: View {
         }
         .sheet(isPresented: $showAllHistory) {
             ChoreHistoryView().environmentObject(appState)
+        }
+        .sheet(isPresented: $showInsights) {
+            InsightsView().environmentObject(appState)
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView().environmentObject(appState).environmentObject(authManager)
+        }
+        .sheet(isPresented: $showInvite) {
+            PartnerInviteView().environmentObject(appState)
         }
         .onChange(of: appState.newlyEarnedBadge) { badge in
             if badge != nil { withAnimation(.spring()) { showBadgeToast = true } }
@@ -197,6 +210,45 @@ struct ProfileView: View {
         }
     }
 
+    // MARK: - Quick Actions
+    private var quickActionsRow: some View {
+        HStack(spacing: 10) {
+            quickActionBtn(icon: "chart.bar.fill", label: "Insights", color: Color(hex: "7B6EF6")) {
+                showInsights = true
+            }
+            quickActionBtn(icon: "person.2.fill", label: "Invite", color: CozyTheme.accent) {
+                showInvite = true
+            }
+            quickActionBtn(icon: "gearshape.fill", label: "Settings", color: CozyTheme.primary) {
+                showSettings = true
+            }
+        }
+    }
+
+    private func quickActionBtn(icon: String, label: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(color.opacity(0.12))
+                        .frame(width: 46, height: 46)
+                    Image(systemName: icon)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(color)
+                }
+                Text(label)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(CozyTheme.mutedText)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(CozyTheme.card)
+            .cornerRadius(CozyTheme.cornerRadius)
+            .overlay(RoundedRectangle(cornerRadius: CozyTheme.cornerRadius).stroke(CozyTheme.border, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+    }
+
     // MARK: - Stats
     private var statsRow: some View {
         HStack(spacing: 12) {
@@ -302,18 +354,19 @@ struct ProfileView: View {
     // MARK: - Sign Out
     private var signOutBtn: some View {
         Button {
-            Task { try? await authManager.signOut() }
+            showSettings = true
         } label: {
             HStack(spacing: 8) {
-                Image(systemName: "rectangle.portrait.and.arrow.right")
-                Text("Sign Out")
+                Image(systemName: "gearshape")
+                Text("More Settings")
             }
-            .font(.system(size: 16, weight: .medium))
-            .foregroundColor(.red.opacity(0.8))
+            .font(.system(size: 15, weight: .medium))
+            .foregroundColor(CozyTheme.mutedText)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(Color.red.opacity(0.07))
+            .padding(.vertical, 13)
+            .background(CozyTheme.card)
             .cornerRadius(CozyTheme.cornerRadius)
+            .overlay(RoundedRectangle(cornerRadius: CozyTheme.cornerRadius).stroke(CozyTheme.border, lineWidth: 1))
         }
         .buttonStyle(.plain)
     }

@@ -31,6 +31,8 @@
 		6FC7358723EEF5B466C9456D /* OnboardingQ2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = D125F051AADC8FE2B391CDC4 /* OnboardingQ2View.swift */; };
 		74D6E26A096BBB05158080A3 /* ChoreDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26F66028700C4B400AEF136 /* ChoreDetailView.swift */; };
 		76169137FD2D4B18AFF823D6 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAA9EA36A6984ACCACA3C7C /* RootView.swift */; };
+		7C4EC61596374C0273AFB7A1 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAAF789037C2180EC18D703 /* SettingsView.swift */; };
+		87B332465754EF7D655A938E /* PartnerInviteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04C439911253436E9F80C581 /* PartnerInviteView.swift */; };
 		8B0D8D1E2A202696F99F5B58 /* AuthFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2137E0C63B37D3B3E93B7CBF /* AuthFormView.swift */; };
 		90D01C3CECCD81D633C9FA21 /* OnboardingStep2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8293F2BF25E38C4D35EF3493 /* OnboardingStep2.swift */; };
 		9EB96C99A24EEA97CB740584 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 616C9B61556E6F41E912D812 /* WelcomeView.swift */; };
@@ -46,6 +48,7 @@
 		BFE951B32418ABC233291736 /* DataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7F888FC5F7F45390693E254 /* DataService.swift */; };
 		C05F7D9E5A074C795530AF04 /* OnboardingStep3.swift in Sources */ = {isa = PBXBuildFile; fileRef = A04DCD7141588AFEAD32864A /* OnboardingStep3.swift */; };
 		C9B9D696B290A4D6517D82A0 /* OnboardingQ5View.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1E10FF744EEB9816E3E14EE /* OnboardingQ5View.swift */; };
+		CAB97C1BB4CCF02143B92AC8 /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC5A776E2DB6974CC5CD8D0 /* InsightsView.swift */; };
 		CC67EC560804A1F31673C556 /* ChoreHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EF8F802A1AEB90F78016D2 /* ChoreHistoryView.swift */; };
 		D5F32BBCA8AFAB14477DBEF1 /* CozyTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 819737D6BB603362F0AC4AF6 /* CozyTheme.swift */; };
 		D78BC9CF6C4C8ABF32B595EA /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55467CD7AAA96BBBAF6C956 /* AuthManager.swift */; };
@@ -63,6 +66,7 @@
 
 /* Begin PBXFileReference section */
 		00EF8F802A1AEB90F78016D2 /* ChoreHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoreHistoryView.swift; sourceTree = "<group>"; };
+		04C439911253436E9F80C581 /* PartnerInviteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerInviteView.swift; sourceTree = "<group>"; };
 		09D9F7C7ABD764041E0C51B2 /* BadgeGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeGridView.swift; sourceTree = "<group>"; };
 		1B0B2E525114F96C2DA2996F /* OnboardingStep5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep5.swift; sourceTree = "<group>"; };
 		1EC5A77FBE93BD5AB344AE77 /* MonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthView.swift; sourceTree = "<group>"; };
@@ -76,7 +80,9 @@
 		3EEA7142AF91D5CBAE6C81D6 /* ChoreTrayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoreTrayView.swift; sourceTree = "<group>"; };
 		415D986C78A01A4B4A3B3B7A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		51A9AB9CCC9FBE8CFB9F0A23 /* NotificationPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPrefsView.swift; sourceTree = "<group>"; };
+		5BAAF789037C2180EC18D703 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		5DA6668BBFE9F6F3E60BE798 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
+		5DC5A776E2DB6974CC5CD8D0 /* InsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsView.swift; sourceTree = "<group>"; };
 		5E026455FA8CB87877B7FB00 /* ConfettiOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiOverlay.swift; sourceTree = "<group>"; };
 		5E2BA0AE4C53E265D4D4F0EC /* OnboardingQ3View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingQ3View.swift; sourceTree = "<group>"; };
 		612F00D5A618CDE804A96CDC /* CozyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyApp.swift; sourceTree = "<group>"; };
@@ -171,8 +177,11 @@
 				09D9F7C7ABD764041E0C51B2 /* BadgeGridView.swift */,
 				00EF8F802A1AEB90F78016D2 /* ChoreHistoryView.swift */,
 				8ED2D9F725A479E126A5990E /* HouseholdPanelView.swift */,
+				5DC5A776E2DB6974CC5CD8D0 /* InsightsView.swift */,
 				51A9AB9CCC9FBE8CFB9F0A23 /* NotificationPrefsView.swift */,
+				04C439911253436E9F80C581 /* PartnerInviteView.swift */,
 				C03D8179A77DA4367A00E492 /* ProfileView.swift */,
+				5BAAF789037C2180EC18D703 /* SettingsView.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -367,6 +376,7 @@
 				26701BD811E88E5F283B8AD8 /* FloatingDragChip.swift in Sources */,
 				5864AED484F4398CDE7092EC /* HomeView.swift in Sources */,
 				9F09307CF720B101FA76829B /* HouseholdPanelView.swift in Sources */,
+				CAB97C1BB4CCF02143B92AC8 /* InsightsView.swift in Sources */,
 				3F895CB94DB94F6D3CCF51A5 /* LoginView.swift in Sources */,
 				D9FB39CC93745FCC86A58D9F /* Models.swift in Sources */,
 				076439CB047C7A002FED14B3 /* MonthView.swift in Sources */,
@@ -385,10 +395,12 @@
 				E2D1CE6FE89C599A01F9C234 /* OnboardingStep5.swift in Sources */,
 				A55194DBB8E69D62C75425A0 /* OnboardingView.swift in Sources */,
 				EEB49F4C50FDB7BF4D0F2B9A /* OnboardingViewModel.swift in Sources */,
+				87B332465754EF7D655A938E /* PartnerInviteView.swift in Sources */,
 				DA78B3B67F82835BA2E5B590 /* ProfileView.swift in Sources */,
 				76169137FD2D4B18AFF823D6 /* RootView.swift in Sources */,
 				F9084DBCF7562EA4EA386B4B /* ScheduleReadyView.swift in Sources */,
 				B72ADC6BEB7B2EEAAB5C82D0 /* ScienceTrustView.swift in Sources */,
+				7C4EC61596374C0273AFB7A1 /* SettingsView.swift in Sources */,
 				F1CFC925F7176622381CEDB4 /* SignUpView.swift in Sources */,
 				503331955FBB1C032FE294F1 /* SplashView.swift in Sources */,
 				5F2C930980429932F256E13F /* SupabaseConfig.swift in Sources */,
