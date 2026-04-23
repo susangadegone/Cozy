@@ -102,8 +102,9 @@ struct RoomToggleCard: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 10) {
-                Text(room.icon)
-                    .font(.system(size: 26))
+                Image(systemName: room.icon)
+                    .font(.system(size: 24, weight: .light))
+                    .foregroundColor(isSelected ? .white : CozyTheme.accent)
                 Text(room.name)
                     .font(.custom("DMSans-Medium", size: 14))
                     .foregroundColor(CozyTheme.primary)

@@ -7,8 +7,16 @@ struct AddChoreView: View {
     @State private var step = 0
     @State private var selectedRoom: String = ""
     @State private var selectedChore: String = ""
+    @State private var choreNameInput: String = ""
+    @State private var selectedFrequency: String = "Weekly"
+    @State private var selectedDays: Set<String> = []
+    @State private var rotatePartners: Bool = false
     @State private var selectedDate: Date = Date()
     @State private var assignedTo: String = ""
+    @State private var showNameError: Bool = false
+
+    private let frequencies = ["Daily", "2–3 times/week", "Weekly", "Every 2 weeks", "Monthly"]
+    private let dayPills = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"]
 
     // Pre-populate assignedTo with current user's name
     private func defaultAssignedTo() -> String {
@@ -54,8 +62,8 @@ struct AddChoreView: View {
     private var stepContent: some View {
         switch step {
         case 0: roomPicker
-        case 1: chorePicker
-        case 2: datePicker
+        case 1: choreDetails
+        case 2: schedulePicker
         case 3: memberPicker
         default: EmptyView()
         }
@@ -78,16 +86,18 @@ struct AddChoreView: View {
         let isOn = selectedRoom == room.id
         return Button {
             selectedRoom = room.id
-            withAnimation { step = 1 }
+            withAnimation(.easeInOut(duration: 0.15)) { step = 1 }
         } label: {
             VStack(spacing: 8) {
-                Text(room.icon).font(.system(size: 32))
+                Image(systemName: room.icon)
+                    .font(.system(size: 24, weight: .light))
+                    .foregroundColor(isOn ? CozyTheme.accent : CozyTheme.primary)
                 Text(room.name)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(CozyTheme.primary)
+                    .foregroundColor(isOn ? CozyTheme.accent : Color(hex: "8B6B5A"))
             }
             .frame(maxWidth: .infinity).frame(height: 100)
-            .background(isOn ? CozyTheme.accent.opacity(0.15) : Color(hex: room.color))
+            .background(isOn ? CozyTheme.accent.opacity(0.12) : Color(hex: room.color))
             .cornerRadius(16)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
@@ -96,66 +106,138 @@ struct AddChoreView: View {
         }
     }
 
-    private var chorePicker: some View {
-        let chores = Room.defaultChores[selectedRoom] ?? []
-        return VStack(alignment: .leading, spacing: 16) {
-            Text("Pick a chore")
+    // MARK: - Step 2: Chore Details
+    private var choreDetails: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("What needs doing?")
                 .font(.system(size: 22, weight: .bold, design: .serif))
                 .foregroundColor(CozyTheme.primary)
-            ForEach(chores, id: \.self) { name in
-                choreOption(name)
-            }
-        }
-    }
 
-    private func choreOption(_ name: String) -> some View {
-        let isOn = selectedChore == name
-        return Button {
-            selectedChore = name
-            withAnimation { step = 2 }
-        } label: {
-            HStack {
-                Text(name)
-                    .font(.system(size: 16, weight: .medium))
+            VStack(alignment: .leading, spacing: 6) {
+                TextField("Chore name", text: $choreNameInput)
+                    .font(.system(size: 16))
                     .foregroundColor(CozyTheme.primary)
-                Spacer()
-                if isOn {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(CozyTheme.accent)
+                    .padding(14)
+                    .background(CozyTheme.card)
+                    .cornerRadius(12)
+                    .overlay(RoundedRectangle(cornerRadius: 12)
+                        .stroke(showNameError ? Color.red.opacity(0.6) : CozyTheme.border, lineWidth: 1))
+                    .onChange(of: choreNameInput) { _ in
+                        if showNameError && !choreNameInput.isEmpty { showNameError = false }
+                    }
+                if showNameError {
+                    Text("Name is required.")
+                        .font(.system(size: 12))
+                        .foregroundColor(.red.opacity(0.8))
+                        .padding(.leading, 4)
                 }
             }
-            .padding(16)
-            .background(isOn ? CozyTheme.accent.opacity(0.1) : CozyTheme.card)
-            .cornerRadius(14)
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(isOn ? CozyTheme.accent : CozyTheme.border, lineWidth: 1)
-            )
-        }
-    }
 
-    private var datePicker: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("When?")
-                .font(.system(size: 22, weight: .bold, design: .serif))
-                .foregroundColor(CozyTheme.primary)
-            DatePicker("Select date", selection: $selectedDate, displayedComponents: .date)
-                .datePickerStyle(.graphical)
-                .tint(CozyTheme.accent)
-            Button {
-                // Always pre-select the current user when advancing to assign step
-                if assignedTo.isEmpty {
-                    assignedTo = defaultAssignedTo()
+            VStack(alignment: .leading, spacing: 10) {
+                Text("How often?")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(CozyTheme.primary)
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                    ForEach(frequencies, id: \.self) { freq in
+                        frequencyPill(freq)
+                    }
                 }
-                withAnimation { step = 3 }
+            }
+
+            Button {
+                let name = choreNameInput.trimmingCharacters(in: .whitespaces)
+                guard !name.isEmpty else { showNameError = true; return }
+                selectedChore = name
+                withAnimation(.easeInOut(duration: 0.15)) { step = 2 }
             } label: {
-                Text("Continue")
+                Text("Next")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.white)
-                    .frame(maxWidth: .infinity).frame(height: 48)
-                    .background(CozyTheme.primary)
+                    .frame(maxWidth: .infinity).frame(height: 50)
+                    .background(choreNameInput.trimmingCharacters(in: .whitespaces).isEmpty
+                        ? CozyTheme.border : CozyTheme.accent)
                     .cornerRadius(14)
             }
+            .disabled(choreNameInput.trimmingCharacters(in: .whitespaces).isEmpty)
+        }
+    }
+
+    private func frequencyPill(_ freq: String) -> some View {
+        let isOn = selectedFrequency == freq
+        return Button { selectedFrequency = freq } label: {
+            Text(freq)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(isOn ? .white : CozyTheme.primary)
+                .padding(.horizontal, 12).padding(.vertical, 10)
+                .frame(maxWidth: .infinity)
+                .background(isOn ? CozyTheme.accent : Color(hex: "F0EBE5"))
+                .cornerRadius(10)
+        }
+    }
+
+    // MARK: - Step 3: Schedule
+    private var schedulePicker: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Which days?")
+                .font(.system(size: 22, weight: .bold, design: .serif))
+                .foregroundColor(CozyTheme.primary)
+            Text("You can change this anytime.")
+                .font(.system(size: 14))
+                .foregroundColor(CozyTheme.mutedText)
+
+            HStack(spacing: 6) {
+                ForEach(dayPills, id: \.self) { day in
+                    dayPill(day)
+                }
+            }
+
+            if (appState.profile?.members.count ?? 0) > 0 {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Rotate between partners")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(CozyTheme.primary)
+                        Text("Alternates who does this chore each week.")
+                            .font(.system(size: 12))
+                            .foregroundColor(CozyTheme.mutedText)
+                    }
+                    Spacer()
+                    Toggle("", isOn: $rotatePartners)
+                        .toggleStyle(SwitchToggleStyle(tint: CozyTheme.accent))
+                        .labelsHidden()
+                        .animation(.easeInOut(duration: 0.15), value: rotatePartners)
+                }
+                .padding(14)
+                .background(CozyTheme.card)
+                .cornerRadius(14)
+                .overlay(RoundedRectangle(cornerRadius: 14).stroke(CozyTheme.border, lineWidth: 1))
+            }
+
+            Button {
+                if assignedTo.isEmpty { assignedTo = defaultAssignedTo() }
+                withAnimation(.easeInOut(duration: 0.15)) { step = 3 }
+            } label: {
+                Text("Next")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity).frame(height: 50)
+                    .background(CozyTheme.accent)
+                    .cornerRadius(14)
+            }
+        }
+    }
+
+    private func dayPill(_ day: String) -> some View {
+        let isOn = selectedDays.contains(day)
+        return Button {
+            if isOn { selectedDays.remove(day) } else { selectedDays.insert(day) }
+        } label: {
+            Text(day)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(isOn ? .white : CozyTheme.primary)
+                .frame(maxWidth: .infinity).frame(height: 36)
+                .background(isOn ? CozyTheme.accent : Color(hex: "F0EBE5"))
+                .cornerRadius(8)
         }
     }
 
@@ -218,11 +300,11 @@ struct AddChoreView: View {
         Group {
             if step == 3 {
                 Button(action: saveChore) {
-                    Text("Add Chore ✨")
+                    Text("Add Chore")
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity).frame(height: 54)
-                        .background(canSave ? CozyTheme.primary : CozyTheme.border)
+                        .background(canSave ? CozyTheme.accent : CozyTheme.border)
                         .cornerRadius(CozyTheme.cornerRadius)
                 }
                 .disabled(!canSave)
@@ -242,15 +324,16 @@ struct AddChoreView: View {
         let dayFmt = DateFormatter()
         dayFmt.dateFormat = "EEEE"
         let finalAssignedTo = assignedTo.isEmpty ? defaultAssignedTo() : assignedTo
+        let scheduledDay = selectedDays.first ?? dayFmt.string(from: Date())
         let chore = Chore(
             id: UUID(),
             userId: userId,
             roomId: selectedRoom,
             choreName: selectedChore,
-            dayOfWeek: dayFmt.string(from: selectedDate),
+            dayOfWeek: scheduledDay,
             assignedTo: finalAssignedTo,
             isDone: false,
-            scheduledDate: fmt.string(from: selectedDate)
+            scheduledDate: fmt.string(from: Date())
         )
         Task {
             await appState.addChore(chore)

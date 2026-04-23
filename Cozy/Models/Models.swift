@@ -113,12 +113,12 @@ struct Room: Identifiable, Hashable {
     let color: String
 
     static let defaults: [Room] = [
-        Room(id: "kitchen", name: "Kitchen", icon: "🍳", color: "FFF0D6"),
-        Room(id: "bedroom", name: "Bedroom", icon: "🛏️", color: "F5EDE6"),
-        Room(id: "bathroom", name: "Bathroom", icon: "🚿", color: "FDEEF4"),
-        Room(id: "living_room", name: "Living Room", icon: "🛋️", color: "FFF5E6"),
-        Room(id: "outdoor", name: "Outdoor", icon: "🌿", color: "E8F5E9"),
-        Room(id: "other", name: "Other", icon: "📦", color: "F0EBF5"),
+        Room(id: "kitchen", name: "Kitchen", icon: "fork.knife", color: "FFF3E0"),
+        Room(id: "bedroom", name: "Bedroom", icon: "bed.double", color: "F3E5F5"),
+        Room(id: "bathroom", name: "Bathroom", icon: "shower", color: "E0F2F1"),
+        Room(id: "living_room", name: "Living Room", icon: "sofa", color: "FFFDE7"),
+        Room(id: "outdoor", name: "Outdoor", icon: "leaf", color: "E8F5E9"),
+        Room(id: "other", name: "Other", icon: "archivebox", color: "F1F8E9"),
     ]
 
     static let defaultChores: [String: [String]] = [

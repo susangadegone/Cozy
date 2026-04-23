@@ -87,7 +87,7 @@ struct ProfileView: View {
                 if let emoji = appState.profile?.avatarEmoji {
                     Text(emoji).font(.system(size: 42))
                 } else {
-                    Text(appState.profile?.initials ?? "??")
+                    Text(String(appState.profile?.displayName.prefix(1) ?? "?").uppercased())
                         .font(.system(size: 30, weight: .bold))
                         .foregroundColor(.white)
                 }

@@ -22,27 +22,16 @@ struct DashboardView: View {
 
     // MARK: Greeting Header
     private var greetingHeader: some View {
-        let hour = Calendar.current.component(.hour, from: Date())
-        let greeting: String
-        switch hour {
-        case 0..<12: greeting = "Good morning"
-        case 12..<17: greeting = "Good afternoon"
-        default: greeting = "Good evening"
-        }
-        let name = appState.profile?.displayName.components(separatedBy: " ").first ?? "there"
         let formatter = DateFormatter()
         formatter.dateFormat = "EEEE, MMM d"
         let dateStr = formatter.string(from: Date())
         let streak = appState.currentStreak
 
         return VStack(alignment: .leading, spacing: 4) {
-            Text("\(greeting), \(name) 👋")
+            Text(dateStr)
                 .font(.system(size: 22, weight: .bold, design: .serif))
                 .foregroundColor(CozyTheme.primary)
             HStack(spacing: 10) {
-                Text(dateStr)
-                    .font(.system(size: 13))
-                    .foregroundColor(CozyTheme.mutedText)
                 Spacer()
                 if streak > 0 {
                     Label("\(streak)-day streak", systemImage: "flame.fill")
@@ -51,10 +40,6 @@ struct DashboardView: View {
                         .padding(.horizontal, 10).padding(.vertical, 4)
                         .background(Color(hex: "E07B5A").opacity(0.12))
                         .cornerRadius(20)
-                } else {
-                    Text("Start your streak today 🌱")
-                        .font(.system(size: 12))
-                        .foregroundColor(CozyTheme.mutedText)
                 }
             }
         }
@@ -128,9 +113,16 @@ struct DashboardView: View {
         HStack {
             Spacer()
             VStack(spacing: 6) {
-                Text("🎉").font(.system(size: 30))
-                Text("Nothing due today!")
-                    .font(.system(size: 13)).foregroundColor(CozyTheme.mutedText)
+                Image(systemName: "party.popper")
+                    .font(.system(size: 28, weight: .light))
+                    .foregroundColor(CozyTheme.accent)
+                Text("Nothing due today.")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(CozyTheme.primary)
+                Text("Set up your first chore to get started.")
+                    .font(.system(size: 12))
+                    .foregroundColor(CozyTheme.mutedText)
+                    .multilineTextAlignment(.center)
             }
             .padding(.vertical, 16)
             Spacer()
@@ -158,7 +150,7 @@ struct DashboardView: View {
                 .font(.system(size: 14, weight: .semibold, design: .serif))
                 .foregroundColor(CozyTheme.primary)
             if appState.activityLog.isEmpty {
-                Text("No activity yet — complete a chore to get started! 🧹")
+                Text("No activity yet.")
                     .font(.system(size: 13)).foregroundColor(CozyTheme.mutedText)
                     .padding(.vertical, 10)
             } else {
@@ -243,9 +235,14 @@ struct DashChoreRow: View {
                     .foregroundColor(chore.isDone ? CozyTheme.mutedText : CozyTheme.primary)
                     .strikethrough(chore.isDone, color: CozyTheme.mutedText)
                 if let r = room {
-                    Text("\(r.icon) \(r.name)")
-                        .font(.system(size: 11))
-                        .foregroundColor(CozyTheme.mutedText)
+                    HStack(spacing: 4) {
+                        Image(systemName: r.icon)
+                            .font(.system(size: 10, weight: .light))
+                            .foregroundColor(CozyTheme.mutedText)
+                        Text(r.name)
+                            .font(.system(size: 11))
+                            .foregroundColor(CozyTheme.mutedText)
+                    }
                 }
             }
             Spacer()
