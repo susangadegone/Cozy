@@ -3,56 +3,57 @@ import SwiftUI
 struct WelcomeView: View {
     @EnvironmentObject var appRouter: AppRouter
 
-    private let benefits = [
-        "Know what needs doing without the mental load",
-        "Share chores without the conversation",
-        "Build habits that actually stick",
-        "See your progress over time"
-    ]
-
     var body: some View {
         ZStack {
-            Color(hex: "FAF7F2").ignoresSafeArea()
+            CozyTheme.background.ignoresSafeArea()
             VStack(alignment: .leading, spacing: 0) {
-                headline
+                wordmark
                 Spacer()
-                benefitCards
+                benefits
                 Spacer()
                 buttons
             }
             .padding(.horizontal, 24)
-            .padding(.top, 64)
+            .padding(.top, 72)
             .padding(.bottom, 44)
         }
     }
 
-    private var headline: some View {
-        Text("A calmer home\nstarts here.")
-            .font(.system(size: 36, weight: .light, design: .serif))
-            .foregroundColor(CozyTheme.primary)
-            .lineSpacing(4)
-    }
-
-    private var benefitCards: some View {
-        VStack(spacing: 12) {
-            ForEach(benefits, id: \.self) { benefit in
-                HStack(spacing: 14) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(CozyTheme.accent)
-                        .font(.system(size: 20))
-                    Text(benefit)
-                        .font(.system(size: 15, weight: .regular))
-                        .foregroundColor(CozyTheme.primary)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Spacer()
-                }
-                .padding(16)
-                .background(Color(hex: "F5EDE4"))
-                .cornerRadius(14)
-            }
+    // MARK: - Wordmark
+    private var wordmark: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Cozy")
+                .font(.system(size: 42, weight: .bold))
+                .foregroundColor(CozyTheme.primary)
+            Text("A calmer home starts here.")
+                .font(.system(size: 17, weight: .regular))
+                .foregroundColor(CozyTheme.mutedText)
         }
     }
 
+    // MARK: - Benefits
+    private var benefits: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            benefitRow("Know what needs doing without the mental load")
+            benefitRow("Share chores without the conversation")
+            benefitRow("Build habits that actually stick")
+        }
+    }
+
+    private func benefitRow(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 20))
+                .foregroundColor(CozyTheme.accent)
+            Text(text)
+                .font(.system(size: 15, weight: .regular))
+                .foregroundColor(CozyTheme.primary)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer()
+        }
+    }
+
+    // MARK: - Buttons
     private var buttons: some View {
         VStack(spacing: 12) {
             Button { appRouter.navigate(to: .signUp) } label: {
@@ -61,20 +62,15 @@ struct WelcomeView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 54)
-                    .background(CozyTheme.primary)
-                    .cornerRadius(CozyTheme.cornerRadius)
+                    .background(CozyTheme.accent)
+                    .cornerRadius(CozyTheme.pillRadius)
             }
             Button { appRouter.navigate(to: .login) } label: {
                 Text("I already have an account")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(CozyTheme.primary)
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundColor(CozyTheme.mutedText)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 54)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: CozyTheme.cornerRadius)
-                            .stroke(CozyTheme.primary.opacity(0.4), lineWidth: 1.5)
-                    )
-                    .cornerRadius(CozyTheme.cornerRadius)
+                    .frame(height: 44)
             }
         }
     }

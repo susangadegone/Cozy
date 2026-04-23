@@ -2,40 +2,41 @@ import SwiftUI
 
 struct SplashView: View {
     @EnvironmentObject var appRouter: AppRouter
+    @EnvironmentObject var authManager: AuthManager
+    @EnvironmentObject var appState: AppState
+
     @State private var opacity: Double = 0
-    @State private var pulse: Bool = false
 
     var body: some View {
         ZStack {
-            Color(hex: "FAF7F2").ignoresSafeArea()
-            VStack(spacing: 14) {
-                Text("🏠")
-                    .font(.system(size: 72))
-                    .scaleEffect(pulse ? 1.06 : 1.0)
+            CozyTheme.background.ignoresSafeArea()
+            VStack(spacing: 12) {
                 Text("Cozy")
-                    .font(.system(size: 42, weight: .bold, design: .serif))
+                    .font(.system(size: 36, weight: .bold))
                     .foregroundColor(CozyTheme.primary)
-                Text("your home, your rhythm")
-                    .font(.system(size: 16, weight: .light))
-                    .foregroundColor(CozyTheme.mutedText)
-                    .italic()
+                Image(systemName: "sparkles")
+                    .font(.system(size: 22, weight: .regular))
+                    .foregroundColor(CozyTheme.accent)
             }
             .opacity(opacity)
-        }
-        .onAppear {
-            withAnimation(.easeInOut(duration: 0.7)) { opacity = 1 }
-            withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true).delay(0.7)) {
-                pulse = true
-            }
-            Task {
-                try? await Task.sleep(nanoseconds: 1_500_000_000)
-                await AuthManager.shared.checkSession()
-                if AuthManager.shared.isAuthenticated {
-                    appRouter.navigate(to: .dashboard)
-                } else {
-                    appRouter.navigate(to: .welcome)
+            .onAppear {
+                withAnimation(.easeIn(duration: 0.8)) { opacity = 1 }
+                Task {
+                    try? await Task.sleep(nanoseconds: 1_400_000_000)
+                    await route()
                 }
             }
+        }
+    }
+
+    @MainActor
+    private func route() async {
+        await authManager.checkSession()
+        if authManager.isAuthenticated {
+            await appState.loadData()
+            appRouter.navigate(to: appState.needsOnboarding ? .onboardingQ1 : .dashboard)
+        } else {
+            appRouter.navigate(to: .welcome)
         }
     }
 }
