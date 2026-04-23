@@ -5,6 +5,7 @@ struct HomeView: View {
     @StateObject private var dragManager = DragDropManager()
 
     @State private var showAddChore = false
+    @State private var showCalendar = false
     @State private var activeConfetti: ConfettiEvent? = nil
     @State private var toastMessage: String?
     @State private var toastIcon: String?
@@ -22,6 +23,10 @@ struct HomeView: View {
             AddChoreView()
                 .presentationDetents([.fraction(0.85)])
                 .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showCalendar) {
+            CalendarView()
+                .environmentObject(appState)
         }
         .task { await appState.loadData() }
         .onChange(of: appState.pendingConfettiEvent) { event in
@@ -113,6 +118,15 @@ struct HomeView: View {
                     .foregroundColor(CozyTheme.mutedText)
             }
             Spacer()
+            Button { showCalendar = true } label: {
+                Image(systemName: "calendar")
+                    .font(.system(size: 17, weight: .medium))
+                    .foregroundColor(CozyTheme.accent)
+                    .frame(width: 36, height: 36)
+                    .background(CozyTheme.accent.opacity(0.1))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
             if appState.currentStreak > 0 {
                 HStack(spacing: 4) {
                     Text("🔥")

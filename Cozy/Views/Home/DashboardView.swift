@@ -6,6 +6,8 @@ struct DashboardView: View {
     @EnvironmentObject var dragManager: DragDropManager
     var onChoreComplete: () -> Void
 
+    @State private var selectedChore: Chore? = nil
+
     var body: some View {
         VStack(spacing: 16) {
             greetingHeader
@@ -18,6 +20,10 @@ struct DashboardView: View {
         .padding(.horizontal, 16)
         .padding(.top, 12)
         .padding(.bottom, 120)
+        .sheet(item: $selectedChore) { chore in
+            ChoreDetailView(chore: chore)
+                .environmentObject(appState)
+        }
     }
 
     // MARK: Greeting Header
@@ -98,6 +104,8 @@ struct DashboardView: View {
                     DashChoreRow(chore: chore) {
                         Task { await appState.toggleChore(chore) }
                     }
+                    .contentShape(Rectangle())
+                    .onTapGesture { selectedChore = chore }
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) { Task { await appState.deleteChore(chore) } }
                             label: { Label("Delete", systemImage: "trash") }
