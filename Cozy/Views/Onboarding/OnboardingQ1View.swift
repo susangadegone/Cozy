@@ -8,10 +8,9 @@ struct OnboardingQ1View: View {
 
     private let options = [
         "Studio or 1-bed apartment",
-        "2–3 bedroom apartment",
-        "Small house",
-        "Large house or home with yard",
-        "Shared house with roommates"
+        "2+ bedroom apartment",
+        "House",
+        "Other"
     ]
 
     var body: some View {

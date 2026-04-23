@@ -6,7 +6,8 @@ struct WelcomeView: View {
     private let benefits = [
         "Know what needs doing without the mental load",
         "Share chores without the conversation",
-        "Build habits that actually stick"
+        "Build habits that actually stick",
+        "See your progress over time"
     ]
 
     var body: some View {
