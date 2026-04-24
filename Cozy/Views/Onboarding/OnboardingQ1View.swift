@@ -5,62 +5,62 @@ struct OnboardingQ1View: View {
     @EnvironmentObject var onboardingVM: OnboardingViewModel
 
     @State private var selection: String? = nil
+    @State private var appeared = false
 
-    private let options = [
-        "Studio or 1-bed apartment",
-        "2+ bedroom apartment",
-        "House",
-        "Other"
+    private struct HomeOption: Identifiable {
+        let id: String
+        let icon: String
+    }
+
+    private let options: [HomeOption] = [
+        HomeOption(id: "Studio or 1-bed apartment", icon: "building.2"),
+        HomeOption(id: "2+ bedroom apartment",       icon: "building"),
+        HomeOption(id: "House",                      icon: "house"),
+        HomeOption(id: "Other",                      icon: "questionmark.square")
     ]
 
     var body: some View {
-        ZStack {
-            Color(hex: "FAF7F2").ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 0) {
-                OnboardingProgressBar(step: 1, total: 5)
-                    .padding(.bottom, 28)
-                questionHeader
-                    .padding(.bottom, 24)
-                optionsList
-                Spacer()
-                nextButton
+        OnboardingShell(step: 1, total: 5, onBack: { appRouter.navigate(to: .science) }) {
+            questionHeader
+                .padding(.bottom, 24)
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 10)
+            optionsList
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 14)
+            Spacer()
+            OnboardingNextButton(isEnabled: selection != nil) {
+                if let s = selection {
+                    onboardingVM.homeType = s
+                    appRouter.navigate(to: .onboardingQ2)
+                }
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 56)
-            .padding(.bottom, 44)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.4)) { appeared = true }
         }
     }
 
     private var questionHeader: some View {
-        Text("What kind of home do you live in?")
-            .font(.system(size: 24, weight: .bold, design: .serif))
-            .foregroundColor(CozyTheme.primary)
-            .fixedSize(horizontal: false, vertical: true)
+        VStack(alignment: .leading, spacing: 6) {
+            Text("🏠")
+                .font(.system(size: 36))
+            Text("What kind of home\ndo you live in?")
+                .font(.system(size: 26, weight: .bold))
+                .foregroundColor(CozyTheme.primary)
+                .lineSpacing(2)
+        }
     }
 
     private var optionsList: some View {
         VStack(spacing: 10) {
-            ForEach(options, id: \.self) { option in
-                OnboardingChoiceCard(label: option, isSelected: selection == option) {
-                    selection = option
-                }
+            ForEach(options) { option in
+                OnboardingChoiceCard(
+                    label: option.id,
+                    icon: option.icon,
+                    isSelected: selection == option.id
+                ) { selection = option.id }
             }
         }
-    }
-
-    private var nextButton: some View {
-        Button {
-            guard let s = selection else { return }
-            onboardingVM.homeType = s
-            appRouter.navigate(to: .onboardingQ2)
-        } label: {
-            Text("Next")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity).frame(height: 54)
-                .background(selection == nil ? CozyTheme.primary.opacity(0.4) : CozyTheme.primary)
-                .cornerRadius(CozyTheme.cornerRadius)
-        }
-        .disabled(selection == nil)
     }
 }

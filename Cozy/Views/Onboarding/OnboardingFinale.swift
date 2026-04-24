@@ -3,7 +3,7 @@ import SwiftUI
 struct OnboardingFinale: View {
     let name: String
     @State private var showConfetti = false
-    @State private var scale: CGFloat = 0.6
+    @State private var scale: CGFloat = 0.7
     @State private var opacity: Double = 0
 
     var body: some View {
@@ -43,49 +43,52 @@ struct OnboardingFinale: View {
     private var houseIcon: some View {
         ZStack {
             Circle()
-                .fill(CozyTheme.accent.opacity(0.15))
-                .frame(width: 130, height: 130)
+                .fill(CozyTheme.accent.opacity(0.12))
+                .frame(width: 120, height: 120)
             Text("🏡")
-                .font(.system(size: 70))
+                .font(.system(size: 64))
         }
     }
 
     private var titleText: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 6) {
             Text("You're all set,")
-                .font(.custom("Fraunces-Regular", size: 32))
+                .font(.system(size: 30, weight: .regular))
                 .foregroundColor(CozyTheme.mutedText)
-            Text(name.isEmpty ? "Friend" : name + "!")
-                .font(.custom("Fraunces-Regular", size: 38))
+            Text(name.isEmpty ? "friend!" : "\(name)!")
+                .font(.system(size: 36, weight: .bold))
                 .foregroundColor(CozyTheme.primary)
         }
     }
 
     private var subtitleText: some View {
         Text("Your cozy home is ready.\nLet's keep it clean and happy ✨")
-            .font(.custom("DMSans-Regular", size: 16))
+            .font(.system(size: 16))
             .foregroundColor(CozyTheme.mutedText)
             .multilineTextAlignment(.center)
-            .lineSpacing(5)
+            .lineSpacing(4)
     }
 
     private var statsRow: some View {
         HStack(spacing: 0) {
             FinaleStatBadge(emoji: "🏠", label: "Rooms set")
             Divider()
-                .frame(width: 1, height: 40)
+                .frame(width: 1, height: 36)
                 .background(CozyTheme.border)
             FinaleStatBadge(emoji: "✅", label: "Chores ready")
             Divider()
-                .frame(width: 1, height: 40)
+                .frame(width: 1, height: 36)
                 .background(CozyTheme.border)
             FinaleStatBadge(emoji: "🔔", label: "Reminders on")
         }
-        .padding(.vertical, 20)
+        .padding(.vertical, 18)
         .background(CozyTheme.card)
-        .overlay(RoundedRectangle(cornerRadius: CozyTheme.cardCornerRadius).stroke(CozyTheme.border, lineWidth: 1))
-        .cornerRadius(CozyTheme.cardCornerRadius)
-        .padding(.horizontal, 32)
+        .cornerRadius(CozyTheme.cornerRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: CozyTheme.cornerRadius)
+                .stroke(CozyTheme.border, lineWidth: 1)
+        )
+        .padding(.horizontal, 24)
     }
 }
 
@@ -95,16 +98,17 @@ struct FinaleStatBadge: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            Text(emoji).font(.system(size: 24))
+            Text(emoji).font(.system(size: 22))
             Text(label)
-                .font(.custom("DMSans-Regular", size: 12))
+                .font(.system(size: 12, weight: .medium))
                 .foregroundColor(CozyTheme.mutedText)
         }
         .frame(maxWidth: .infinity)
     }
 }
 
-// MARK: - Confetti for Finale
+// MARK: - Confetti overlay
+
 struct FinaleConfettiOverlay: View {
     @State private var particles: [FinaleParticle] = []
 
@@ -124,21 +128,21 @@ struct FinaleConfettiOverlay: View {
     private func spawnParticles() {
         let symbols = ["🎉","✨","🌟","🎊","💛","🧡","🌸","⭐","🎈","🍀"]
         let screenW = UIScreen.main.bounds.width
-        particles = (0..<80).map { i in
+        let screenH = UIScreen.main.bounds.height
+        particles = (0..<70).map { i in
             FinaleParticle(
                 id: i,
                 symbol: symbols.randomElement()!,
                 x: CGFloat.random(in: 0...screenW),
-                y: CGFloat.random(in: -100...200),
-                size: CGFloat.random(in: 14...28),
+                y: CGFloat.random(in: -80...160),
+                size: CGFloat.random(in: 14...26),
                 opacity: 1.0,
                 rotation: Double.random(in: 0...360)
             )
         }
-        let screenH = UIScreen.main.bounds.height
         for i in particles.indices {
             let delay = Double(i) * 0.015
-            withAnimation(.easeOut(duration: 2.2).delay(delay)) {
+            withAnimation(.easeOut(duration: 2.0).delay(delay)) {
                 particles[i].y = screenH + 60
                 particles[i].opacity = 0
                 particles[i].rotation += Double.random(in: 180...540)

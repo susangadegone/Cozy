@@ -5,61 +5,62 @@ struct OnboardingQ3View: View {
     @EnvironmentObject var onboardingVM: OnboardingViewModel
 
     @State private var selection: String? = nil
+    @State private var appeared = false
 
-    private let options = [
-        "A little every day",
-        "Power session on weekends",
-        "Mix of both",
-        "Whenever something really needs it"
+    private struct RhythmOption: Identifiable {
+        let id: String
+        let icon: String
+    }
+
+    private let options: [RhythmOption] = [
+        RhythmOption(id: "A little every day",                icon: "sun.min"),
+        RhythmOption(id: "Power session on weekends",          icon: "bolt.fill"),
+        RhythmOption(id: "Mix of both",                       icon: "shuffle"),
+        RhythmOption(id: "Whenever something really needs it", icon: "clock.badge.exclamationmark")
     ]
 
     var body: some View {
-        ZStack {
-            Color(hex: "FAF7F2").ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 0) {
-                OnboardingProgressBar(step: 3, total: 5)
-                    .padding(.bottom, 28)
-                questionHeader.padding(.bottom, 24)
-                optionsList
-                Spacer()
-                nextButton
+        OnboardingShell(step: 3, total: 5, onBack: { appRouter.navigate(to: .onboardingQ2) }) {
+            questionHeader
+                .padding(.bottom, 24)
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 10)
+            optionsList
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 14)
+            Spacer()
+            OnboardingNextButton(isEnabled: selection != nil) {
+                if let s = selection {
+                    onboardingVM.cleaningRhythm = s
+                    appRouter.navigate(to: .onboardingQ4)
+                }
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 56)
-            .padding(.bottom, 44)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.4)) { appeared = true }
         }
     }
 
     private var questionHeader: some View {
-        Text("How do you prefer to handle chores?")
-            .font(.system(size: 24, weight: .bold, design: .serif))
-            .foregroundColor(CozyTheme.primary)
-            .fixedSize(horizontal: false, vertical: true)
+        VStack(alignment: .leading, spacing: 6) {
+            Text("🧹")
+                .font(.system(size: 36))
+            Text("How do you prefer\nto handle chores?")
+                .font(.system(size: 26, weight: .bold))
+                .foregroundColor(CozyTheme.primary)
+                .lineSpacing(2)
+        }
     }
 
     private var optionsList: some View {
         VStack(spacing: 10) {
-            ForEach(options, id: \.self) { option in
-                OnboardingChoiceCard(label: option, isSelected: selection == option) {
-                    selection = option
-                }
+            ForEach(options) { opt in
+                OnboardingChoiceCard(
+                    label: opt.id,
+                    icon: opt.icon,
+                    isSelected: selection == opt.id
+                ) { selection = opt.id }
             }
         }
-    }
-
-    private var nextButton: some View {
-        Button {
-            guard let s = selection else { return }
-            onboardingVM.cleaningRhythm = s
-            appRouter.navigate(to: .onboardingQ4)
-        } label: {
-            Text("Next")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity).frame(height: 54)
-                .background(selection == nil ? CozyTheme.primary.opacity(0.4) : CozyTheme.primary)
-                .cornerRadius(CozyTheme.cornerRadius)
-        }
-        .disabled(selection == nil)
     }
 }

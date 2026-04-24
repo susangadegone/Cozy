@@ -11,97 +11,97 @@ struct OnboardingQ4View: View {
     @EnvironmentObject var onboardingVM: OnboardingViewModel
 
     @State private var selected: Set<String> = []
+    @State private var appeared = false
 
     private let rooms: [RoomTile] = [
-        RoomTile(id: "Kitchen",       label: "Kitchen",      icon: "fork.knife"),
-        RoomTile(id: "Bedroom",       label: "Bedroom",      icon: "bed.double"),
-        RoomTile(id: "Bathroom",      label: "Bathroom",     icon: "shower"),
-        RoomTile(id: "Living room",   label: "Living room",  icon: "sofa"),
-        RoomTile(id: "Outdoor/yard",  label: "Outdoor",      icon: "leaf"),
-        RoomTile(id: "Home office",   label: "Home office",  icon: "desktopcomputer"),
-        RoomTile(id: "Other",         label: "Other",        icon: "plus.circle")
+        RoomTile(id: "Kitchen",      label: "Kitchen",     icon: "fork.knife"),
+        RoomTile(id: "Bedroom",      label: "Bedroom",     icon: "bed.double"),
+        RoomTile(id: "Bathroom",     label: "Bathroom",    icon: "shower"),
+        RoomTile(id: "Living room",  label: "Living room", icon: "sofa"),
+        RoomTile(id: "Outdoor/yard", label: "Outdoor",     icon: "leaf"),
+        RoomTile(id: "Home office",  label: "Office",      icon: "desktopcomputer"),
+        RoomTile(id: "Other",        label: "Other",       icon: "plus.circle")
     ]
 
     private let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
-        ZStack {
-            Color(hex: "FAF7F2").ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 0) {
-                OnboardingProgressBar(step: 4, total: 5)
-                    .padding(.bottom, 28)
-                questionHeader.padding(.bottom, 24)
-                roomGrid
-                captionLine.padding(.top, 12)
-                Spacer()
-                nextButton
+        OnboardingShell(step: 4, total: 5, onBack: { appRouter.navigate(to: .onboardingQ3) }) {
+            questionHeader
+                .padding(.bottom, 20)
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 10)
+            roomGrid
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 14)
+            hint
+                .padding(.top, 10)
+            Spacer()
+            OnboardingNextButton(isEnabled: !selected.isEmpty) {
+                onboardingVM.selectedRooms = Array(selected)
+                appRouter.navigate(to: .onboardingQ5)
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 56)
-            .padding(.bottom, 44)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.4)) { appeared = true }
         }
     }
 
     private var questionHeader: some View {
-        Text("Which rooms do you want to keep on top of?")
-            .font(.system(size: 24, weight: .bold, design: .serif))
-            .foregroundColor(CozyTheme.primary)
-            .fixedSize(horizontal: false, vertical: true)
+        VStack(alignment: .leading, spacing: 6) {
+            Text("🛋️")
+                .font(.system(size: 36))
+            Text("Which rooms do you\nwant to keep on top of?")
+                .font(.system(size: 26, weight: .bold))
+                .foregroundColor(CozyTheme.primary)
+                .lineSpacing(2)
+        }
     }
 
     private var roomGrid: some View {
         LazyVGrid(columns: columns, spacing: 10) {
             ForEach(rooms) { room in
                 roomTile(room)
-                    .onTapGesture { toggle(room.id) }
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.18)) { toggle(room.id) }
+                    }
             }
         }
     }
 
     private func roomTile(_ room: RoomTile) -> some View {
-        let isSelected = selected.contains(room.id)
+        let on = selected.contains(room.id)
         return ZStack(alignment: .topTrailing) {
             VStack(spacing: 8) {
                 Image(systemName: room.icon)
                     .font(.system(size: 26))
-                    .foregroundColor(isSelected ? .white : CozyTheme.accent)
+                    .foregroundColor(on ? .white : CozyTheme.accent)
                 Text(room.label)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(isSelected ? .white : CozyTheme.primary)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(on ? .white : CozyTheme.primary)
                     .multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 88)
-            .background(isSelected ? CozyTheme.primary : Color(hex: "F5EDE4"))
+            .frame(height: 86)
+            .background(on ? CozyTheme.accent : CozyTheme.card)
             .cornerRadius(14)
-            if isSelected {
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(on ? CozyTheme.accent : CozyTheme.border, lineWidth: on ? 2 : 1)
+            )
+            if on {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(.white)
-                    .font(.system(size: 16))
-                    .padding(6)
+                    .font(.system(size: 14))
+                    .padding(5)
             }
         }
     }
 
-    private var captionLine: some View {
-        Text("You can always add more later")
+    private var hint: some View {
+        Text("Select all that apply — you can add more later")
             .font(.system(size: 12))
             .foregroundColor(CozyTheme.mutedText)
-    }
-
-    private var nextButton: some View {
-        Button {
-            onboardingVM.selectedRooms = Array(selected)
-            appRouter.navigate(to: .onboardingQ5)
-        } label: {
-            Text("Next")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity).frame(height: 54)
-                .background(selected.isEmpty ? CozyTheme.primary.opacity(0.4) : CozyTheme.primary)
-                .cornerRadius(CozyTheme.cornerRadius)
-        }
-        .disabled(selected.isEmpty)
     }
 
     private func toggle(_ id: String) {

@@ -26,7 +26,8 @@ final class AppRouter: ObservableObject {
     func navigateBack() {
         switch route {
         case .login, .signUp: route = .welcome
-        default: route = .welcome
+        case .science:        route = .signUp
+        default:              route = .welcome
         }
     }
 }
