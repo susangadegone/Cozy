@@ -22,4 +22,11 @@ final class AppRouter: ObservableObject {
     func navigate(to route: AppRoute) {
         self.route = route
     }
+
+    func navigateBack() {
+        switch route {
+        case .login, .signUp: route = .welcome
+        default: route = .welcome
+        }
+    }
 }
