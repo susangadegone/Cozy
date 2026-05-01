@@ -49,6 +49,31 @@ final class DataService: ObservableObject {
     private let client = SupabaseConfig.client
 
     // MARK: - Profile
+    func createProfile(userId: UUID, displayName: String) async throws {
+        struct NewProfile: Encodable {
+            var id: String
+            var display_name: String
+            var household_type: String
+            var members: [String]
+            var rooms: [String]
+            var notification_preference: String
+            var onboarding_completed: Bool
+        }
+        let payload = NewProfile(
+            id: userId.uuidString,
+            display_name: displayName,
+            household_type: "solo",
+            members: [],
+            rooms: [],
+            notification_preference: "daily",
+            onboarding_completed: false
+        )
+        try await client
+            .from("profiles")
+            .upsert(payload)
+            .execute()
+    }
+
     func fetchProfile(userId: UUID) async throws -> Profile? {
         let response: [Profile] = try await client
             .from("profiles")

@@ -204,7 +204,12 @@ struct SignUpView: View {
         isLoading = true
         do {
             try await authManager.signUp(email: email, password: password)
-            onboardingVM.userName = name.trimmingCharacters(in: .whitespaces)
+            let trimmedName = name.trimmingCharacters(in: .whitespaces)
+            onboardingVM.userName = trimmedName
+            // Create a profile row immediately so onboarding data has a home
+            if let userId = authManager.currentUserId {
+                try? await DataService.shared.createProfile(userId: userId, displayName: trimmedName)
+            }
             let hasSeen = UserDefaults.standard.bool(forKey: "hasSeenScienceScreen")
             appRouter.navigate(to: hasSeen ? .onboardingQ1 : .science)
         } catch {

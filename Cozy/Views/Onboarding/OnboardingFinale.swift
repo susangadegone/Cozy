@@ -2,9 +2,12 @@ import SwiftUI
 
 struct OnboardingFinale: View {
     let name: String
+    @EnvironmentObject var appRouter: AppRouter
+    @EnvironmentObject var appState: AppState
     @State private var showConfetti = false
     @State private var scale: CGFloat = 0.7
     @State private var opacity: Double = 0
+    @State private var isEntering = false
 
     var body: some View {
         ZStack {
@@ -35,9 +38,41 @@ struct OnboardingFinale: View {
             subtitleText
             statsRow
             Spacer()
+            enterButton
+                .padding(.horizontal, 28)
+                .padding(.bottom, 40)
         }
         .scaleEffect(scale)
         .opacity(opacity)
+    }
+
+    private var enterButton: some View {
+        Button {
+            guard !isEntering else { return }
+            isEntering = true
+            if var p = appState.profile {
+                p.onboardingCompleted = true
+                appState.profile = p
+                Task { try? await DataService.shared.updateProfile(p) }
+            }
+            appState.needsOnboarding = false
+            appRouter.navigate(to: .dashboard)
+        } label: {
+            ZStack {
+                RoundedRectangle(cornerRadius: CozyTheme.pillRadius)
+                    .fill(CozyTheme.accent)
+                    .frame(height: 54)
+                if isEntering {
+                    ProgressView().tint(.white)
+                } else {
+                    Text("Enter my home →")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .disabled(isEntering)
     }
 
     private var houseIcon: some View {

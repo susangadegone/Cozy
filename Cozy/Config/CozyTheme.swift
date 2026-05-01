@@ -1,27 +1,27 @@
 import SwiftUI
 
 enum CozyTheme {
-    // MARK: - Core Colors
-    static let background  = Color(hex: "F2EDE8")  // warm linen
+    // MARK: - Core Colors (warm, human-intentional)
+    static let background  = Color(hex: "FBF8F3")  // unbleached linen
     static let card        = Color(hex: "FFFFFF")
-    static let border      = Color(hex: "E0D8D0")
-    static let primary     = Color(hex: "1C1C1E")   // iOS system black
-    static let mutedText   = Color(hex: "8E8E93")   // iOS gray
-    static let accent      = Color(hex: "FF6B5A")   // coral — CTAs only
-    static let teal        = Color(hex: "5DAFAB")   // done/complete
-    static let yellow      = Color(hex: "F4D975")   // streak/rewards
+    static let border      = Color(hex: "EAE5DE")  // pencil-on-paper hairline
+    static let primary     = Color(hex: "2B2520")  // warm brown — reads "sophisticated home"
+    static let mutedText   = Color(hex: "9B9489")  // warm gray — quiet and readable
+    static let accent      = Color(hex: "BA7517")  // beeswax amber — inviting not urgent
+    static let teal        = Color(hex: "5C9B8D")  // sage — calm earthy completion
+    static let yellow      = Color(hex: "D4A574")  // terracotta — cozy rewards
 
-    // MARK: - Deprecated room colors kept for backward compat
-    static let kitchenColor    = Color(hex: "FFF0D6")
-    static let bedroomColor    = Color(hex: "F5EDE6")
-    static let bathroomColor   = Color(hex: "FDEEF4")
-    static let livingRoomColor = Color(hex: "FFF5E6")
-    static let outdoorColor    = Color(hex: "E8F5E9")
-    static let otherColor      = Color(hex: "F0EBF5")
+    // MARK: - Room Colors (warmed)
+    static let kitchenColor    = Color(hex: "FFF3DC")  // buttery
+    static let bedroomColor    = Color(hex: "F0E8E0")  // warm taupe
+    static let bathroomColor   = Color(hex: "E4EEF2")  // cool mist
+    static let livingRoomColor = Color(hex: "FDF3E3")  // amber cream
+    static let outdoorColor    = Color(hex: "E5EDDF")  // sage green
+    static let otherColor      = Color(hex: "EDE6F5")  // soft violet
 
     // MARK: - Shape
-    static let cornerRadius: CGFloat = 12   // cards / rows
-    static let pillRadius:   CGFloat = 28   // buttons
+    static let cornerRadius: CGFloat = 12
+    static let pillRadius:   CGFloat = 28
     static let cardCornerRadius: CGFloat = 12
     static let padding: CGFloat = 16
 }

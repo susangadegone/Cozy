@@ -172,7 +172,8 @@ struct LoginView: View {
             try await authManager.signIn(email: email, password: password)
             UserDefaults.standard.set(email, forKey: "lastUsedEmail")
             await appState.loadData()
-            appRouter.navigate(to: .dashboard)
+            // Route based on whether onboarding is complete
+            appRouter.navigate(to: appState.needsOnboarding ? .onboardingQ1 : .dashboard)
         } catch {
             generalError = error.localizedDescription
         }
