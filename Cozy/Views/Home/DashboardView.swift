@@ -8,15 +8,46 @@ struct DashboardView: View {
 
     @State private var selectedChore: Chore? = nil
     @State private var selectedMood: String = ""
+    @State private var showAllChores: Bool = false
+    @State private var snoozeConfirmed: Bool = false
+
+    // MARK: - Mood Logic
+    private enum Mood: String {
+        case allGood = "All good"
+        case manageable = "Manageable"
+        case overwhelming = "Overwhelming"
+        case none = ""
+    }
+    private var mood: Mood { Mood(rawValue: selectedMood) ?? .none }
+
+    /// Chores shown based on mood
+    private var visibleChores: [Chore] {
+        let sorted = appState.todayChores.filter { !$0.isDone }.sorted { _, _ in false }
+            + appState.todayChores.filter { $0.isDone }
+        switch mood {
+        case .overwhelming: return showAllChores ? sorted : Array(sorted.prefix(1))
+        case .manageable:   return showAllChores ? sorted : Array(sorted.prefix(3))
+        default:            return sorted
+        }
+    }
+    private var hiddenCount: Int {
+        let undone = appState.todayChores.filter { !$0.isDone }.count
+        switch mood {
+        case .overwhelming: return showAllChores ? 0 : max(0, undone - 1)
+        case .manageable:   return showAllChores ? 0 : max(0, undone - 3)
+        default:            return 0
+        }
+    }
 
     var body: some View {
         VStack(spacing: 16) {
             greetingHeader
             moodRow
-            weekProgressCard
+            moodBanner
+            if mood != .overwhelming { weekProgressCard }
             todaySection
-            if !upcomingChores.isEmpty { upcomingCard }
-            if !appState.memberBreakdown.isEmpty { householdSection }
+            if !upcomingChores.isEmpty && mood != .overwhelming { upcomingCard }
+            if !appState.memberBreakdown.isEmpty && mood == .none { householdSection }
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
@@ -41,21 +72,152 @@ struct DashboardView: View {
     // MARK: Mood Row
     private var moodRow: some View {
         HStack(spacing: 8) {
-            ForEach(["All good", "Manageable", "Overwhelming"], id: \.self) { mood in
-                let isOn = selectedMood == mood
-                Button { selectedMood = mood } label: {
-                    Text(mood)
-                        .font(.system(size: 12))
-                        .foregroundColor(isOn ? .white : CozyTheme.primary)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(isOn ? CozyTheme.accent : Color.clear)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(CozyTheme.border, lineWidth: isOn ? 0 : 1))
+            Text("How are you feeling?")
+                .font(.system(size: 12))
+                .foregroundColor(CozyTheme.mutedText)
+            ForEach(["All good", "Manageable", "Overwhelming"], id: \.self) { m in
+                let isOn = selectedMood == m
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        selectedMood = isOn ? "" : m
+                        showAllChores = false
+                        snoozeConfirmed = false
+                    }
+                } label: {
+                    Text(moodEmoji(m))
+                        .font(.system(size: 18))
+                        .padding(6)
+                        .background(isOn ? moodColor(m).opacity(0.2) : Color.clear)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(isOn ? moodColor(m) : CozyTheme.border, lineWidth: isOn ? 2 : 1))
+                        .scaleEffect(isOn ? 1.15 : 1.0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isOn)
                 }
                 .buttonStyle(.plain)
             }
             Spacer()
+            if !selectedMood.isEmpty {
+                Button {
+                    withAnimation { selectedMood = ""; showAllChores = false; snoozeConfirmed = false }
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(CozyTheme.mutedText)
+                        .font(.system(size: 16))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func moodEmoji(_ m: String) -> String {
+        switch m {
+        case "All good": return "😊"
+        case "Manageable": return "😐"
+        case "Overwhelming": return "😰"
+        default: return ""
+        }
+    }
+    private func moodColor(_ m: String) -> Color {
+        switch m {
+        case "All good": return Color(hex: "4CAF82")
+        case "Manageable": return CozyTheme.accent
+        case "Overwhelming": return Color(hex: "E57373")
+        default: return CozyTheme.accent
+        }
+    }
+
+    // MARK: Mood Banner
+    @ViewBuilder
+    private var moodBanner: some View {
+        switch mood {
+        case .allGood:
+            moodCard(
+                color: Color(hex: "4CAF82"),
+                icon: "🌟",
+                title: "You're on a roll!",
+                message: "All chores are ready for you. Let's crush it today."
+            )
+        case .manageable:
+            moodCard(
+                color: CozyTheme.accent,
+                icon: "🎯",
+                title: "Keeping it steady",
+                message: "Showing your top 3 for today. You can do this."
+            )
+        case .overwhelming:
+            VStack(spacing: 10) {
+                moodCard(
+                    color: Color(hex: "E57373"),
+                    icon: "🌿",
+                    title: "Just one thing today.",
+                    message: "That's enough. The rest can wait — you've got this."
+                )
+                if !snoozeConfirmed && hiddenCount > 0 {
+                    Button {
+                        withAnimation {
+                            snoozeChores()
+                            snoozeConfirmed = true
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "moon.zzz.fill")
+                                .font(.system(size: 13))
+                            Text("Snooze \(hiddenCount) chore\(hiddenCount == 1 ? "" : "s") to tomorrow")
+                                .font(.system(size: 13, weight: .medium))
+                        }
+                        .foregroundColor(Color(hex: "E57373"))
+                        .padding(.horizontal, 16).padding(.vertical, 10)
+                        .frame(maxWidth: .infinity)
+                        .background(Color(hex: "E57373").opacity(0.1))
+                        .cornerRadius(12)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: "E57373").opacity(0.3), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                } else if snoozeConfirmed {
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle.fill").foregroundColor(Color(hex: "4CAF82"))
+                        Text("Moved to tomorrow — rest up 💛")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(CozyTheme.mutedText)
+                    }
+                    .padding(.horizontal, 16).padding(.vertical, 10)
+                    .frame(maxWidth: .infinity)
+                    .background(CozyTheme.card)
+                    .cornerRadius(12)
+                }
+            }
+        case .none:
+            EmptyView()
+        }
+    }
+
+    private func moodCard(color: Color, icon: String, title: String, message: String) -> some View {
+        HStack(spacing: 12) {
+            Text(icon).font(.system(size: 24))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(color)
+                Text(message)
+                    .font(.system(size: 12))
+                    .foregroundColor(CozyTheme.mutedText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer()
+        }
+        .padding(12)
+        .background(color.opacity(0.08))
+        .cornerRadius(12)
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(0.25), lineWidth: 1))
+        .transition(.opacity.combined(with: .scale(scale: 0.97)))
+    }
+
+    private func snoozeChores() {
+        let all = appState.todayChores.filter { !$0.isDone }
+        let toSnooze = mood == .overwhelming ? Array(all.dropFirst(1)) : Array(all.dropFirst(3))
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+        for chore in toSnooze {
+            appState.rescheduleChore(chore, to: tomorrow)
         }
     }
 
@@ -95,23 +257,42 @@ struct DashboardView: View {
     // MARK: Today
     private var todaySection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Today's Chores")
-                .font(.system(size: 14, weight: .semibold, design: .serif))
-                .foregroundColor(CozyTheme.primary)
-            let sorted = appState.todayChores.sorted { !$0.isDone && $1.isDone }
-            if sorted.isEmpty {
+            HStack {
+                Text(mood == .overwhelming ? "Focus on this" : "Today's Chores")
+                    .font(.system(size: 14, weight: .semibold, design: .serif))
+                    .foregroundColor(CozyTheme.primary)
+                Spacer()
+                if mood == .manageable && appState.todayChores.filter({ !$0.isDone }).count > 3 {
+                    Text("\(appState.totalToday) total")
+                        .font(.system(size: 11))
+                        .foregroundColor(CozyTheme.mutedText)
+                }
+            }
+            let shown = visibleChores
+            if shown.isEmpty {
                 emptyTodayState
             } else {
-                ForEach(sorted) { chore in
-                    DashChoreRow(chore: chore) {
-                        appState.toggleChore(chore)
+                ForEach(shown) { chore in
+                    DashChoreRow(chore: chore) { appState.toggleChore(chore) }
+                        .contentShape(Rectangle())
+                        .onTapGesture { selectedChore = chore }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) { appState.deleteChore(chore) }
+                                label: { Label("Delete", systemImage: "trash") }
+                        }
+                }
+                if hiddenCount > 0 && !showAllChores {
+                    Button { withAnimation(.spring()) { showAllChores = true } } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.down.circle")
+                                .font(.system(size: 12))
+                            Text("+ \(hiddenCount) more chore\(hiddenCount == 1 ? "" : "s")")
+                                .font(.system(size: 12, weight: .medium))
+                        }
+                        .foregroundColor(CozyTheme.mutedText)
+                        .padding(.top, 4)
                     }
-                    .contentShape(Rectangle())
-                    .onTapGesture { selectedChore = chore }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) { appState.deleteChore(chore) }
-                            label: { Label("Delete", systemImage: "trash") }
-                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
