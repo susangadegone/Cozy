@@ -45,7 +45,7 @@ struct RootView: View {
         case .scheduleReady:
             ScheduleReadyView()
         case .recap:
-            OnboardingRecapView()
+            OnboardingFinale(name: appState.profile?.displayName ?? "Friend")
         case .dashboard:
             mainTabs
         }

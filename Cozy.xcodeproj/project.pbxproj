@@ -44,6 +44,7 @@
 		B68D1E896F1DF06E42E0C5A1 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F0C390C1673B21023FAFD /* AppState.swift */; };
 		B6B347E48D89CC9963361AB1 /* WeekStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78C0776E7767DC8F5484E49A /* WeekStripView.swift */; };
 		B72ADC6BEB7B2EEAAB5C82D0 /* ScienceTrustView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD973002C83193782DC45391 /* ScienceTrustView.swift */; };
+		B9C28C184F13570576BCCAAD /* CalendarHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D037AA57F9C56F60AA7E40 /* CalendarHelpers.swift */; };
 		BAECA3174FDEA96C4392A6D3 /* OnboardingStep1.swift in Sources */ = {isa = PBXBuildFile; fileRef = F826DEC4C80D8F813CF980AE /* OnboardingStep1.swift */; };
 		BFE951B32418ABC233291736 /* DataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7F888FC5F7F45390693E254 /* DataService.swift */; };
 		C05F7D9E5A074C795530AF04 /* OnboardingStep3.swift in Sources */ = {isa = PBXBuildFile; fileRef = A04DCD7141588AFEAD32864A /* OnboardingStep3.swift */; };
@@ -87,6 +88,7 @@
 		5E2BA0AE4C53E265D4D4F0EC /* OnboardingQ3View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingQ3View.swift; sourceTree = "<group>"; };
 		612F00D5A618CDE804A96CDC /* CozyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyApp.swift; sourceTree = "<group>"; };
 		616C9B61556E6F41E912D812 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		71D037AA57F9C56F60AA7E40 /* CalendarHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarHelpers.swift; sourceTree = "<group>"; };
 		78C0776E7767DC8F5484E49A /* WeekStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekStripView.swift; sourceTree = "<group>"; };
 		819737D6BB603362F0AC4AF6 /* CozyTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyTheme.swift; sourceTree = "<group>"; };
 		8293F2BF25E38C4D35EF3493 /* OnboardingStep2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep2.swift; sourceTree = "<group>"; };
@@ -211,6 +213,7 @@
 			isa = PBXGroup;
 			children = (
 				DEAF991B7E5BE6BDD153B61D /* AddChoreView.swift */,
+				71D037AA57F9C56F60AA7E40 /* CalendarHelpers.swift */,
 				A254716DA90B17E9E5CFA1F7 /* CalendarView.swift */,
 				F26F66028700C4B400AEF136 /* ChoreDetailView.swift */,
 				3EEA7142AF91D5CBAE6C81D6 /* ChoreTrayView.swift */,
@@ -363,6 +366,7 @@
 				D78BC9CF6C4C8ABF32B595EA /* AuthManager.swift in Sources */,
 				DA6246FBFB66C4E26FCDAB99 /* BadgeGridView.swift in Sources */,
 				6898E2F45C0C7DFEE2F53B51 /* BadgeService.swift in Sources */,
+				B9C28C184F13570576BCCAAD /* CalendarHelpers.swift in Sources */,
 				328778127023E1E5BD6BA007 /* CalendarView.swift in Sources */,
 				74D6E26A096BBB05158080A3 /* ChoreDetailView.swift in Sources */,
 				CC67EC560804A1F31673C556 /* ChoreHistoryView.swift in Sources */,
