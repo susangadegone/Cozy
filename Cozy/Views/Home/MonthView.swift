@@ -86,7 +86,7 @@ struct MonthCalendarView: View {
     // MARK: - Month Grid
     private var monthGrid: some View {
         let grid = CalendarHelpers.monthGrid(for: displayMonth)
-        let allChores = appState.chores + sampleMonthChores()
+        let allChores = appState.chores
         return LazyVGrid(columns: columns, spacing: 0) {
             ForEach(Array(grid.enumerated()), id: \.offset) { _, date in
                 if let date {
@@ -101,38 +101,6 @@ struct MonthCalendarView: View {
                     Color.clear.frame(height: 60)
                 }
             }
-        }
-    }
-
-    private func sampleMonthChores() -> [Chore] {
-        guard appState.chores.isEmpty else { return [] }
-        let cal = Calendar.current
-        guard let range = cal.range(of: .day, in: .month, for: displayMonth),
-              let firstDay = cal.date(from: cal.dateComponents([.year, .month], from: displayMonth))
-        else { return [] }
-        let pairs: [(Int, String, String)] = [
-            (1,"kitchen","Wipe counters"),(1,"living_room","Vacuum"),
-            (3,"bathroom","Scrub toilet"),
-            (5,"bedroom","Change sheets"),(5,"kitchen","Empty trash"),
-            (8,"living_room","Dust shelves"),
-            (10,"outdoor","Sweep porch"),
-            (12,"kitchen","Wipe counters"),
-            (15,"bedroom","Make bed"),
-            (17,"bathroom","Clean mirror"),
-            (19,"living_room","Vacuum carpet"),
-            (22,"kitchen","Mop floor"),
-            (24,"outdoor","Water plants"),
-        ]
-        let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"
-        return pairs.compactMap { day, roomId, name in
-            guard range.contains(day),
-                  let d = cal.date(byAdding: .day, value: day - 1, to: firstDay)
-            else { return nil }
-            return Chore(
-                id: UUID(), userId: UUID(), roomId: roomId, choreName: name,
-                dayOfWeek: "", assignedTo: "You", isDone: false,
-                scheduledDate: fmt.string(from: d), completedAt: nil
-            )
         }
     }
 }
@@ -199,9 +167,7 @@ struct DayChoresSheet: View {
 
     private var chores: [Chore] {
         let ds = CalendarHelpers.dateString(date)
-        let real = appState.chores.filter { $0.scheduledDate == ds }
-        let sample = CalendarHelpers.sampleChores(for: date, existing: appState.chores)
-        return real + sample
+        return appState.chores.filter { $0.scheduledDate == ds }
     }
 
     var body: some View {

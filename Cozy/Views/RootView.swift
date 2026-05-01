@@ -14,6 +14,8 @@ struct RootView: View {
         TabView {
             HomeView()
                 .tabItem { Label("Home", systemImage: "house.fill") }
+            ChoresView()
+                .tabItem { Label("Chores", systemImage: "checkmark.circle.fill") }
             CalendarView()
                 .tabItem { Label("Calendar", systemImage: "calendar") }
             ProfileView()

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0367AF9E3D363460AA0E528D /* ChoresView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09DE828A909208CF43FFBCF9 /* ChoresView.swift */; };
 		076439CB047C7A002FED14B3 /* MonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EC5A77FBE93BD5AB344AE77 /* MonthView.swift */; };
 		0A40E5886940ED8D2E9D8898 /* OnboardingQ4View.swift in Sources */ = {isa = PBXBuildFile; fileRef = C31991E75960A024F2603E43 /* OnboardingQ4View.swift */; };
 		105496B3BC6B758BF7C17B56 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = C31EDEB58DB1711DFF025955 /* Auth */; };
@@ -70,6 +71,7 @@
 		00EF8F802A1AEB90F78016D2 /* ChoreHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoreHistoryView.swift; sourceTree = "<group>"; };
 		04C439911253436E9F80C581 /* PartnerInviteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerInviteView.swift; sourceTree = "<group>"; };
 		09D9F7C7ABD764041E0C51B2 /* BadgeGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeGridView.swift; sourceTree = "<group>"; };
+		09DE828A909208CF43FFBCF9 /* ChoresView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoresView.swift; sourceTree = "<group>"; };
 		1B0B2E525114F96C2DA2996F /* OnboardingStep5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep5.swift; sourceTree = "<group>"; };
 		1EC5A77FBE93BD5AB344AE77 /* MonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthView.swift; sourceTree = "<group>"; };
 		2137E0C63B37D3B3E93B7CBF /* AuthFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthFormView.swift; sourceTree = "<group>"; };
@@ -218,6 +220,7 @@
 				71D037AA57F9C56F60AA7E40 /* CalendarHelpers.swift */,
 				A254716DA90B17E9E5CFA1F7 /* CalendarView.swift */,
 				F26F66028700C4B400AEF136 /* ChoreDetailView.swift */,
+				09DE828A909208CF43FFBCF9 /* ChoresView.swift */,
 				3EEA7142AF91D5CBAE6C81D6 /* ChoreTrayView.swift */,
 				5E026455FA8CB87877B7FB00 /* ConfettiOverlay.swift */,
 				9F748F412D2AB9A2EA205B2C /* DashboardView.swift */,
@@ -374,6 +377,7 @@
 				74D6E26A096BBB05158080A3 /* ChoreDetailView.swift in Sources */,
 				CC67EC560804A1F31673C556 /* ChoreHistoryView.swift in Sources */,
 				5B95BE7E3A05CEC14ED07957 /* ChoreTrayView.swift in Sources */,
+				0367AF9E3D363460AA0E528D /* ChoresView.swift in Sources */,
 				1D8162A9B651E8049A3BCE4C /* ConfettiOverlay.swift in Sources */,
 				AC0813DD4AB7B7266DB26080 /* CozyApp.swift in Sources */,
 				D5F32BBCA8AFAB14477DBEF1 /* CozyTheme.swift in Sources */,

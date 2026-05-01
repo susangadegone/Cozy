@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - Week Calendar View
+// MARK: - Week Calendar View (Date Strip + Vertical List)
 struct WeekCalendarView: View {
     @EnvironmentObject var appState: AppState
     @Binding var weekOffset: Int
@@ -11,34 +11,21 @@ struct WeekCalendarView: View {
     var body: some View {
         VStack(spacing: 0) {
             weekNavBar
-            Divider().background(CozyTheme.border).opacity(0.4)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .top, spacing: 0) {
-                    ForEach(Array(days.enumerated()), id: \.offset) { idx, day in
-                        WeekDayColumn(
-                            day: day,
-                            abbrev: CalendarHelpers.dayAbbreviations[idx],
-                            chores: chores(for: day),
-                            selectedChore: $selectedChore
-                        )
-                        if idx < 6 {
-                            Divider()
-                                .background(CozyTheme.border)
-                                .opacity(0.4)
-                        }
-                    }
+            DateStrip(
+                days: days,
+                selectedDate: appState.selectedDate,
+                choresDates: Set(appState.chores.map(\.scheduledDate))
+            ) { date in
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    appState.selectedDate = date
                 }
             }
-            .frame(maxHeight: .infinity)
+            Divider().background(CozyTheme.border).opacity(0.4)
+            dayChoreList
         }
     }
 
-    private func chores(for date: Date) -> [Chore] {
-        let ds = CalendarHelpers.dateString(date)
-        return appState.chores.filter { $0.scheduledDate == ds }
-            + CalendarHelpers.sampleChores(for: date, existing: appState.chores)
-    }
-
+    // MARK: - Nav bar
     private var weekNavBar: some View {
         HStack {
             Button {
@@ -50,9 +37,17 @@ struct WeekCalendarView: View {
                     .frame(width: 36, height: 36)
             }
             Spacer()
-            Text(weekOffset == 0 ? "This week" : weekLabel)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(CozyTheme.mutedText)
+            Button {
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    weekOffset = 0
+                    appState.selectedDate = Date()
+                }
+            } label: {
+                Text(weekOffset == 0 ? "This week" : weekLabel)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(CozyTheme.mutedText)
+            }
+            .buttonStyle(.plain)
             Spacer()
             Button {
                 withAnimation(.easeInOut(duration: 0.15)) { weekOffset += 1 }
@@ -72,109 +67,132 @@ struct WeekCalendarView: View {
         let fmt = DateFormatter(); fmt.dateFormat = "MMM d"
         return "\(fmt.string(from: first)) – \(fmt.string(from: last))"
     }
-}
 
-// MARK: - Single Day Column
-private struct WeekDayColumn: View {
-    @Binding var selectedChore: Chore?
-    let day: Date
-    let abbrev: String
-    let chores: [Chore]
-
-    init(day: Date, abbrev: String, chores: [Chore], selectedChore: Binding<Chore?>) {
-        self.day = day
-        self.abbrev = abbrev
-        self.chores = chores
-        self._selectedChore = selectedChore
+    // MARK: - Day chore list
+    @ViewBuilder
+    private var dayChoreList: some View {
+        let chores = appState.selectedDateChores
+        if chores.isEmpty {
+            dayEmptyState
+        } else {
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(chores) { chore in
+                        ChoreRow(chore: chore)
+                            .onTapGesture { selectedChore = chore }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    appState.deleteChore(chore)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
+                    }
+                }
+                .padding(.bottom, 100)
+            }
+        }
     }
 
-    private var isToday: Bool { CalendarHelpers.isToday(day) }
-    private let col = UIScreen.main.bounds.width / 7
+    private var dayEmptyState: some View {
+        VStack(spacing: 10) {
+            Spacer()
+            Text("Nothing scheduled")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundColor(CozyTheme.primary)
+            Text("Tap + to add a chore for this day.")
+                .font(.system(size: 14))
+                .foregroundColor(CozyTheme.mutedText)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+// MARK: - Date Strip
+private struct DateStrip: View {
+    let days: [Date]
+    let selectedDate: Date
+    let choresDates: Set<String>
+    let onSelect: (Date) -> Void
 
     var body: some View {
-        VStack(spacing: 6) {
-            dayHeader
-            VStack(spacing: 4) {
-                ForEach(chores) { chore in
-                    WeekChoreChip(chore: chore)
-                        .onTapGesture { selectedChore = chore }
+        HStack(spacing: 0) {
+            ForEach(Array(days.enumerated()), id: \.offset) { idx, day in
+                DateCell(
+                    day: day,
+                    abbrev: dayAbbrev(for: day),
+                    isSelected: Calendar.current.isDate(day, inSameDayAs: selectedDate),
+                    isToday: CalendarHelpers.isToday(day),
+                    hasDot: choresDates.contains(CalendarHelpers.dateString(day))
+                ) {
+                    onSelect(day)
                 }
             }
-            .padding(.horizontal, 3)
-            Spacer(minLength: 0)
         }
-        .frame(width: col)
-        .padding(.top, 10)
-        .padding(.bottom, 12)
-        .background(isToday ? Color(hex: "D4A574").opacity(0.06) : Color.clear)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
     }
 
-    private var dayHeader: some View {
-        VStack(spacing: 3) {
-            Text(abbrev)
-                .font(.system(size: 10, weight: .medium))
-                .foregroundColor(CozyTheme.mutedText)
-            let dayNum = Calendar.current.component(.day, from: day)
-            Text("\(dayNum)")
-                .font(.system(size: 14, weight: isToday ? .semibold : .regular))
-                .foregroundColor(isToday ? .white : CozyTheme.primary)
-                .frame(width: 26, height: 26)
-                .background(isToday ? Color(hex: "D4A574") : Color.clear)
-                .cornerRadius(13)
-        }
+    private func dayAbbrev(for date: Date) -> String {
+        let abbrevs = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"]
+        let weekday = Calendar.current.component(.weekday, from: date) - 1
+        return abbrevs[weekday]
     }
 }
 
-// MARK: - Chore Chip
-private struct WeekChoreChip: View {
-    let chore: Chore
-    private var room: Room? { Room.defaults.first { $0.id == chore.roomId } }
-    private var borderColor: Color { CalendarHelpers.roomBorderColor(for: chore.roomId) }
+// MARK: - Date Cell
+private struct DateCell: View {
+    let day: Date
+    let abbrev: String
+    let isSelected: Bool
+    let isToday: Bool
+    let hasDot: Bool
+    let onTap: () -> Void
+
+    private var dayNum: Int { Calendar.current.component(.day, from: day) }
 
     var body: some View {
-        let roomName = room?.name ?? chore.roomId.capitalized
-        let label = "\(roomName): \(chore.choreName)"
-
-        Text(label)
-            .font(.system(size: 10))
-            .foregroundColor(chore.isDone ? CozyTheme.mutedText : CozyTheme.primary)
-            .lineLimit(2)
-            .multilineTextAlignment(.leading)
-            .padding(.horizontal, 5)
-            .padding(.vertical, 4)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(CalendarHelpers.roomColor(for: chore.roomId).opacity(chore.isDone ? 0.4 : 1.0))
-            .cornerRadius(4)
-            .overlay(
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(borderColor)
-                    .frame(width: 2)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            )
-            .opacity(chore.isDone ? 0.6 : 1.0)
-    }
-}
-
-// MARK: - Sample Data Fallback
-extension CalendarHelpers {
-    static func sampleChores(for date: Date, existing: [Chore]) -> [Chore] {
-        let ds = dateString(date)
-        guard !existing.contains(where: { $0.scheduledDate == ds }) else { return [] }
-        let cal = Calendar.current
-        let weekday = cal.component(.weekday, from: date)
-        let samples: [Int: [(String, String)]] = [
-            2: [("kitchen", "Wipe counters"), ("living_room", "Vacuum")],
-            3: [("bathroom", "Scrub toilet")],
-            5: [("bedroom", "Change sheets"), ("kitchen", "Empty trash")],
-            6: [("living_room", "Dust shelves")],
-            7: [("outdoor", "Sweep porch")],
-        ]
-        return (samples[weekday] ?? []).map { roomId, name in
-            Chore(
-                id: UUID(), userId: UUID(), roomId: roomId, choreName: name,
-                dayOfWeek: "", assignedTo: "You", isDone: false,
-                scheduledDate: ds, completedAt: nil
-            )
+        Button(action: onTap) {
+            VStack(spacing: 5) {
+                Text(abbrev)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(labelColor)
+                ZStack {
+                    Circle()
+                        .fill(circleFill)
+                        .frame(width: 34, height: 34)
+                    Text("\(dayNum)")
+                        .font(.system(size: 15, weight: isSelected || isToday ? .semibold : .regular))
+                        .foregroundColor(numColor)
+                }
+                Circle()
+                    .fill(hasDot ? dotColor : Color.clear)
+                    .frame(width: 5, height: 5)
+            }
+            .frame(maxWidth: .infinity)
         }
+        .buttonStyle(.plain)
+    }
+
+    private var circleFill: Color {
+        if isSelected { return CozyTheme.accent }
+        return Color.clear
+    }
+
+    private var numColor: Color {
+        if isSelected { return .white }
+        if isToday { return CozyTheme.accent }
+        return CozyTheme.primary
+    }
+
+    private var labelColor: Color {
+        if isSelected { return CozyTheme.accent }
+        if isToday { return CozyTheme.accent }
+        return CozyTheme.mutedText
+    }
+
+    private var dotColor: Color {
+        isSelected ? .white.opacity(0.7) : CozyTheme.accent.opacity(0.6)
     }
 }

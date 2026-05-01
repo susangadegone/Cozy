@@ -19,9 +19,7 @@ struct CalendarView: View {
                 CozyTheme.background.ignoresSafeArea()
                 VStack(spacing: 0) {
                     calHeader
-                    Divider()
-                        .background(CozyTheme.border)
-                        .opacity(0.6)
+                    Divider().background(CozyTheme.border).opacity(0.5)
                     Group {
                         if mode == .week {
                             WeekCalendarView(
@@ -62,7 +60,7 @@ struct CalendarView: View {
                 .font(.system(size: 28, weight: .semibold))
                 .foregroundColor(CozyTheme.primary)
             Spacer()
-            ModeToggle(mode: $mode)
+            CalModeToggle(mode: $mode)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 14)
@@ -82,27 +80,27 @@ struct CalendarView: View {
     }
 }
 
-// MARK: - Mode Toggle (custom pill)
-private struct ModeToggle: View {
+// MARK: - Mode Toggle
+private struct CalModeToggle: View {
     @Binding var mode: CalendarMode
     var body: some View {
         HStack(spacing: 0) {
-            toggleButton("Week", selected: mode == .week) { mode = .week }
-            toggleButton("Month", selected: mode == .month) { mode = .month }
+            toggleBtn("Week", selected: mode == .week) { mode = .week }
+            toggleBtn("Month", selected: mode == .month) { mode = .month }
         }
         .background(CozyTheme.border.opacity(0.5))
         .cornerRadius(20)
     }
 
     @ViewBuilder
-    private func toggleButton(_ label: String, selected: Bool, action: @escaping () -> Void) -> some View {
+    private func toggleBtn(_ label: String, selected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label)
                 .font(.system(size: 13, weight: selected ? .semibold : .regular))
                 .foregroundColor(selected ? .white : CozyTheme.mutedText)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 7)
-                .background(selected ? Color(hex: "D4A574") : Color.clear)
+                .background(selected ? CozyTheme.accent : Color.clear)
                 .cornerRadius(18)
         }
         .buttonStyle(.plain)
@@ -118,9 +116,8 @@ struct CalFAB: View {
                 .font(.system(size: 22, weight: .medium))
                 .foregroundColor(CozyTheme.primary)
                 .frame(width: 56, height: 56)
-                .background(Color(hex: "D4A574"))
+                .background(CozyTheme.accent)
                 .cornerRadius(28)
-                .overlay(RoundedRectangle(cornerRadius: 28).stroke(CozyTheme.border, lineWidth: 1))
         }
         .buttonStyle(.plain)
         .padding(.bottom, 28)
