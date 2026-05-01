@@ -93,10 +93,37 @@ final class AppState: ObservableObject {
     // MARK: - Load (local)
     func loadData() {
         isLoadingData = true
-        profile = store.loadProfile() ?? store.defaultProfile()
+        let loaded = store.loadProfile()
+        if loaded == nil {
+            // Brand new user — create default profile (onboardingCompleted = false)
+            let fresh = store.defaultProfile()
+            store.saveProfile(fresh)
+            profile = fresh
+        } else {
+            profile = loaded
+        }
         chores = store.loadChores()
         if let p = profile?.preferences { preferences = p }
         isLoadingData = false
+    }
+
+    /// Called by OnboardingView finale — saves profile + seeds chores
+    func completeOnboarding(name: String, householdType: String, members: [HouseholdMember],
+                            rooms: [String], notificationPref: String) {
+        guard var p = profile else { return }
+        p.displayName = name
+        p.householdType = householdType
+        p.members = members
+        p.rooms = rooms
+        p.notificationPreference = notificationPref
+        p.onboardingCompleted = true
+        profile = p
+        store.saveProfile(p)
+
+        // Seed preset chores for selected rooms
+        chores = store.seedChoresIfNeeded(for: rooms, userId: p.id)
+
+        NotificationCenter.default.post(name: .onboardingCompleted, object: nil)
     }
 
     // MARK: - Mutations
@@ -214,4 +241,9 @@ final class AppState: ObservableObject {
         activityLog.insert(entry, at: 0)
         if activityLog.count > 20 { activityLog = Array(activityLog.prefix(20)) }
     }
+}
+
+// MARK: - Notification Names
+extension Notification.Name {
+    static let onboardingCompleted = Notification.Name("cozy.onboardingCompleted")
 }

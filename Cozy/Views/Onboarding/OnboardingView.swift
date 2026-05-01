@@ -197,29 +197,17 @@ struct OnboardingView: View {
 
     private func saveAndFinish() {
         isSaving = true
-        Task {
-            guard var profile = appState.profile else {
-                isSaving = false
-                return
-            }
-            profile.displayName = name.trimmingCharacters(in: .whitespaces)
-            profile.householdType = householdType
-            profile.members = isSolo ? [] : members
-            profile.rooms = Array(selectedRooms)
-            profile.notificationPreference = notificationPref
-            profile.onboardingCompleted = true
-            do {
-                try await DataService.shared.updateProfile(profile)
-                appState.profile = profile
-                isSaving = false
-                step = 5
-            } catch {
-                NSLog("Onboarding save error: \(error)")
-                isSaving = false
-                // Still advance to finale on error
-                step = 5
-            }
-        }
+        let trimmedName = name.trimmingCharacters(in: .whitespaces)
+        let finalMembers = isSolo ? [] : members
+        appState.completeOnboarding(
+            name: trimmedName.isEmpty ? "You" : trimmedName,
+            householdType: householdType,
+            members: finalMembers,
+            rooms: Array(selectedRooms),
+            notificationPref: notificationPref
+        )
+        isSaving = false
+        step = 5
     }
 
     // MARK: - Finale
@@ -229,7 +217,7 @@ struct OnboardingView: View {
             OnboardingFinale(name: name)
             Spacer()
             Button(action: {
-                // local mode: no-op, onboarding is UI-only
+                NotificationCenter.default.post(name: .onboardingCompleted, object: nil)
             }) {
                 Text("Open My Home 🏡")
                     .font(.custom("DMSans-SemiBold", size: 18))

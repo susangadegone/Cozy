@@ -20,16 +20,24 @@ struct DashboardView: View {
     }
     private var mood: Mood { Mood(rawValue: selectedMood) ?? .none }
 
-    /// Chores shown based on mood
+    /// Sort undone chores by name length (shorter = quicker wins) then append done chores
+    private var prioritizedChores: [Chore] {
+        let undone = appState.todayChores.filter { !$0.isDone }
+            .sorted { $0.choreName.count < $1.choreName.count }
+        let done = appState.todayChores.filter { $0.isDone }
+        return undone + done
+    }
+
+    /// Chores shown based on mood — overwhelming = 1 quick win, manageable = top 3
     private var visibleChores: [Chore] {
-        let sorted = appState.todayChores.filter { !$0.isDone }.sorted { _, _ in false }
-            + appState.todayChores.filter { $0.isDone }
+        let sorted = prioritizedChores
         switch mood {
         case .overwhelming: return showAllChores ? sorted : Array(sorted.prefix(1))
         case .manageable:   return showAllChores ? sorted : Array(sorted.prefix(3))
         default:            return sorted
         }
     }
+
     private var hiddenCount: Int {
         let undone = appState.todayChores.filter { !$0.isDone }.count
         switch mood {
@@ -114,15 +122,23 @@ struct DashboardView: View {
         }
     }
 
-    // MARK: Mood Banner — functional info only, no slogans
+    // MARK: Mood Banner — empathetic, functional
     @ViewBuilder
     private var moodBanner: some View {
         switch mood {
+        case .allGood:
+            HStack(spacing: 8) {
+                Circle().fill(moodColor("All good")).frame(width: 7, height: 7)
+                Text("Great! Showing all \(appState.todayChores.count) chores for today.")
+                    .font(.system(size: 12)).foregroundColor(CozyTheme.mutedText)
+                Spacer()
+            }
+            .transition(.opacity)
         case .manageable:
             let total = appState.todayChores.filter { !$0.isDone }.count
             HStack(spacing: 8) {
                 Circle().fill(moodColor("Manageable")).frame(width: 7, height: 7)
-                Text("Showing top 3 of \(total) remaining")
+                Text(total <= 3 ? "You've got this — \(total) left today." : "Showing your top 3 of \(total) remaining.")
                     .font(.system(size: 12)).foregroundColor(CozyTheme.mutedText)
                 Spacer()
             }
@@ -132,7 +148,7 @@ struct DashboardView: View {
                 let total = appState.todayChores.filter { !$0.isDone }.count
                 HStack(spacing: 8) {
                     Circle().fill(moodColor("Overwhelming")).frame(width: 7, height: 7)
-                    Text("Showing 1 of \(total) remaining")
+                    Text(total <= 1 ? "Just one thing. You can do this." : "Just focus on this one. Rest can wait.")
                         .font(.system(size: 12)).foregroundColor(CozyTheme.mutedText)
                     Spacer()
                 }
@@ -158,7 +174,7 @@ struct DashboardView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(Color(hex: "4CAF82")).font(.system(size: 13))
-                        Text("\(hiddenCount) chore\(hiddenCount == 1 ? "" : "s") moved to tomorrow")
+                        Text("\(hiddenCount) chore\(hiddenCount == 1 ? "" : "s") moved to tomorrow — take it easy.")
                             .font(.system(size: 12)).foregroundColor(CozyTheme.mutedText)
                     }
                 }
@@ -215,7 +231,14 @@ struct DashboardView: View {
     private var todaySection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(mood == .overwhelming ? "Focus on this" : "Today's Chores")
+                let title: String = {
+                    switch mood {
+                    case .overwhelming: return "Start with this"
+                    case .manageable: return "Your short list"
+                    default: return "Today's Chores"
+                    }
+                }()
+                Text(title)
                     .font(.system(size: 14, weight: .semibold, design: .serif))
                     .foregroundColor(CozyTheme.primary)
                 Spacer()
