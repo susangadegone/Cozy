@@ -229,7 +229,7 @@ struct OnboardingView: View {
             OnboardingFinale(name: name)
             Spacer()
             Button(action: {
-                appState.needsOnboarding = false
+                // local mode: no-op, onboarding is UI-only
             }) {
                 Text("Open My Home 🏡")
                     .font(.custom("DMSans-SemiBold", size: 18))

@@ -9,4 +9,5 @@ final class AuthManager: ObservableObject {
     func signUp(email: String, password: String) async throws {}
     func signIn(email: String, password: String) async throws {}
     func signOut() async throws {}
+    func sendMagicLink(email: String) async throws {}
 }
