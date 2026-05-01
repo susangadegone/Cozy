@@ -113,7 +113,7 @@ struct ChoreDetailView: View {
                 .tracking(0.5)
 
             if history.isEmpty {
-                Text("No completions yet.")
+                Text("Not done yet.")
                     .font(.system(size: 14))
                     .foregroundColor(CozyTheme.mutedText)
                     .padding(.vertical, 4)
@@ -167,7 +167,7 @@ struct ChoreDetailView: View {
     private var rescheduleSheet: some View {
         NavigationStack {
             VStack(spacing: 20) {
-                Text("Move to a new date")
+                Text("Move this chore")
                     .font(.system(size: 18, weight: .semibold, design: .serif))
                     .foregroundColor(CozyTheme.primary)
                     .padding(.top, 12)

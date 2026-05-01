@@ -92,18 +92,11 @@ struct ProfileView: View {
         } label: {
             ZStack {
                 Circle()
-                    .fill(LinearGradient(
-                        colors: [CozyTheme.accent, CozyTheme.primary],
-                        startPoint: .topLeading, endPoint: .bottomTrailing
-                    ))
+                    .fill(CozyTheme.primary)
                     .frame(width: 86, height: 86)
-                if let emoji = appState.profile?.avatarEmoji {
-                    Text(emoji).font(.system(size: 42))
-                } else {
-                    Text(String(appState.profile?.displayName.prefix(1) ?? "?").uppercased())
-                        .font(.system(size: 30, weight: .bold))
-                        .foregroundColor(.white)
-                }
+                Text(String(appState.profile?.displayName.prefix(1) ?? "?").uppercased())
+                    .font(.system(size: 32, weight: .semibold))
+                    .foregroundColor(Color(hex: "FAF7F2"))
                 // camera badge
                 Circle()
                     .fill(CozyTheme.accent)
@@ -113,7 +106,7 @@ struct ProfileView: View {
             }
         }
         .buttonStyle(.plain)
-        .shadow(color: CozyTheme.accent.opacity(0.3), radius: 10, y: 4)
+        .shadow(color: CozyTheme.primary.opacity(0.2), radius: 10, y: 4)
     }
 
     private var avatarPickerRow: some View {
@@ -290,7 +283,7 @@ struct ProfileView: View {
                         .font(.system(size: 15))
                         .foregroundColor(CozyTheme.primary)
                     Spacer()
-                    Text("Cozy 🏡")
+                    Text("Cozy")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(CozyTheme.accent)
                         .padding(.horizontal, 12).padding(.vertical, 5)

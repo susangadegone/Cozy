@@ -61,9 +61,9 @@ struct InsightsView: View {
     // MARK: - Top Stats
     private var topStatsRow: some View {
         HStack(spacing: 10) {
-            InsightStatCard(value: "\(appState.totalDone)", label: "All time done", icon: "checkmark.seal.fill", color: Color(hex: "4CAF82"))
-            InsightStatCard(value: "\(appState.currentStreak)", label: "Current streak", icon: "flame.fill", color: CozyTheme.accent)
-            InsightStatCard(value: "\(Int(completionRate * 100))%", label: "Completion rate", icon: "chart.pie.fill", color: Color(hex: "7B6EF6"))
+            InsightStatCard(value: "\(appState.totalDone)", label: "Total", icon: "checkmark.seal.fill", color: Color(hex: "4CAF82"))
+            InsightStatCard(value: "\(appState.currentStreak)", label: "Streak", icon: "flame.fill", color: CozyTheme.accent)
+            InsightStatCard(value: "\(Int(completionRate * 100))%", label: "Done rate", icon: "chart.pie.fill", color: Color(hex: "7B6EF6"))
         }
     }
 

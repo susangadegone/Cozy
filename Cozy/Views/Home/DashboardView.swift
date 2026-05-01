@@ -13,9 +13,9 @@ struct DashboardView: View {
 
     // MARK: - Mood Logic
     private enum Mood: String {
-        case allGood = "All good"
+        case allGood = "Fine"
         case manageable = "Manageable"
-        case overwhelming = "Overwhelming"
+        case overwhelming = "Too much"
         case none = ""
     }
     private var mood: Mood { Mood(rawValue: selectedMood) ?? .none }
@@ -80,7 +80,7 @@ struct DashboardView: View {
     // MARK: Mood Row — word pills
     private var moodRow: some View {
         HStack(spacing: 8) {
-            ForEach(["All good", "Manageable", "Overwhelming"], id: \.self) { m in
+            ForEach(["Fine", "Manageable", "Too much"], id: \.self) { m in
                 let isOn = selectedMood == m
                 Button {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -115,9 +115,9 @@ struct DashboardView: View {
 
     private func moodColor(_ m: String) -> Color {
         switch m {
-        case "All good":     return Color(hex: "4CAF82")
+        case "Fine":     return Color(hex: "4CAF82")
         case "Manageable":   return CozyTheme.accent
-        case "Overwhelming": return Color(hex: "E57373")
+        case "Too much": return Color(hex: "E57373")
         default:             return CozyTheme.accent
         }
     }
@@ -128,8 +128,8 @@ struct DashboardView: View {
         switch mood {
         case .allGood:
             HStack(spacing: 8) {
-                Circle().fill(moodColor("All good")).frame(width: 7, height: 7)
-                Text("Great! Showing all \(appState.todayChores.count) chores for today.")
+                Circle().fill(moodColor("Fine")).frame(width: 7, height: 7)
+                Text("\(appState.todayChores.count) chores today. That's it.")
                     .font(.system(size: 12)).foregroundColor(CozyTheme.mutedText)
                 Spacer()
             }
@@ -138,7 +138,7 @@ struct DashboardView: View {
             let total = appState.todayChores.filter { !$0.isDone }.count
             HStack(spacing: 8) {
                 Circle().fill(moodColor("Manageable")).frame(width: 7, height: 7)
-                Text(total <= 3 ? "You've got this — \(total) left today." : "Showing your top 3 of \(total) remaining.")
+                Text(total <= 3 ? "\(total) left today. You're close." : "Showing your top 3 of \(total) remaining.")
                     .font(.system(size: 12)).foregroundColor(CozyTheme.mutedText)
                 Spacer()
             }
@@ -147,8 +147,8 @@ struct DashboardView: View {
             VStack(alignment: .leading, spacing: 8) {
                 let total = appState.todayChores.filter { !$0.isDone }.count
                 HStack(spacing: 8) {
-                    Circle().fill(moodColor("Overwhelming")).frame(width: 7, height: 7)
-                    Text(total <= 1 ? "Just one thing. You can do this." : "Just focus on this one. Rest can wait.")
+                    Circle().fill(moodColor("Too much")).frame(width: 7, height: 7)
+                    Text(total <= 1 ? "Just one thing. You can do this." : "Pick one. The rest waits.")
                         .font(.system(size: 12)).foregroundColor(CozyTheme.mutedText)
                     Spacer()
                 }
@@ -158,7 +158,7 @@ struct DashboardView: View {
                     } label: {
                         HStack(spacing: 6) {
                             Image(systemName: "moon.zzz.fill").font(.system(size: 12))
-                            Text("Move \(hiddenCount) chore\(hiddenCount == 1 ? "" : "s") to tomorrow")
+                            Text("Push \(hiddenCount) to tomorrow")
                                 .font(.system(size: 13, weight: .medium))
                         }
                         .foregroundColor(Color(hex: "E57373"))
@@ -198,7 +198,7 @@ struct DashboardView: View {
     private var weekProgressCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Week Progress")
+                Text("This week")
                     .font(.system(size: 14, weight: .semibold, design: .serif))
                     .foregroundColor(CozyTheme.primary)
                 if appState.currentStreak > 0 {
@@ -233,8 +233,8 @@ struct DashboardView: View {
             HStack {
                 let title: String = {
                     switch mood {
-                    case .overwhelming: return "Start with this"
-                    case .manageable: return "Your short list"
+                    case .overwhelming: return "Start here"
+                    case .manageable: return "Today"
                     default: return "Today's Chores"
                     }
                 }()

@@ -128,8 +128,9 @@ struct HomeView: View {
             .buttonStyle(.plain)
             if appState.currentStreak > 0 {
                 HStack(spacing: 4) {
-                    Text("🔥")
-                        .font(.system(size: 14))
+                    Image(systemName: "flame.fill")
+                        .font(.system(size: 13))
+                        .foregroundColor(CozyTheme.accent)
                     Text("\(appState.currentStreak)")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(CozyTheme.accent)
@@ -185,6 +186,6 @@ struct HomeView: View {
 
     private var greetingLine: String {
         let name = appState.profile?.displayName ?? "Friend"
-        return "Hey \(name)! 👋"
+        return "Hey \(name)."
     }
 }

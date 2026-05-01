@@ -12,20 +12,12 @@ struct OnboardingFinale: View {
     var body: some View {
         ZStack {
             CozyTheme.background.ignoresSafeArea()
-            if showConfetti {
-                SparseCalmConfetti()
-                    .ignoresSafeArea()
-                    .allowsHitTesting(false)
-            }
             contentStack
         }
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.65).delay(0.1)) {
                 scale = 1.0
                 opacity = 1.0
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                showConfetti = true
             }
         }
     }
@@ -47,21 +39,22 @@ struct OnboardingFinale: View {
     private var houseIcon: some View {
         ZStack {
             Circle()
-                .fill(CozyTheme.accent.opacity(0.12))
-                .frame(width: 110, height: 110)
-            Text("🏠")
-                .font(.system(size: 52))
+                .fill(CozyTheme.primary)
+                .frame(width: 88, height: 88)
+            Text(name.prefix(1).uppercased().isEmpty ? "C" : String(name.prefix(1).uppercased()))
+                .font(.system(size: 36, weight: .semibold))
+                .foregroundColor(Color(hex: "FAF7F2"))
         }
     }
 
     private var headingBlock: some View {
         VStack(spacing: 12) {
-            Text("Your home is ready, \(name.isEmpty ? "you" : name).")
+            Text("Your place is set up.")
                 .font(.system(size: 26, weight: .semibold, design: .default))
                 .foregroundColor(CozyTheme.primary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
-            Text("Your first chore is waiting.\nTakes about 20 minutes.")
+            Text("Rooms, chores, and reminders are ready.")
                 .font(.system(size: 16, weight: .regular))
                 .foregroundColor(CozyTheme.primary.opacity(0.5))
                 .multilineTextAlignment(.center)
@@ -88,7 +81,7 @@ struct OnboardingFinale: View {
                 if isEntering {
                     ProgressView().tint(.white)
                 } else {
-                    Text("Enter my home →")
+                    Text("Open Cozy")
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.white)
                 }
