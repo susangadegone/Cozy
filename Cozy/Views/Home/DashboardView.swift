@@ -7,15 +7,16 @@ struct DashboardView: View {
     var onChoreComplete: () -> Void
 
     @State private var selectedChore: Chore? = nil
+    @State private var selectedMood: String = ""
 
     var body: some View {
         VStack(spacing: 16) {
             greetingHeader
-            statRow
+            moodRow
             weekProgressCard
             todaySection
+            if !upcomingChores.isEmpty { upcomingCard }
             if !appState.memberBreakdown.isEmpty { householdSection }
-            activityFeedCard
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
@@ -30,35 +31,31 @@ struct DashboardView: View {
     private var greetingHeader: some View {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEEE, MMM d"
-        let dateStr = formatter.string(from: Date())
-        let streak = appState.currentStreak
-
-        return VStack(alignment: .leading, spacing: 4) {
-            Text(dateStr)
-                .font(.system(size: 22, weight: .bold, design: .serif))
-                .foregroundColor(CozyTheme.primary)
-            HStack(spacing: 10) {
-                Spacer()
-                if streak > 0 {
-                    Label("\(streak)-day streak", systemImage: "flame.fill")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Color(hex: "E07B5A"))
-                        .padding(.horizontal, 10).padding(.vertical, 4)
-                        .background(Color(hex: "E07B5A").opacity(0.12))
-                        .cornerRadius(20)
-                }
-            }
-        }
-        .padding(.top, 4)
+        return Text(formatter.string(from: Date()))
+            .font(.system(size: 22, weight: .bold, design: .serif))
+            .foregroundColor(CozyTheme.primary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 4)
     }
 
-    // MARK: Stat Row
-    private var statRow: some View {
+    // MARK: Mood Row
+    private var moodRow: some View {
         HStack(spacing: 8) {
-            DashStatCard(label: "Week", value: "\(appState.weekTotal)", icon: "calendar", color: CozyTheme.accent)
-            DashStatCard(label: "Done", value: "\(appState.weekDone)", icon: "checkmark.circle.fill", color: Color(hex: "4CAF82"))
-            DashStatCard(label: "Left", value: "\(appState.weekRemaining)", icon: "clock.fill", color: Color(hex: "E07B5A"))
-            DashStatCard(label: "Streak", value: "\(appState.currentStreak)", icon: "flame.fill", color: Color(hex: "C47C3E"), suffix: "🔥")
+            ForEach(["All good", "Manageable", "Overwhelming"], id: \.self) { mood in
+                let isOn = selectedMood == mood
+                Button { selectedMood = mood } label: {
+                    Text(mood)
+                        .font(.system(size: 12))
+                        .foregroundColor(isOn ? .white : CozyTheme.primary)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(isOn ? CozyTheme.accent : Color.clear)
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(CozyTheme.border, lineWidth: isOn ? 0 : 1))
+                }
+                .buttonStyle(.plain)
+            }
+            Spacer()
         }
     }
 
@@ -69,6 +66,11 @@ struct DashboardView: View {
                 Text("Week Progress")
                     .font(.system(size: 14, weight: .semibold, design: .serif))
                     .foregroundColor(CozyTheme.primary)
+                if appState.currentStreak > 0 {
+                    Text("\(appState.currentStreak)-day streak")
+                        .font(.system(size: 11))
+                        .foregroundColor(CozyTheme.accent)
+                }
                 Spacer()
                 Text("\(Int(appState.weekProgress * 100))%")
                     .font(.system(size: 14, weight: .bold))
@@ -121,9 +123,6 @@ struct DashboardView: View {
         HStack {
             Spacer()
             VStack(spacing: 6) {
-                Image(systemName: "party.popper")
-                    .font(.system(size: 28, weight: .light))
-                    .foregroundColor(CozyTheme.accent)
                 Text("Nothing due today.")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(CozyTheme.primary)
@@ -135,6 +134,65 @@ struct DashboardView: View {
             .padding(.vertical, 16)
             Spacer()
         }
+    }
+
+    // MARK: Upcoming Chores
+    private var upcomingChores: [Chore] {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd"
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        return appState.chores.filter { !$0.isDone }.filter {
+            guard let d = fmt.date(from: $0.scheduledDate) else { return false }
+            let diff = cal.dateComponents([.day], from: today, to: cal.startOfDay(for: d)).day ?? 0
+            return diff > 0 && diff <= 3
+        }
+    }
+
+    private var upcomingCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Coming up")
+                .font(.system(size: 14, weight: .semibold, design: .serif))
+                .foregroundColor(CozyTheme.primary)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(upcomingChores) { chore in
+                        upcomingChip(chore)
+                    }
+                }
+            }
+        }
+        .padding(14)
+        .cardStyle()
+    }
+
+    private func upcomingChip(_ chore: Chore) -> some View {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd"
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        let dayLabel: String = {
+            guard let d = fmt.date(from: chore.scheduledDate) else { return chore.dayOfWeek }
+            let diff = cal.dateComponents([.day], from: today, to: cal.startOfDay(for: d)).day ?? 0
+            if diff == 1 { return "Tomorrow" }
+            let df = DateFormatter()
+            df.dateFormat = "EEE"
+            return df.string(from: d)
+        }()
+        return VStack(alignment: .leading, spacing: 3) {
+            Text(chore.choreName)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(CozyTheme.primary)
+                .lineLimit(1)
+            Text(dayLabel)
+                .font(.system(size: 10))
+                .foregroundColor(CozyTheme.mutedText)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(CozyTheme.card)
+        .cornerRadius(10)
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(CozyTheme.border, lineWidth: 1))
     }
 
     // MARK: Household
@@ -151,7 +209,7 @@ struct DashboardView: View {
         .cardStyle()
     }
 
-    // MARK: Activity Feed
+    // MARK: Activity Feed (retained, not shown in body per spec)
     private var activityFeedCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Recent Activity")
@@ -219,53 +277,77 @@ struct DashChoreRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Button {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { bouncing = true }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { bouncing = false; onToggle() }
-            } label: {
-                ZStack {
-                    Circle()
-                        .strokeBorder(chore.isDone ? Color(hex: "4CAF82") : CozyTheme.border, lineWidth: 2)
-                        .frame(width: 26, height: 26)
-                    if chore.isDone {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(Color(hex: "4CAF82"))
-                    }
-                }
-                .scaleEffect(bouncing ? 1.25 : 1.0)
-            }
-            .buttonStyle(.plain)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(chore.choreName)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(chore.isDone ? CozyTheme.mutedText : CozyTheme.primary)
-                    .strikethrough(chore.isDone, color: CozyTheme.mutedText)
-                if let r = room {
-                    HStack(spacing: 4) {
-                        Image(systemName: r.icon)
-                            .font(.system(size: 10, weight: .light))
-                            .foregroundColor(CozyTheme.mutedText)
-                        Text(r.name)
-                            .font(.system(size: 11))
-                            .foregroundColor(CozyTheme.mutedText)
-                    }
-                }
-            }
+            checkButton
+            choreInfo
             Spacer()
-            if !chore.assignedTo.isEmpty {
-                Text(chore.assignedTo.prefix(1).uppercased())
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(width: 22, height: 22)
-                    .background(CozyTheme.accent)
-                    .clipShape(Circle())
-            }
+            assigneeAvatar
         }
         .padding(.vertical, 3)
         .opacity(chore.isDone ? 0.55 : 1.0)
         .animation(.easeInOut(duration: 0.2), value: chore.isDone)
+    }
+
+    private var checkButton: some View {
+        Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { bouncing = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { bouncing = false; onToggle() }
+        } label: {
+            ZStack {
+                Circle()
+                    .strokeBorder(chore.isDone ? Color(hex: "4CAF82") : CozyTheme.border, lineWidth: 2)
+                    .frame(width: 26, height: 26)
+                if chore.isDone {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Color(hex: "4CAF82"))
+                }
+            }
+            .scaleEffect(bouncing ? 1.25 : 1.0)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var choreInfo: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(chore.choreName)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(chore.isDone ? CozyTheme.mutedText : CozyTheme.primary)
+                .strikethrough(chore.isDone, color: CozyTheme.mutedText)
+            if let r = room {
+                HStack(spacing: 4) {
+                    Image(systemName: r.icon)
+                        .font(.system(size: 10, weight: .light))
+                        .foregroundColor(CozyTheme.mutedText)
+                    Text(r.name)
+                        .font(.system(size: 11))
+                        .foregroundColor(CozyTheme.mutedText)
+                }
+            }
+            lastDoneLine
+        }
+    }
+
+    @ViewBuilder
+    private var lastDoneLine: some View {
+        if let cat = chore.completedAt,
+           let parsed = ISO8601DateFormatter().date(from: cat) {
+            let days = Calendar.current.dateComponents([.day], from: parsed, to: Date()).day ?? 0
+            Text("Last done \(days) days ago")
+                .font(.system(size: 11))
+                .foregroundColor(days > 7 ? Color(hex: "A03A1A") : CozyTheme.mutedText)
+        }
+    }
+
+    @ViewBuilder
+    private var assigneeAvatar: some View {
+        if !chore.assignedTo.isEmpty {
+            Text(chore.assignedTo.prefix(1).uppercased())
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 22, height: 22)
+                .background(CozyTheme.accent)
+                .clipShape(Circle())
+        }
     }
 }
 
