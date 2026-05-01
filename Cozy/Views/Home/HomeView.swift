@@ -28,7 +28,6 @@ struct HomeView: View {
             CalendarView()
                 .environmentObject(appState)
         }
-        .task { await appState.loadData() }
         .onChange(of: appState.pendingConfettiEvent) { event in
             guard let event else { return }
             appState.pendingConfettiEvent = nil

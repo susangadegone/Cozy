@@ -318,26 +318,38 @@ struct AddChoreView: View {
     }
 
     private func saveChore() {
-        guard let userId = AuthManager.shared.currentUserId else { return }
-        let fmt = DateFormatter()
-        fmt.dateFormat = "yyyy-MM-dd"
-        let dayFmt = DateFormatter()
-        dayFmt.dateFormat = "EEEE"
+        let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"
+        let dayFmt = DateFormatter(); dayFmt.dateFormat = "EEEE"
         let finalAssignedTo = assignedTo.isEmpty ? defaultAssignedTo() : assignedTo
-        let scheduledDay = selectedDays.first ?? dayFmt.string(from: Date())
+
+        // Map selected day pills to the next matching calendar date
+        let scheduledDate = nextDate(for: selectedDays.first)
+        let scheduledDayName = dayFmt.string(from: scheduledDate)
+
         let chore = Chore(
             id: UUID(),
-            userId: userId,
+            userId: UUID(), // local placeholder
             roomId: selectedRoom,
             choreName: selectedChore,
-            dayOfWeek: scheduledDay,
+            dayOfWeek: scheduledDayName,
             assignedTo: finalAssignedTo,
             isDone: false,
-            scheduledDate: fmt.string(from: Date())
+            scheduledDate: fmt.string(from: scheduledDate)
         )
-        Task {
-            await appState.addChore(chore)
-            dismiss()
+        appState.addChore(chore)
+        dismiss()
+    }
+
+    /// Returns the next date matching the given 2-letter day abbreviation (SU/MO/…), or today if none.
+    private func nextDate(for dayAbbrev: String?) -> Date {
+        let map = ["SU": 1, "MO": 2, "TU": 3, "WE": 4, "TH": 5, "FR": 6, "SA": 7]
+        guard let abbrev = dayAbbrev, let target = map[abbrev] else { return Date() }
+        let cal = Calendar.current
+        var check = cal.startOfDay(for: Date())
+        for _ in 0..<8 {
+            if cal.component(.weekday, from: check) == target { return check }
+            check = cal.date(byAdding: .day, value: 1, to: check) ?? check
         }
+        return Date()
     }
 }

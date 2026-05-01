@@ -104,12 +104,12 @@ struct DashboardView: View {
             } else {
                 ForEach(sorted) { chore in
                     DashChoreRow(chore: chore) {
-                        Task { await appState.toggleChore(chore) }
+                        appState.toggleChore(chore)
                     }
                     .contentShape(Rectangle())
                     .onTapGesture { selectedChore = chore }
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) { Task { await appState.deleteChore(chore) } }
+                        Button(role: .destructive) { appState.deleteChore(chore) }
                             label: { Label("Delete", systemImage: "trash") }
                     }
                 }

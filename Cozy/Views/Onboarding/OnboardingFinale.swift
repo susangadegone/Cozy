@@ -79,7 +79,6 @@ struct OnboardingFinale: View {
                 appState.profile = p
                 Task { try? await DataService.shared.updateProfile(p) }
             }
-            appState.needsOnboarding = false
             appRouter.navigate(to: .dashboard)
         } label: {
             ZStack {

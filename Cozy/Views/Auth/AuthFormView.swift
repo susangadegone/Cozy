@@ -123,7 +123,7 @@ struct AuthFormView: View {
                 } else {
                     try await authManager.signIn(email: email, password: password)
                 }
-                await appState.loadData()
+                appState.loadData()
             } catch {
                 errorMessage = error.localizedDescription
             }

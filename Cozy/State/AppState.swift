@@ -5,17 +5,19 @@ final class AppState: ObservableObject {
     @Published var profile: Profile?
     @Published var chores: [Chore] = []
     @Published var selectedDate: Date = Date()
-    @Published var needsOnboarding = false
     @Published var isLoadingData = false
     @Published var activityLog: [ActivityLog] = []
     @Published var newlyEarnedBadge: BadgeDefinition?
     @Published var preferences: UserPreferences = UserPreferences()
     @Published var pendingConfettiEvent: ConfettiEvent? = nil
 
-    private let dataService = DataService.shared
+    private let store = LocalStore.shared
     private let prefsKey = "userPreferences_v1"
 
-    init() { loadLocalPreferences() }
+    init() {
+        loadLocalPreferences()
+        loadData()
+    }
 
     // MARK: - Date helpers
     func dateString(from date: Date) -> String {
@@ -24,13 +26,20 @@ final class AppState: ObservableObject {
         return fmt.string(from: date)
     }
 
+    var todayString: String { dateString(from: Date()) }
     var selectedDateString: String { dateString(from: selectedDate) }
 
+    /// Always shows today's chores regardless of selected calendar date
     var todayChores: [Chore] {
-        chores.filter { $0.scheduledDate == selectedDateString }
+        chores.filter { $0.scheduledDate == todayString }
     }
     var completedToday: Int { todayChores.filter(\.isDone).count }
     var totalToday: Int { todayChores.count }
+
+    /// Chores for the currently selected calendar date
+    var selectedDateChores: [Chore] {
+        chores.filter { $0.scheduledDate == selectedDateString }
+    }
 
     // MARK: - Week stats
     var weekChores: [Chore] {
@@ -46,7 +55,6 @@ final class AppState: ObservableObject {
     var weekProgress: Double { weekTotal > 0 ? Double(weekDone) / Double(weekTotal) : 0 }
 
     // MARK: - Streak
-    // Spec: at least 1 chore completed on a day counts for that day's streak
     var currentStreak: Int {
         let cal = Calendar.current
         var streak = 0
@@ -71,7 +79,7 @@ final class AppState: ObservableObject {
         }
     }
 
-    // MARK: - Chore history (completed, sorted by completedAt desc)
+    // MARK: - Chore history
     var choreHistory: [Chore] {
         chores.filter(\.isDone).sorted {
             let a = $0.completedAt ?? $0.scheduledDate
@@ -82,23 +90,17 @@ final class AppState: ObservableObject {
 
     var totalDone: Int { chores.filter(\.isDone).count }
 
-    // MARK: - Load
-    func loadData() async {
-        guard let userId = AuthManager.shared.currentUserId else { return }
+    // MARK: - Load (local)
+    func loadData() {
         isLoadingData = true
-        do {
-            profile = try await dataService.fetchProfile(userId: userId)
-            chores = try await dataService.fetchChores(userId: userId)
-            needsOnboarding = !(profile?.onboardingCompleted ?? false)
-            if let p = profile?.preferences { preferences = p }
-        } catch {
-            NSLog("AppState loadData error: \(error)")
-        }
+        profile = store.loadProfile() ?? store.defaultProfile()
+        chores = store.loadChores()
+        if let p = profile?.preferences { preferences = p }
         isLoadingData = false
     }
 
     // MARK: - Mutations
-    func toggleChore(_ chore: Chore) async {
+    func toggleChore(_ chore: Chore) {
         guard let i = chores.firstIndex(where: { $0.id == chore.id }) else { return }
         chores[i].isDone.toggle()
         let nowDone = chores[i].isDone
@@ -113,123 +115,69 @@ final class AppState: ObservableObject {
         } else {
             chores[i].completedAt = nil
         }
-        do {
-            try await dataService.updateChore(chores[i])
-        } catch {
-            chores[i].isDone.toggle()
-            chores[i].completedAt = nil
-            NSLog("Error toggling chore: \(error)")
-        }
+        store.saveChores(chores)
     }
 
-    func addChore(_ chore: Chore) async {
-        do {
-            try await dataService.addChore(chore)
-            chores.append(chore)
-            logActivity(.choreAdded, "\(chore.choreName) added")
-            pendingConfettiEvent = .choreAdded
-        } catch {
-            NSLog("Error adding chore: \(error)")
-        }
+    func addChore(_ chore: Chore) {
+        chores.append(chore)
+        logActivity(.choreAdded, "\(chore.choreName) added")
+        pendingConfettiEvent = .choreAdded
+        store.saveChores(chores)
     }
 
-    func deleteChore(_ chore: Chore) async {
+    func deleteChore(_ chore: Chore) {
         chores.removeAll { $0.id == chore.id }
-        do {
-            try await dataService.deleteChore(id: chore.id)
-        } catch {
-            NSLog("Error deleting chore: \(error)")
-        }
+        store.saveChores(chores)
     }
 
-    func rescheduleChore(_ chore: Chore, to date: Date) async {
+    func rescheduleChore(_ chore: Chore, to date: Date) {
         guard let i = chores.firstIndex(where: { $0.id == chore.id }) else { return }
         let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"
         chores[i].scheduledDate = fmt.string(from: date)
         let df = DateFormatter(); df.dateFormat = "EEEE"
         chores[i].dayOfWeek = df.string(from: date)
-        do {
-            try await dataService.updateChore(chores[i])
-        } catch {
-            NSLog("Error rescheduling chore: \(error)")
-        }
+        store.saveChores(chores)
     }
 
-    func updateProfileName(_ name: String) async {
+    func updateProfileName(_ name: String) {
         guard var p = profile else { return }
         p.displayName = name
         profile = p
-        do { try await dataService.updateDisplayName(profileId: p.id, name: name) }
-        catch { NSLog("Error updating name: \(error)") }
+        store.saveProfile(p)
     }
 
-    func updateAvatarEmoji(_ emoji: String) async {
+    func updateAvatarEmoji(_ emoji: String) {
         guard var p = profile else { return }
         p.avatarEmoji = emoji
-        profile = p   // update immediately so UI reacts
-        NSLog("updateAvatarEmoji: setting emoji \(emoji) for profile \(p.id)")
-        do {
-            try await dataService.updateAvatarEmoji(profileId: p.id, emoji: emoji)
-            NSLog("updateAvatarEmoji: DB update succeeded")
-        } catch {
-            NSLog("updateAvatarEmoji ERROR: \(error)")
-        }
+        profile = p
+        store.saveProfile(p)
     }
 
-    func addHouseholdMember(_ member: HouseholdMember) async {
-        guard var p = profile else {
-            NSLog("addHouseholdMember: profile is nil")
-            return
-        }
-        guard !p.members.contains(where: { $0.name.lowercased() == member.name.lowercased() }) else {
-            NSLog("addHouseholdMember: duplicate \(member.name)")
-            return
-        }
+    func addHouseholdMember(_ member: HouseholdMember) {
+        guard var p = profile else { return }
+        guard !p.members.contains(where: { $0.name.lowercased() == member.name.lowercased() }) else { return }
         p.members.append(member)
-        profile = p   // update local state immediately
-        NSLog("addHouseholdMember: local count now \(p.members.count), saving to DB")
-        do {
-            // Use targeted members-only update — most reliable for JSONB array
-            try await dataService.updateMembers(profileId: p.id, members: p.members)
-            NSLog("addHouseholdMember: DB update succeeded, members: \(p.members.map(\.name))")
-        } catch {
-            NSLog("addHouseholdMember ERROR: \(error)")
-        }
+        profile = p
+        store.saveProfile(p)
     }
 
-    func refreshProfile() async {
-        guard let userId = AuthManager.shared.currentUserId else { return }
-        if let fresh = try? await dataService.fetchProfile(userId: userId) {
-            // Preserve locally-set avatar emoji if DB hasn't caught up yet
-            let localEmoji = profile?.avatarEmoji
-            if let localEmoji, fresh.avatarEmoji == nil {
-                var patched = fresh
-                patched.avatarEmoji = localEmoji
-                profile = patched
-            } else {
-                profile = fresh
-            }
-        }
-    }
-
-    func removeMember(_ member: HouseholdMember) async {
-        guard var p = profile, p.isAdmin else { return }
+    func removeMember(_ member: HouseholdMember) {
+        guard var p = profile else { return }
         p.members.removeAll { $0.name == member.name }
         profile = p
-        do {
-            try await dataService.updateMembers(profileId: p.id, members: p.members)
-        } catch {
-            NSLog("removeMember ERROR: \(error)")
-        }
+        store.saveProfile(p)
     }
 
-    func savePreferences() async {
+    func refreshProfile() {
+        profile = store.loadProfile() ?? profile
+    }
+
+    func savePreferences() {
         saveLocalPreferences()
-        guard let p = profile else { return }
-        do {
-            // Save preferences as part of full profile (preferences is a jsonb column)
-            try await dataService.updateProfile(p)
-        } catch { NSLog("savePreferences ERROR: \(error)") }
+        guard var p = profile else { return }
+        p.preferences = preferences
+        profile = p
+        store.saveProfile(p)
     }
 
     // MARK: - Badge Check
@@ -245,7 +193,7 @@ final class AppState: ObservableObject {
         newlyEarnedBadge = newBadges.first
         pendingConfettiEvent = .badgeUnlock
         logActivity(.badgeEarned, "\(newBadges.first!.name) earned!")
-        Task { try? await dataService.updateBadges(profileId: p.id, badgeIds: ids) }
+        store.saveProfile(updated)
     }
 
     // MARK: - Local Preferences
@@ -262,10 +210,7 @@ final class AppState: ObservableObject {
 
     // MARK: - Activity log
     func logActivity(_ type: ActivityLog.ActivityType, _ text: String) {
-        let entry = ActivityLog(
-            id: UUID(), type: type, text: text, timestamp: Date(),
-            userId: AuthManager.shared.currentUserId?.uuidString ?? ""
-        )
+        let entry = ActivityLog(id: UUID(), type: type, text: text, timestamp: Date(), userId: "local")
         activityLog.insert(entry, at: 0)
         if activityLog.count > 20 { activityLog = Array(activityLog.prefix(20)) }
     }

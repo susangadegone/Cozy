@@ -61,6 +61,7 @@
 		E2D1CE6FE89C599A01F9C234 /* OnboardingStep5.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0B2E525114F96C2DA2996F /* OnboardingStep5.swift */; };
 		EEB49F4C50FDB7BF4D0F2B9A /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB2588917122D4F60EA3660 /* OnboardingViewModel.swift */; };
 		F1CFC925F7176622381CEDB4 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C67D63080E0EB972BAC3198 /* SignUpView.swift */; };
+		F8588D15CE46B8312D02AEC9 /* LocalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D99B4BBC12440095F31A9B /* LocalStore.swift */; };
 		F9084DBCF7562EA4EA386B4B /* ScheduleReadyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B1170808E3FF4F4954EF62 /* ScheduleReadyView.swift */; };
 		FFAFCEF0E890CA193DB83BF7 /* OnboardingComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94A952BF18DD21FEDE41062 /* OnboardingComponents.swift */; };
 /* End PBXBuildFile section */
@@ -104,6 +105,7 @@
 		A7F888FC5F7F45390693E254 /* DataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataService.swift; sourceTree = "<group>"; };
 		AF4A1D4E01A7B9FE6D132BE1 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		C03D8179A77DA4367A00E492 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		C0D99B4BBC12440095F31A9B /* LocalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStore.swift; sourceTree = "<group>"; };
 		C31991E75960A024F2603E43 /* OnboardingQ4View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingQ4View.swift; sourceTree = "<group>"; };
 		C9501FBEDA9BEFDDD17CE1D7 /* BadgeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeService.swift; sourceTree = "<group>"; };
 		D125F051AADC8FE2B391CDC4 /* OnboardingQ2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingQ2View.swift; sourceTree = "<group>"; };
@@ -264,6 +266,7 @@
 				F55467CD7AAA96BBBAF6C956 /* AuthManager.swift */,
 				C9501FBEDA9BEFDDD17CE1D7 /* BadgeService.swift */,
 				A7F888FC5F7F45390693E254 /* DataService.swift */,
+				C0D99B4BBC12440095F31A9B /* LocalStore.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -381,6 +384,7 @@
 				5864AED484F4398CDE7092EC /* HomeView.swift in Sources */,
 				9F09307CF720B101FA76829B /* HouseholdPanelView.swift in Sources */,
 				CAB97C1BB4CCF02143B92AC8 /* InsightsView.swift in Sources */,
+				F8588D15CE46B8312D02AEC9 /* LocalStore.swift in Sources */,
 				3F895CB94DB94F6D3CCF51A5 /* LoginView.swift in Sources */,
 				D9FB39CC93745FCC86A58D9F /* Models.swift in Sources */,
 				076439CB047C7A002FED14B3 /* MonthView.swift in Sources */,
