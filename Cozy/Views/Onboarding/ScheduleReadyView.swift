@@ -74,7 +74,7 @@ struct ScheduleReadyView: View {
             Text("Your schedule is ready,")
                 .font(.system(size: 28, weight: .bold))
                 .foregroundColor(CozyTheme.primary)
-            Text(name + " 🎉")
+            Text(name + ".")
                 .font(.system(size: 28, weight: .bold))
                 .foregroundColor(CozyTheme.accent)
         }
@@ -160,7 +160,7 @@ struct ScheduleReadyView: View {
     }
 
     private var letsGoButton: some View {
-        Button { appRouter.navigate(to: .dashboard) } label: {
+        Button { appRouter.navigate(to: .recap) } label: {
             RoundedRectangle(cornerRadius: CozyTheme.pillRadius)
                 .fill(CozyTheme.accent)
                 .frame(height: 54)

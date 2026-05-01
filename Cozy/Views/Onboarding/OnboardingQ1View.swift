@@ -43,8 +43,6 @@ struct OnboardingQ1View: View {
 
     private var questionHeader: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("🏠")
-                .font(.system(size: 36))
             Text("What kind of home\ndo you live in?")
                 .font(.system(size: 26, weight: .bold))
                 .foregroundColor(CozyTheme.primary)

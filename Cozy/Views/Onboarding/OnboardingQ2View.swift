@@ -47,8 +47,6 @@ struct OnboardingQ2View: View {
 
     private var questionHeader: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("👥")
-                .font(.system(size: 36))
             Text("Who shares your\nhome with you?")
                 .font(.system(size: 26, weight: .bold))
                 .foregroundColor(CozyTheme.primary)

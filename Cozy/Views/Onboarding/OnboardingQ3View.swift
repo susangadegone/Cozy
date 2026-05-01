@@ -43,8 +43,6 @@ struct OnboardingQ3View: View {
 
     private var questionHeader: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("🧹")
-                .font(.system(size: 36))
             Text("How do you prefer\nto handle chores?")
                 .font(.system(size: 26, weight: .bold))
                 .foregroundColor(CozyTheme.primary)

@@ -12,6 +12,7 @@ enum AppRoute: Equatable {
     case onboardingQ4
     case onboardingQ5
     case scheduleReady
+    case recap
     case dashboard
 }
 

@@ -44,6 +44,8 @@ struct RootView: View {
             OnboardingQ5View()
         case .scheduleReady:
             ScheduleReadyView()
+        case .recap:
+            OnboardingRecapView()
         case .dashboard:
             mainTabs
         }
@@ -53,6 +55,8 @@ struct RootView: View {
         TabView {
             HomeView()
                 .tabItem { Label("Home", systemImage: "house.fill") }
+            CalendarView()
+                .tabItem { Label("Calendar", systemImage: "calendar") }
             ProfileView()
                 .tabItem { Label("Profile", systemImage: "person.fill") }
         }
