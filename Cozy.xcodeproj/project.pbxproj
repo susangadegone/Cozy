@@ -26,6 +26,7 @@
 		59E768CA3C423CFFD28517C1 /* OnboardingQ1View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 377DB9E362D49E868CAE1EA6 /* OnboardingQ1View.swift */; };
 		5B95BE7E3A05CEC14ED07957 /* ChoreTrayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEA7142AF91D5CBAE6C81D6 /* ChoreTrayView.swift */; };
 		5F2C930980429932F256E13F /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F72CD998737E99C59F15A4C9 /* SupabaseConfig.swift */; };
+		5F7BC1CD477E600D2010417D /* PresetChoreLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13E9F742C6C9C5ACC39D4FEB /* PresetChoreLibrary.swift */; };
 		68362E21237049111F1D9C90 /* OnboardingFinale.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26DCE7F72815D4D734B4126 /* OnboardingFinale.swift */; };
 		6898E2F45C0C7DFEE2F53B51 /* BadgeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9501FBEDA9BEFDDD17CE1D7 /* BadgeService.swift */; };
 		6DE14890CCB6A436DD901920 /* OnboardingStep4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3328C29606F144AC5DC5EE98 /* OnboardingStep4.swift */; };
@@ -73,6 +74,7 @@
 		04C439911253436E9F80C581 /* PartnerInviteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerInviteView.swift; sourceTree = "<group>"; };
 		09D9F7C7ABD764041E0C51B2 /* BadgeGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeGridView.swift; sourceTree = "<group>"; };
 		09DE828A909208CF43FFBCF9 /* ChoresView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoresView.swift; sourceTree = "<group>"; };
+		13E9F742C6C9C5ACC39D4FEB /* PresetChoreLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetChoreLibrary.swift; sourceTree = "<group>"; };
 		1B0B2E525114F96C2DA2996F /* OnboardingStep5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep5.swift; sourceTree = "<group>"; };
 		1EC5A77FBE93BD5AB344AE77 /* MonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthView.swift; sourceTree = "<group>"; };
 		2137E0C63B37D3B3E93B7CBF /* AuthFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthFormView.swift; sourceTree = "<group>"; };
@@ -147,6 +149,7 @@
 			isa = PBXGroup;
 			children = (
 				AF4A1D4E01A7B9FE6D132BE1 /* Models.swift */,
+				13E9F742C6C9C5ACC39D4FEB /* PresetChoreLibrary.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -412,6 +415,7 @@
 				A55194DBB8E69D62C75425A0 /* OnboardingView.swift in Sources */,
 				EEB49F4C50FDB7BF4D0F2B9A /* OnboardingViewModel.swift in Sources */,
 				87B332465754EF7D655A938E /* PartnerInviteView.swift in Sources */,
+				5F7BC1CD477E600D2010417D /* PresetChoreLibrary.swift in Sources */,
 				DA78B3B67F82835BA2E5B590 /* ProfileView.swift in Sources */,
 				76169137FD2D4B18AFF823D6 /* RootView.swift in Sources */,
 				F9084DBCF7562EA4EA386B4B /* ScheduleReadyView.swift in Sources */,

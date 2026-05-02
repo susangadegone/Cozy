@@ -110,8 +110,12 @@ final class AppState: ObservableObject {
         profile = p
         store.saveProfile(p)
 
-        // Seed preset chores for selected rooms
-        chores = store.seedChoresIfNeeded(for: rooms, userId: p.id)
+        // Seed from curated preset library (new users only — guard inside)
+        if chores.isEmpty {
+            let seeded = store.seedFromPresets(for: rooms, userId: p.id)
+            chores = seeded
+            store.saveChores(seeded)
+        }
 
         NotificationCenter.default.post(name: .onboardingCompleted, object: nil)
     }
