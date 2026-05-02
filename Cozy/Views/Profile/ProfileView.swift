@@ -10,10 +10,6 @@ struct ProfileView: View {
     @State private var showAvatarPicker = false
     @State private var showInsights = false
     @State private var showSettings = false
-    @State private var showInvite = false
-
-    private let avatarOptions = ["🧑","👩","👨","🧒","👧","👦","🧔","👩‍🦰","👩‍🦱","👩‍🦳","🧓","🧕",
-                                  "😊","😎","🥰","🤗","😇","🐶","🐱","🐼","🦊","🦄","🌸","⭐"]
 
     var body: some View {
         NavigationView {
@@ -55,9 +51,6 @@ struct ProfileView: View {
         .sheet(isPresented: $showSettings) {
             SettingsView().environmentObject(appState).environmentObject(authManager)
         }
-        .sheet(isPresented: $showInvite) {
-            PartnerInviteView().environmentObject(appState)
-        }
         .onChange(of: appState.newlyEarnedBadge) { badge in
             if badge != nil { withAnimation(.spring()) { showBadgeToast = true } }
         }
@@ -67,7 +60,6 @@ struct ProfileView: View {
     private var headerSection: some View {
         VStack(spacing: 14) {
             avatarCircle.padding(.top, 20)
-            if showAvatarPicker { avatarPickerRow }
             if isEditingName {
                 nameEditRow
             } else {
@@ -75,7 +67,11 @@ struct ProfileView: View {
                     Text(appState.profile?.displayName ?? "You")
                         .font(.system(size: 22, weight: .bold))
                         .foregroundColor(CozyTheme.primary)
-                    roleBadgeRow
+                    if let joined = appState.profile?.joinedAt {
+                        Text("Joined \(formattedJoin(joined))")
+                            .font(.system(size: 12))
+                            .foregroundColor(CozyTheme.mutedText)
+                    }
                 }
             }
             editButtons
@@ -85,65 +81,22 @@ struct ProfileView: View {
     }
 
     private var avatarCircle: some View {
-        Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                showAvatarPicker.toggle()
-            }
-        } label: {
-            ZStack {
-                Circle()
-                    .fill(CozyTheme.primary)
-                    .frame(width: 86, height: 86)
-                Text(String(appState.profile?.displayName.prefix(1) ?? "?").uppercased())
-                    .font(.system(size: 32, weight: .semibold))
-                    .foregroundColor(Color(hex: "FAF7F2"))
-                // camera badge
-                Circle()
-                    .fill(CozyTheme.accent)
-                    .frame(width: 26, height: 26)
-                    .overlay(Image(systemName: "pencil").font(.system(size: 11, weight: .semibold)).foregroundColor(.white))
-                    .offset(x: 28, y: 28)
-            }
+        ZStack {
+            Circle()
+                .fill(CozyTheme.primary)
+                .frame(width: 86, height: 86)
+            Text(String(appState.profile?.displayName.prefix(1) ?? "?").uppercased())
+                .font(.system(size: 32, weight: .semibold))
+                .foregroundColor(Color(hex: "FAF7F2"))
         }
-        .buttonStyle(.plain)
         .shadow(color: CozyTheme.primary.opacity(0.2), radius: 10, y: 4)
-    }
-
-    private var avatarPickerRow: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                ForEach(avatarOptions, id: \.self) { emoji in
-                    let isSelected = appState.profile?.avatarEmoji == emoji
-                    Button {
-                        Task {
-                            await appState.updateAvatarEmoji(emoji)
-                        }
-                        withAnimation { showAvatarPicker = false }
-                    } label: {
-                        Text(emoji)
-                            .font(.system(size: 28))
-                            .frame(width: 46, height: 46)
-                            .background(isSelected ? CozyTheme.accent.opacity(0.2) : CozyTheme.card)
-                            .overlay(RoundedRectangle(cornerRadius: 12)
-                                .stroke(isSelected ? CozyTheme.accent : CozyTheme.border, lineWidth: isSelected ? 2 : 1))
-                            .cornerRadius(12)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 4)
-        }
     }
 
     private var editButtons: some View {
         HStack(spacing: 10) {
             Button {
                 editedName = appState.profile?.displayName ?? ""
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isEditingName.toggle()
-                    showAvatarPicker = false
-                }
+                withAnimation(.easeInOut(duration: 0.2)) { isEditingName.toggle() }
             } label: {
                 Label(isEditingName ? "Cancel" : "Edit Name",
                       systemImage: isEditingName ? "xmark" : "pencil")
@@ -167,7 +120,6 @@ struct ProfileView: View {
                 .background(CozyTheme.card)
                 .cornerRadius(12)
                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(CozyTheme.border, lineWidth: 1))
-
             Button {
                 let name = editedName.trimmingCharacters(in: .whitespaces)
                 guard !name.isEmpty else { return }
@@ -185,32 +137,11 @@ struct ProfileView: View {
         .padding(.horizontal, 20)
     }
 
-    private var roleBadgeRow: some View {
-        HStack(spacing: 8) {
-            let admin = appState.profile?.isAdmin == true
-            Label(admin ? "Admin" : "Member", systemImage: admin ? "crown.fill" : "person.fill")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(CozyTheme.accent)
-                .padding(.horizontal, 10).padding(.vertical, 4)
-                .background(CozyTheme.accent.opacity(0.12))
-                .cornerRadius(20)
-
-            if let joined = appState.profile?.joinedAt {
-                Text("Joined \(formattedJoin(joined))")
-                    .font(.system(size: 12))
-                    .foregroundColor(CozyTheme.mutedText)
-            }
-        }
-    }
-
-    // MARK: - Quick Actions
+    // MARK: - Quick Actions (2 tiles)
     private var quickActionsRow: some View {
         HStack(spacing: 10) {
             quickActionBtn(icon: "chart.bar.fill", label: "Insights", color: Color(hex: "7B6EF6")) {
                 showInsights = true
-            }
-            quickActionBtn(icon: "person.2.fill", label: "Invite", color: CozyTheme.accent) {
-                showInvite = true
             }
             quickActionBtn(icon: "gearshape.fill", label: "Settings", color: CozyTheme.primary) {
                 showSettings = true
@@ -242,12 +173,11 @@ struct ProfileView: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - Stats
+    // MARK: - Stats (2 cards)
     private var statsRow: some View {
         HStack(spacing: 12) {
             StatCard(value: "\(appState.totalDone)", label: "Total Done", icon: "checkmark.seal.fill", color: .green)
             StatCard(value: "\(appState.currentStreak)", label: "Day Streak", icon: "flame.fill", color: .orange)
-            StatCard(value: "\(appState.profile?.members.count ?? 1)", label: "Members", icon: "house.fill", color: CozyTheme.accent)
         }
     }
 
@@ -344,11 +274,9 @@ struct ProfileView: View {
         }
     }
 
-    // MARK: - Sign Out
+    // MARK: - Sign Out / Settings
     private var signOutBtn: some View {
-        Button {
-            showSettings = true
-        } label: {
+        Button { showSettings = true } label: {
             HStack(spacing: 8) {
                 Image(systemName: "gearshape")
                 Text("More Settings")
@@ -425,7 +353,7 @@ struct BadgeToast: View {
         HStack(spacing: 14) {
             Text(badge.icon).font(.system(size: 30))
             VStack(alignment: .leading, spacing: 2) {
-                Text("Badge Earned! 🎉")
+                Text("Badge Earned!")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(CozyTheme.accent)
                 Text(badge.name)

@@ -70,15 +70,6 @@ final class AppState: ObservableObject {
         return streak
     }
 
-    // MARK: - Household breakdown
-    var memberBreakdown: [(name: String, emoji: String, done: Int, total: Int)] {
-        guard let members = profile?.members else { return [] }
-        return members.map { m in
-            let mc = weekChores.filter { $0.assignedTo == m.name }
-            return (m.name, m.emoji, mc.filter(\.isDone).count, mc.count)
-        }
-    }
-
     // MARK: - Chore history
     var choreHistory: [Chore] {
         chores.filter(\.isDone).sorted {
@@ -108,12 +99,11 @@ final class AppState: ObservableObject {
     }
 
     /// Called by OnboardingView finale — saves profile + seeds chores
-    func completeOnboarding(name: String, householdType: String, members: [HouseholdMember],
+    func completeOnboarding(name: String, homeName: String,
                             rooms: [String], notificationPref: String) {
         guard var p = profile else { return }
         p.displayName = name
-        p.householdType = householdType
-        p.members = members
+        p.homeName = homeName
         p.rooms = rooms
         p.notificationPreference = notificationPref
         p.onboardingCompleted = true
@@ -157,6 +147,9 @@ final class AppState: ObservableObject {
         store.saveChores(chores)
     }
 
+    func addHouseholdMember(_ member: HouseholdMember) {}
+    func removeMember(_ member: HouseholdMember) {}
+
     func rescheduleChore(_ chore: Chore, to date: Date) {
         guard let i = chores.firstIndex(where: { $0.id == chore.id }) else { return }
         let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"
@@ -176,21 +169,6 @@ final class AppState: ObservableObject {
     func updateAvatarEmoji(_ emoji: String) {
         guard var p = profile else { return }
         p.avatarEmoji = emoji
-        profile = p
-        store.saveProfile(p)
-    }
-
-    func addHouseholdMember(_ member: HouseholdMember) {
-        guard var p = profile else { return }
-        guard !p.members.contains(where: { $0.name.lowercased() == member.name.lowercased() }) else { return }
-        p.members.append(member)
-        profile = p
-        store.saveProfile(p)
-    }
-
-    func removeMember(_ member: HouseholdMember) {
-        guard var p = profile else { return }
-        p.members.removeAll { $0.name == member.name }
         profile = p
         store.saveProfile(p)
     }

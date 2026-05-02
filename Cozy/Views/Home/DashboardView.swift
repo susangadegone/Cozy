@@ -55,7 +55,6 @@ struct DashboardView: View {
             if mood != .overwhelming { weekProgressCard }
             todaySection
             if !upcomingChores.isEmpty && mood != .overwhelming { upcomingCard }
-            if !appState.memberBreakdown.isEmpty && mood == .none { householdSection }
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
@@ -501,14 +500,7 @@ struct DashChoreRow: View {
 
     @ViewBuilder
     private var assigneeAvatar: some View {
-        if !chore.assignedTo.isEmpty {
-            Text(chore.assignedTo.prefix(1).uppercased())
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(.white)
-                .frame(width: 22, height: 22)
-                .background(CozyTheme.accent)
-                .clipShape(Circle())
-        }
+        EmptyView()
     }
 }
 

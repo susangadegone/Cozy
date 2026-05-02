@@ -4,14 +4,12 @@ import Foundation
 struct UserPreferences: Codable {
     var dailyReminders: Bool = true
     var overdueAlerts: Bool = true
-    var partnerActivity: Bool = false
     var streakReminders: Bool = true
     var weekStartsOnSunday: Bool = true
 
     enum CodingKeys: String, CodingKey {
         case dailyReminders = "daily_reminders"
         case overdueAlerts = "overdue_alerts"
-        case partnerActivity = "partner_activity"
         case streakReminders = "streak_reminders"
         case weekStartsOnSunday = "week_starts_sunday"
     }
@@ -21,34 +19,27 @@ struct UserPreferences: Codable {
 struct Profile: Codable, Identifiable {
     let id: UUID
     var displayName: String
-    var householdType: String
-    var members: [HouseholdMember]
+    var homeName: String
     var rooms: [String]
     var notificationPreference: String
     var onboardingCompleted: Bool
-    var role: String?
     var joinedAt: String?
     var earnedBadgeIds: [String]?
     var preferences: UserPreferences?
-    var inviteCode: String?
     var avatarEmoji: String?
 
     enum CodingKeys: String, CodingKey {
         case id
         case displayName = "display_name"
-        case householdType = "household_type"
-        case members, rooms
+        case homeName = "home_name"
+        case rooms
         case notificationPreference = "notification_preference"
         case onboardingCompleted = "onboarding_completed"
-        case role
         case joinedAt = "joined_at"
         case earnedBadgeIds = "earned_badge_ids"
         case preferences
-        case inviteCode = "invite_code"
         case avatarEmoji = "avatar_emoji"
     }
-
-    var isAdmin: Bool { role == "admin" || role == nil }
 
     var initials: String {
         let parts = displayName.split(separator: " ")
@@ -59,12 +50,11 @@ struct Profile: Codable, Identifiable {
     }
 }
 
-// MARK: - HouseholdMember
+// MARK: - HouseholdMember (legacy stub — kept for compile compatibility)
 struct HouseholdMember: Codable, Identifiable, Hashable {
     var id: String { name }
     let name: String
     let emoji: String
-    var role: String?
 }
 
 // MARK: - Chore
@@ -74,7 +64,6 @@ struct Chore: Codable, Identifiable {
     var roomId: String
     var choreName: String
     var dayOfWeek: String
-    var assignedTo: String
     var isDone: Bool
     var scheduledDate: String
     var completedAt: String?
@@ -85,7 +74,6 @@ struct Chore: Codable, Identifiable {
         case roomId = "room_id"
         case choreName = "chore_name"
         case dayOfWeek = "day_of_week"
-        case assignedTo = "assigned_to"
         case isDone = "is_done"
         case scheduledDate = "scheduled_date"
         case completedAt = "completed_at"

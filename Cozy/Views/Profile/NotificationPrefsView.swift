@@ -27,16 +27,6 @@ struct NotificationPrefsView: View {
             )
             divider
             toggleRow(
-                label: "Partner activity",
-                icon: "person.2.fill",
-                color: CozyTheme.accent,
-                binding: Binding(
-                    get: { appState.preferences.partnerActivity },
-                    set: { appState.preferences.partnerActivity = $0; save() }
-                )
-            )
-            divider
-            toggleRow(
                 label: "Streak reminders",
                 icon: "flame.fill",
                 color: .orange,
@@ -78,7 +68,7 @@ struct NotificationPrefsView: View {
 
     private func requestPermissionIfNeeded() {
         let prefs = appState.preferences
-        let anyOn = prefs.dailyReminders || prefs.overdueAlerts || prefs.partnerActivity || prefs.streakReminders
+        let anyOn = prefs.dailyReminders || prefs.overdueAlerts || prefs.streakReminders
         guard anyOn else { return }
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, err in
             if let err = err { NSLog("Notification permission error: \(err)") }
