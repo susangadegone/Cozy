@@ -147,6 +147,12 @@ final class AppState: ObservableObject {
         store.saveChores(chores)
     }
 
+    func updateChore(_ chore: Chore) {
+        guard let i = chores.firstIndex(where: { $0.id == chore.id }) else { return }
+        chores[i] = chore
+        store.saveChores(chores)
+    }
+
     func addHouseholdMember(_ member: HouseholdMember) {}
     func removeMember(_ member: HouseholdMember) {}
 

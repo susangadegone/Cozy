@@ -9,6 +9,7 @@ struct ChoreDetailView: View {
     @State private var showDeleteConfirm = false
     @State private var showReschedule = false
     @State private var rescheduleDate = Date()
+    @State private var showEdit = false
 
     private var room: Room? { Room.defaults.first { $0.id == chore.roomId } }
 
@@ -52,6 +53,10 @@ struct ChoreDetailView: View {
         }
         .sheet(isPresented: $showReschedule) {
             rescheduleSheet
+        }
+        .sheet(isPresented: $showEdit) {
+            EditChoreView(chore: chore)
+                .environmentObject(appState)
         }
     }
 
@@ -133,6 +138,17 @@ struct ChoreDetailView: View {
     // MARK: - Actions
     private var actionsSection: some View {
         VStack(spacing: 10) {
+            Button { showEdit = true } label: {
+                Text("Edit chore")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(CozyTheme.primary)
+                    .frame(maxWidth: .infinity).frame(height: 48)
+                    .background(CozyTheme.card)
+                    .cornerRadius(12)
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(CozyTheme.border, lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+
             Button { showReschedule = true } label: {
                 Text("Reschedule")
                     .font(.system(size: 15, weight: .medium))

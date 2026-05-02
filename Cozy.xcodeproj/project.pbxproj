@@ -46,6 +46,7 @@
 		B6B347E48D89CC9963361AB1 /* WeekStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78C0776E7767DC8F5484E49A /* WeekStripView.swift */; };
 		B72ADC6BEB7B2EEAAB5C82D0 /* ScienceTrustView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD973002C83193782DC45391 /* ScienceTrustView.swift */; };
 		B9C28C184F13570576BCCAAD /* CalendarHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D037AA57F9C56F60AA7E40 /* CalendarHelpers.swift */; };
+		BA48BB3CF98345440AC92B34 /* EditChoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 643C63405702E848DC8BDBED /* EditChoreView.swift */; };
 		BAECA3174FDEA96C4392A6D3 /* OnboardingStep1.swift in Sources */ = {isa = PBXBuildFile; fileRef = F826DEC4C80D8F813CF980AE /* OnboardingStep1.swift */; };
 		BFE951B32418ABC233291736 /* DataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7F888FC5F7F45390693E254 /* DataService.swift */; };
 		C05F7D9E5A074C795530AF04 /* OnboardingStep3.swift in Sources */ = {isa = PBXBuildFile; fileRef = A04DCD7141588AFEAD32864A /* OnboardingStep3.swift */; };
@@ -91,6 +92,7 @@
 		5E2BA0AE4C53E265D4D4F0EC /* OnboardingQ3View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingQ3View.swift; sourceTree = "<group>"; };
 		612F00D5A618CDE804A96CDC /* CozyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyApp.swift; sourceTree = "<group>"; };
 		616C9B61556E6F41E912D812 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		643C63405702E848DC8BDBED /* EditChoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditChoreView.swift; sourceTree = "<group>"; };
 		71D037AA57F9C56F60AA7E40 /* CalendarHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarHelpers.swift; sourceTree = "<group>"; };
 		78C0776E7767DC8F5484E49A /* WeekStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekStripView.swift; sourceTree = "<group>"; };
 		819737D6BB603362F0AC4AF6 /* CozyTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyTheme.swift; sourceTree = "<group>"; };
@@ -225,6 +227,7 @@
 				5E026455FA8CB87877B7FB00 /* ConfettiOverlay.swift */,
 				9F748F412D2AB9A2EA205B2C /* DashboardView.swift */,
 				8E5740F17F6A570A318B64D3 /* DragDropManager.swift */,
+				643C63405702E848DC8BDBED /* EditChoreView.swift */,
 				EE2714606E01035824B61B8E /* FloatingDragChip.swift */,
 				3D279CE06BA349D3086F948A /* HomeView.swift */,
 				1EC5A77FBE93BD5AB344AE77 /* MonthView.swift */,
@@ -384,6 +387,7 @@
 				2B2C274159D8D8F382E6351D /* DashboardView.swift in Sources */,
 				BFE951B32418ABC233291736 /* DataService.swift in Sources */,
 				3AF9A8E7555857F001B769C8 /* DragDropManager.swift in Sources */,
+				BA48BB3CF98345440AC92B34 /* EditChoreView.swift in Sources */,
 				26701BD811E88E5F283B8AD8 /* FloatingDragChip.swift in Sources */,
 				5864AED484F4398CDE7092EC /* HomeView.swift in Sources */,
 				9F09307CF720B101FA76829B /* HouseholdPanelView.swift in Sources */,
