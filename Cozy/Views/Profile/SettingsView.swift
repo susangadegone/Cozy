@@ -4,6 +4,7 @@ import UserNotifications
 // MARK: - SettingsView
 struct SettingsView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var appRouter: AppRouter
     @Environment(\.dismiss) private var dismiss
 
     @State private var showDeleteConfirm = false
@@ -172,6 +173,7 @@ struct SettingsView: View {
                     .padding(.top, 8)
                 Button {
                     appState.devResetAll()
+                    appRouter.navigate(to: .onboardingName)
                     dismiss()
                 } label: {
                     HStack(spacing: 8) {

@@ -3,17 +3,20 @@ import SwiftUI
 @main
 struct CozyApp: App {
     @StateObject private var appState = AppState()
+    @StateObject private var appRouter = AppRouter()
+    @StateObject private var onboardingVM = OnboardingViewModel()
 
     var body: some Scene {
         WindowGroup {
             AppEntryView()
                 .environmentObject(appState)
+                .environmentObject(appRouter)
+                .environmentObject(onboardingVM)
         }
     }
 }
 
-/// Decides whether to show onboarding or the main app.
-/// Uses a computed property so SwiftUI re-renders reactively whenever profile changes.
+/// Reactively routes between onboarding and main app based on profile state.
 struct AppEntryView: View {
     @EnvironmentObject var appState: AppState
 
@@ -25,11 +28,9 @@ struct AppEntryView: View {
         Group {
             if onboardingCompleted {
                 RootView()
-                    .environmentObject(appState)
                     .transition(.opacity)
             } else {
                 OnboardingView()
-                    .environmentObject(appState)
                     .transition(.opacity)
             }
         }

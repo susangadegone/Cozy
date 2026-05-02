@@ -20,7 +20,7 @@ struct OnboardingQ3View: View {
     ]
 
     var body: some View {
-        OnboardingShell(step: 3, total: 5, onBack: { appRouter.navigate(to: .onboardingQ2) }) {
+        OnboardingShell(step: 3, total: 6, onBack: { appRouter.navigate(to: .onboardingQ2) }) {
             questionHeader
                 .padding(.bottom, 24)
                 .opacity(appeared ? 1 : 0)

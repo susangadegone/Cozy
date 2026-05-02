@@ -3,6 +3,7 @@ import SwiftUI
 struct ScheduleReadyView: View {
     @EnvironmentObject var appRouter: AppRouter
     @EnvironmentObject var onboardingVM: OnboardingViewModel
+    @EnvironmentObject var appState: AppState
 
     @State private var headlineVisible = false
     @State private var summaryVisible  = false
@@ -160,12 +161,19 @@ struct ScheduleReadyView: View {
     }
 
     private var letsGoButton: some View {
-        Button { appRouter.navigate(to: .recap) } label: {
+        Button {
+            // onboarding data already saved in Q5 — just flip the flag to enter the app
+            if var p = appState.profile {
+                p.onboardingCompleted = true
+                appState.profile = p
+                LocalStore.shared.saveProfile(p)
+            }
+        } label: {
             RoundedRectangle(cornerRadius: CozyTheme.pillRadius)
                 .fill(CozyTheme.accent)
                 .frame(height: 54)
                 .overlay(
-                    Text("Let's go →")
+                    Text("Open Cozy →")
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.white)
                 )

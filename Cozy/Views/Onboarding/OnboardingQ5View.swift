@@ -4,6 +4,7 @@ import UserNotifications
 struct OnboardingQ5View: View {
     @EnvironmentObject var appRouter: AppRouter
     @EnvironmentObject var onboardingVM: OnboardingViewModel
+    @EnvironmentObject var appState: AppState
 
     @State private var selection: String? = nil
     @State private var isBuilding = false
@@ -22,7 +23,7 @@ struct OnboardingQ5View: View {
     ]
 
     var body: some View {
-        OnboardingShell(step: 5, total: 5, onBack: { appRouter.navigate(to: .onboardingQ4) }) {
+        OnboardingShell(step: 5, total: 6, onBack: { appRouter.navigate(to: .onboardingQ4) }) {
             questionHeader
                 .padding(.bottom, 24)
                 .opacity(appeared ? 1 : 0)
@@ -82,6 +83,26 @@ struct OnboardingQ5View: View {
         let center = UNUserNotificationCenter.current()
         let granted = (try? await center.requestAuthorization(options: [.alert, .sound, .badge])) ?? false
         if granted { scheduleNotification(for: chosen, center: center) }
+
+        // Map rooms from onboardingVM (display names) to room IDs used by preset library
+        let roomIdMap: [String: String] = [
+            "Kitchen": "kitchen",
+            "Bedroom": "bedroom",
+            "Bathroom": "bathroom",
+            "Living room": "living_room",
+            "Outdoor/yard": "outdoor",
+            "Home office": "office",
+            "Other": "other"
+        ]
+        let roomIds = onboardingVM.selectedRooms.compactMap { roomIdMap[$0] }
+
+        // Save all onboarding data and seed chores
+        appState.completeOnboarding(
+            name: onboardingVM.userName,
+            homeName: onboardingVM.userName.isEmpty ? "My Home" : "\(onboardingVM.userName)'s Home",
+            rooms: roomIds.isEmpty ? Array(onboardingVM.selectedRooms) : roomIds,
+            notificationPref: chosen
+        )
 
         onboardingVM.generateSchedule()
         isBuilding = false

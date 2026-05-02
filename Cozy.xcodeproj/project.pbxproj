@@ -33,12 +33,14 @@
 		6C228A772CB1E1B8E8E78FBC /* GIT_QUICKREF.md in Resources */ = {isa = PBXBuildFile; fileRef = CAA3C01671CBBB08BC08B2DB /* GIT_QUICKREF.md */; };
 		6DE14890CCB6A436DD901920 /* OnboardingStep4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3328C29606F144AC5DC5EE98 /* OnboardingStep4.swift */; };
 		6FC7358723EEF5B466C9456D /* OnboardingQ2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = D125F051AADC8FE2B391CDC4 /* OnboardingQ2View.swift */; };
+		746614A1FAB6E25468EB2948 /* TESTING_GUIDE.md in Resources */ = {isa = PBXBuildFile; fileRef = 9B7EF337E2FE18D48DEA1562 /* TESTING_GUIDE.md */; };
 		74D6E26A096BBB05158080A3 /* ChoreDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26F66028700C4B400AEF136 /* ChoreDetailView.swift */; };
 		76169137FD2D4B18AFF823D6 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAA9EA36A6984ACCACA3C7C /* RootView.swift */; };
 		7BCD42C72B9747AEA64071BC /* GITHUB_SETUP.md in Resources */ = {isa = PBXBuildFile; fileRef = 24BEB00595ED84E2DC730F32 /* GITHUB_SETUP.md */; };
 		7C4EC61596374C0273AFB7A1 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAAF789037C2180EC18D703 /* SettingsView.swift */; };
 		87B332465754EF7D655A938E /* PartnerInviteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04C439911253436E9F80C581 /* PartnerInviteView.swift */; };
 		8B0D8D1E2A202696F99F5B58 /* AuthFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2137E0C63B37D3B3E93B7CBF /* AuthFormView.swift */; };
+		8BD813D8FE26F0547B4C1963 /* SIMULATION_QUICK_START.md in Resources */ = {isa = PBXBuildFile; fileRef = 90A1F606FA87D8ACCD59C8BB /* SIMULATION_QUICK_START.md */; };
 		90D01C3CECCD81D633C9FA21 /* OnboardingStep2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8293F2BF25E38C4D35EF3493 /* OnboardingStep2.swift */; };
 		9EB96C99A24EEA97CB740584 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 616C9B61556E6F41E912D812 /* WelcomeView.swift */; };
 		9F09307CF720B101FA76829B /* HouseholdPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED2D9F725A479E126A5990E /* HouseholdPanelView.swift */; };
@@ -111,7 +113,9 @@
 		8E5740F17F6A570A318B64D3 /* DragDropManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragDropManager.swift; sourceTree = "<group>"; };
 		8ED2D9F725A479E126A5990E /* HouseholdPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseholdPanelView.swift; sourceTree = "<group>"; };
 		9071A204A6DFD1DD0D005916 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		90A1F606FA87D8ACCD59C8BB /* SIMULATION_QUICK_START.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SIMULATION_QUICK_START.md; sourceTree = "<group>"; };
 		96B1170808E3FF4F4954EF62 /* ScheduleReadyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleReadyView.swift; sourceTree = "<group>"; };
+		9B7EF337E2FE18D48DEA1562 /* TESTING_GUIDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TESTING_GUIDE.md; sourceTree = "<group>"; };
 		9BB2588917122D4F60EA3660 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
 		9CFE8F830F071EB9612DEFF0 /* .gitignore */ = {isa = PBXFileReference; path = .gitignore; sourceTree = "<group>"; };
 		9F748F412D2AB9A2EA205B2C /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
@@ -251,6 +255,8 @@
 				3D279CE06BA349D3086F948A /* HomeView.swift */,
 				1EC5A77FBE93BD5AB344AE77 /* MonthView.swift */,
 				134EA5B1F5696832F25794FC /* README.md */,
+				90A1F606FA87D8ACCD59C8BB /* SIMULATION_QUICK_START.md */,
+				9B7EF337E2FE18D48DEA1562 /* TESTING_GUIDE.md */,
 				78C0776E7767DC8F5484E49A /* WeekStripView.swift */,
 			);
 			path = Home;
@@ -381,6 +387,8 @@
 				6C228A772CB1E1B8E8E78FBC /* GIT_QUICKREF.md in Resources */,
 				1CAB5A32C3B766544D4ABDFC /* LaunchScreen.storyboard in Resources */,
 				662106F7C8C9C942AB1FC7FB /* README.md in Resources */,
+				8BD813D8FE26F0547B4C1963 /* SIMULATION_QUICK_START.md in Resources */,
+				746614A1FAB6E25468EB2948 /* TESTING_GUIDE.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

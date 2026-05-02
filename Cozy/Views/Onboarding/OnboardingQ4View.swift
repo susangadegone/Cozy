@@ -26,7 +26,7 @@ struct OnboardingQ4View: View {
     private let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
-        OnboardingShell(step: 4, total: 5, onBack: { appRouter.navigate(to: .onboardingQ3) }) {
+        OnboardingShell(step: 4, total: 6, onBack: { appRouter.navigate(to: .onboardingQ3) }) {
             questionHeader
                 .padding(.bottom, 20)
                 .opacity(appeared ? 1 : 0)

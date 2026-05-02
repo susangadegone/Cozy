@@ -6,6 +6,7 @@ enum AppRoute: Equatable {
     case signUp
     case login
     case science
+    case onboardingName
     case onboardingQ1
     case onboardingQ2
     case onboardingQ3
@@ -26,9 +27,15 @@ final class AppRouter: ObservableObject {
 
     func navigateBack() {
         switch route {
+        case .onboardingQ1:  route = .onboardingName
+        case .onboardingQ2:  route = .onboardingQ1
+        case .onboardingQ3:  route = .onboardingQ2
+        case .onboardingQ4:  route = .onboardingQ3
+        case .onboardingQ5:  route = .onboardingQ4
+        case .scheduleReady: route = .onboardingQ5
         case .login, .signUp: route = .welcome
         case .science:        route = .signUp
-        default:              route = .welcome
+        default:              route = .onboardingName
         }
     }
 }

@@ -1,222 +1,111 @@
 import SwiftUI
 
+/// Top-level onboarding container — routes between steps via AppRouter.
 struct OnboardingView: View {
+    @EnvironmentObject var appRouter: AppRouter
+    @EnvironmentObject var onboardingVM: OnboardingViewModel
     @EnvironmentObject var appState: AppState
-    @State private var step: Int = 0
-
-    // Step 1 — name
-    @State private var name: String = ""
-    // Step 2 — home name
-    @State private var homeName: String = ""
-    // Step 3 — rooms
-    @State private var selectedRooms: Set<String> = ["kitchen", "bedroom", "bathroom", "living_room"]
-    // Step 4 — notifications
-    @State private var notificationPref: String = "in_app"
-
-    @State private var isSaving = false
-
-    private let totalSteps = 4
 
     var body: some View {
         ZStack {
             CozyTheme.background.ignoresSafeArea()
-            if step < totalSteps {
-                mainFlow
-            } else {
-                finaleView
-            }
+            currentScreen
         }
-        .animation(.easeInOut(duration: 0.3), value: step)
-    }
-
-    // MARK: - Main Flow
-    private var mainFlow: some View {
-        VStack(spacing: 0) {
-            progressBar
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) { stepContent }
-                    .padding(.top, 12)
+        .animation(.easeInOut(duration: 0.3), value: appRouter.route)
+        .onAppear {
+            // Always start fresh at the name-entry step
+            if appRouter.route == .splash || appRouter.route == .welcome {
+                appRouter.navigate(to: .onboardingName)
             }
-            Spacer(minLength: 0)
-            bottomBar
         }
     }
 
     @ViewBuilder
-    private var stepContent: some View {
-        switch step {
-        case 0: OnboardingStep1(name: $name)
-        case 1: homeNameStep
-        case 2: OnboardingStep4(selectedRooms: $selectedRooms)
-        case 3: OnboardingStep5(selected: $notificationPref)
-        default: EmptyView()
+    private var currentScreen: some View {
+        switch appRouter.route {
+        case .onboardingName:
+            OnboardingNameView()
+        case .onboardingQ1:
+            OnboardingQ1View()
+        case .onboardingQ2:
+            OnboardingQ2View()
+        case .onboardingQ3:
+            OnboardingQ3View()
+        case .onboardingQ4:
+            OnboardingQ4View()
+        case .onboardingQ5:
+            OnboardingQ5View()
+        case .scheduleReady:
+            ScheduleReadyView()
+        default:
+            OnboardingNameView()
+        }
+    }
+}
+
+// MARK: - Name Entry Step (Step 0)
+
+struct OnboardingNameView: View {
+    @EnvironmentObject var appRouter: AppRouter
+    @EnvironmentObject var onboardingVM: OnboardingViewModel
+
+    @State private var name: String = ""
+    @State private var appeared = false
+
+    var body: some View {
+        OnboardingShell(step: 0, total: 6, onBack: nil) {
+            VStack(alignment: .leading, spacing: 0) {
+                headerBlock
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 12)
+                    .padding(.bottom, 32)
+                nameField
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 16)
+                Spacer()
+                OnboardingNextButton(isEnabled: !name.trimmingCharacters(in: .whitespaces).isEmpty) {
+                    let trimmed = name.trimmingCharacters(in: .whitespaces)
+                    onboardingVM.userName = trimmed.isEmpty ? "You" : trimmed
+                    appRouter.navigate(to: .onboardingQ1)
+                }
+            }
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.4)) { appeared = true }
         }
     }
 
-    // MARK: - Home Name Step
-    private var homeNameStep: some View {
-        VStack(spacing: 16) {
-            VStack(spacing: 12) {
-                Text("🏡")
-                    .font(.system(size: 64))
-                    .padding(.top, 8)
-                Text("Name your home")
-                    .font(.custom("Fraunces-Regular", size: 28))
-                    .foregroundColor(CozyTheme.primary)
-                Text("Give your place a name.\nThis appears on your home screen.")
-                    .font(.custom("DMSans-Regular", size: 16))
-                    .foregroundColor(CozyTheme.mutedText)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-            }
-            .padding(.bottom, 12)
-
-            TextField("e.g. Cozy Home, The Nest…", text: $homeName)
-                .font(.custom("DMSans-Regular", size: 18))
+    private var headerBlock: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("🏡")
+                .font(.system(size: 48))
+            Text("Welcome to Cozy")
+                .font(.system(size: 28, weight: .bold))
                 .foregroundColor(CozyTheme.primary)
-                .multilineTextAlignment(.center)
+            Text("Let's get your home set up.\nWhat should we call you?")
+                .font(.system(size: 16))
+                .foregroundColor(CozyTheme.mutedText)
+                .lineSpacing(4)
+        }
+    }
+
+    private var nameField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Your name")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(CozyTheme.mutedText)
+            TextField("e.g. Jamie", text: $name)
+                .font(.system(size: 17))
+                .foregroundColor(CozyTheme.primary)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 16)
                 .background(CozyTheme.card)
                 .cornerRadius(CozyTheme.cornerRadius)
-                .overlay(RoundedRectangle(cornerRadius: CozyTheme.cornerRadius).stroke(CozyTheme.border, lineWidth: 1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: CozyTheme.cornerRadius)
+                        .stroke(name.isEmpty ? CozyTheme.border : CozyTheme.accent, lineWidth: 1.5)
+                )
                 .autocorrectionDisabled()
-                .submitLabel(.next)
-                .padding(.horizontal, 24)
-        }
-    }
-
-    // MARK: - Progress Bar
-    private var progressBar: some View {
-        VStack(spacing: 12) {
-            HStack {
-                if step > 0 {
-                    Button(action: goBack) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                            Text("Back")
-                        }
-                        .font(.custom("DMSans-Regular", size: 15))
-                        .foregroundColor(CozyTheme.mutedText)
-                    }
-                }
-                Spacer()
-                Text("Step \(step + 1) of \(totalSteps)")
-                    .font(.custom("DMSans-Regular", size: 13))
-                    .foregroundColor(CozyTheme.mutedText)
-            }
-            .padding(.horizontal, 24)
-            .padding(.top, 16)
-
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 4).fill(CozyTheme.border).frame(height: 6)
-                    let pct = CGFloat(step + 1) / CGFloat(totalSteps)
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(CozyTheme.accent)
-                        .frame(width: geo.size.width * min(pct, 1.0), height: 6)
-                        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: step)
-                }
-            }
-            .frame(height: 6)
-            .padding(.horizontal, 24)
-        }
-        .padding(.bottom, 8)
-    }
-
-    // MARK: - Bottom Bar
-    private var bottomBar: some View {
-        VStack(spacing: 0) {
-            Divider().background(CozyTheme.border)
-            HStack {
-                Spacer()
-                Button(action: handleNext) {
-                    HStack(spacing: 8) {
-                        if isSaving {
-                            ProgressView().tint(.white).scaleEffect(0.85)
-                        }
-                        Text(step == totalSteps - 1 ? "Let's go" : "Continue")
-                            .font(.custom("DMSans-SemiBold", size: 17))
-                            .foregroundColor(.white)
-                        if !isSaving {
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.white)
-                        }
-                    }
-                    .padding(.horizontal, 28)
-                    .frame(height: 52)
-                    .background(isNextEnabled ? CozyTheme.primary : CozyTheme.border)
-                    .cornerRadius(CozyTheme.cornerRadius)
-                }
-                .disabled(!isNextEnabled || isSaving)
-            }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 16)
-            .padding(.bottom, 8)
-        }
-        .background(CozyTheme.background)
-    }
-
-    // MARK: - Logic
-    private var isNextEnabled: Bool {
-        switch step {
-        case 0: return !name.trimmingCharacters(in: .whitespaces).isEmpty
-        case 2: return !selectedRooms.isEmpty
-        default: return true
-        }
-    }
-
-    private func goBack() {
-        step = max(0, step - 1)
-    }
-
-    private func handleNext() {
-        if step < totalSteps - 1 {
-            step += 1
-        } else {
-            saveAndFinish()
-        }
-    }
-
-    private func saveAndFinish() {
-        isSaving = true
-        let trimmedName = name.trimmingCharacters(in: .whitespaces)
-        let trimmedHome = homeName.trimmingCharacters(in: .whitespaces)
-        appState.completeOnboarding(
-            name: trimmedName.isEmpty ? "You" : trimmedName,
-            homeName: trimmedHome.isEmpty ? "My Home" : trimmedHome,
-            rooms: Array(selectedRooms),
-            notificationPref: notificationPref
-        )
-        isSaving = false
-        step = totalSteps
-    }
-
-    // MARK: - Finale
-    private var finaleView: some View {
-        VStack(spacing: 0) {
-            Spacer()
-            OnboardingFinale(name: name)
-            Spacer()
-            Button(action: {
-                // Mark onboarding complete in profile so routing flips permanently
-                if var p = appState.profile {
-                    p.onboardingCompleted = true
-                    appState.profile = p
-                    LocalStore.shared.saveProfile(p)
-                }
-            }) {
-                Text("Open Cozy")
-                    .font(.custom("DMSans-SemiBold", size: 18))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 56)
-                    .background(CozyTheme.primary)
-                    .cornerRadius(CozyTheme.cornerRadius)
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 48)
         }
     }
 }

@@ -98,7 +98,8 @@ final class AppState: ObservableObject {
         isLoadingData = false
     }
 
-    /// Called by OnboardingView finale — saves profile + seeds chores
+    /// Called from OnboardingQ5 — saves profile data and seeds chores.
+    /// Does NOT set onboardingCompleted — that happens when user taps "Open Cozy" in ScheduleReadyView.
     func completeOnboarding(name: String, homeName: String,
                             rooms: [String], notificationPref: String) {
         guard var p = profile else { return }
@@ -106,18 +107,16 @@ final class AppState: ObservableObject {
         p.homeName = homeName
         p.rooms = rooms
         p.notificationPreference = notificationPref
-        p.onboardingCompleted = true
+        // Do NOT set onboardingCompleted here — ScheduleReadyView does it
         profile = p
         store.saveProfile(p)
 
-        // Seed from curated preset library (new users only — guard inside)
+        // Seed from curated preset library (new users only)
         if chores.isEmpty {
             let seeded = store.seedFromPresets(for: rooms, userId: p.id)
             chores = seeded
             store.saveChores(seeded)
         }
-
-        NotificationCenter.default.post(name: .onboardingCompleted, object: nil)
     }
 
     // MARK: - Mutations
