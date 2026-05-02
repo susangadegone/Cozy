@@ -74,11 +74,6 @@ struct ChoreDetailView: View {
 
             HStack(spacing: 8) {
                 StatusPill(isDone: chore.isDone)
-                if !chore.assignedTo.isEmpty {
-                    Text("· \(chore.assignedTo)")
-                        .font(.system(size: 13))
-                        .foregroundColor(CozyTheme.mutedText)
-                }
             }
         }
         .padding(.horizontal, 20)

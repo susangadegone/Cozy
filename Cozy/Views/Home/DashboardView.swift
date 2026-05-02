@@ -355,20 +355,6 @@ struct DashboardView: View {
         .overlay(RoundedRectangle(cornerRadius: 10).stroke(CozyTheme.border, lineWidth: 1))
     }
 
-    // MARK: Household
-    private var householdSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Household")
-                .font(.system(size: 14, weight: .semibold, design: .serif))
-                .foregroundColor(CozyTheme.primary)
-            ForEach(appState.memberBreakdown, id: \.name) { m in
-                MemberRow(emoji: m.emoji, name: m.name, done: m.done, total: m.total)
-            }
-        }
-        .padding(14)
-        .cardStyle()
-    }
-
     // MARK: Activity Feed (retained, not shown in body per spec)
     private var activityFeedCard: some View {
         VStack(alignment: .leading, spacing: 10) {

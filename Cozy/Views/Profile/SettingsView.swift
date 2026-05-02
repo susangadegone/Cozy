@@ -85,17 +85,6 @@ struct SettingsView: View {
                         set: { appState.preferences.streakReminders = $0; save() }
                     )
                 )
-                Divider().opacity(0.25).padding(.leading, 44)
-                settingsToggle(
-                    label: "Partner activity",
-                    subtitle: "When your partner completes chores",
-                    icon: "person.2.fill",
-                    iconColor: Color(hex: "7B6EF6"),
-                    binding: Binding(
-                        get: { appState.preferences.partnerActivity },
-                        set: { appState.preferences.partnerActivity = $0; save() }
-                    )
-                )
             }
         }
     }
@@ -130,41 +119,12 @@ struct SettingsView: View {
 
     // MARK: - Household Info
     private var householdSection: some View {
-        SettingsCard(title: "Household", icon: "house.fill") {
-            VStack(spacing: 0) {
-                settingsRow(icon: "person.2.fill", iconColor: CozyTheme.accent,
-                            label: "Members",
-                            trailing: Text("\(appState.profile?.members.count ?? 1)").font(.system(size: 14, weight: .semibold)).foregroundColor(CozyTheme.mutedText))
-                Divider().opacity(0.25).padding(.leading, 44)
-                settingsRow(icon: "crown.fill", iconColor: .orange,
-                            label: "Your role",
-                            trailing: Text(appState.profile?.isAdmin == true ? "Admin" : "Member").font(.system(size: 14, weight: .semibold)).foregroundColor(CozyTheme.mutedText))
-                if let code = appState.profile?.inviteCode, !code.isEmpty {
-                    Divider().opacity(0.25).padding(.leading, 44)
-                    HStack(spacing: 12) {
-                        iconCircle("link", color: Color(hex: "7B6EF6"))
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text("Invite code")
-                                .font(.system(size: 15))
-                                .foregroundColor(CozyTheme.primary)
-                            Text(code)
-                                .font(.system(size: 13, weight: .bold, design: .monospaced))
-                                .foregroundColor(CozyTheme.accent)
-                                .tracking(3)
-                        }
-                        Spacer()
-                        Button {
-                            UIPasteboard.general.string = code
-                        } label: {
-                            Image(systemName: "doc.on.doc")
-                                .font(.system(size: 14))
-                                .foregroundColor(CozyTheme.mutedText)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .padding(.vertical, 12)
-                }
-            }
+        SettingsCard(title: "Home", icon: "house.fill") {
+            settingsRow(icon: "house.fill", iconColor: CozyTheme.accent,
+                        label: "Home name",
+                        trailing: Text(appState.profile?.homeName ?? "My Home")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(CozyTheme.mutedText))
         }
     }
 
@@ -223,7 +183,7 @@ struct SettingsView: View {
 
     private func requestNotifPermIfNeeded() {
         let p = appState.preferences
-        guard p.dailyReminders || p.overdueAlerts || p.streakReminders || p.partnerActivity else { return }
+        guard p.dailyReminders || p.overdueAlerts || p.streakReminders else { return }
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
     }
 

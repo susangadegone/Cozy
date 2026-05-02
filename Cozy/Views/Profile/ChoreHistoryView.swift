@@ -107,15 +107,6 @@ struct HistoryRow: View {
                 }
             }
             Spacer()
-            if !chore.assignedTo.isEmpty {
-                Text(chore.assignedTo)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(CozyTheme.accent)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(CozyTheme.accent.opacity(0.1))
-                    .cornerRadius(10)
-            }
         }
         .padding(.vertical, 10)
     }

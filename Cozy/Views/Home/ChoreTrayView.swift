@@ -118,14 +118,7 @@ struct TrayChoreRow: View {
 
     @ViewBuilder
     private var assigneeBadge: some View {
-        if !chore.assignedTo.isEmpty {
-            Text(chore.assignedTo)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundColor(CozyTheme.mutedText)
-                .padding(.horizontal, 8).padding(.vertical, 4)
-                .background(CozyTheme.card)
-                .cornerRadius(8)
-        }
+        EmptyView()
     }
 
     private var doneButton: some View {

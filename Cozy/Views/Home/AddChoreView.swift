@@ -10,18 +10,11 @@ struct AddChoreView: View {
     @State private var choreNameInput: String = ""
     @State private var selectedFrequency: String = "Weekly"
     @State private var selectedDays: Set<String> = []
-    @State private var rotatePartners: Bool = false
     @State private var selectedDate: Date = Date()
-    @State private var assignedTo: String = ""
     @State private var showNameError: Bool = false
 
     private let frequencies = ["Daily", "2–3 times/week", "Weekly", "Every 2 weeks", "Monthly"]
     private let dayPills = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"]
-
-    // Pre-populate assignedTo with current user's name
-    private func defaultAssignedTo() -> String {
-        appState.profile?.displayName ?? "Me"
-    }
 
     var body: some View {
         NavigationStack {
@@ -47,7 +40,7 @@ struct AddChoreView: View {
     // MARK: - Step Indicator
     private var stepIndicator: some View {
         HStack(spacing: 8) {
-            ForEach(0..<4, id: \.self) { i in
+            ForEach(0..<3, id: \.self) { i in
                 Capsule()
                     .fill(i <= step ? CozyTheme.accent : CozyTheme.border)
                     .frame(height: 4)
@@ -64,7 +57,6 @@ struct AddChoreView: View {
         case 0: roomPicker
         case 1: choreDetails
         case 2: schedulePicker
-        case 3: memberPicker
         default: EmptyView()
         }
     }
@@ -190,40 +182,6 @@ struct AddChoreView: View {
                     dayPill(day)
                 }
             }
-
-            if (appState.profile?.members.count ?? 0) > 0 {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Rotate between partners")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(CozyTheme.primary)
-                        Text("Alternates who does this chore each week.")
-                            .font(.system(size: 12))
-                            .foregroundColor(CozyTheme.mutedText)
-                    }
-                    Spacer()
-                    Toggle("", isOn: $rotatePartners)
-                        .toggleStyle(SwitchToggleStyle(tint: CozyTheme.accent))
-                        .labelsHidden()
-                        .animation(.easeInOut(duration: 0.15), value: rotatePartners)
-                }
-                .padding(14)
-                .background(CozyTheme.card)
-                .cornerRadius(14)
-                .overlay(RoundedRectangle(cornerRadius: 14).stroke(CozyTheme.border, lineWidth: 1))
-            }
-
-            Button {
-                if assignedTo.isEmpty { assignedTo = defaultAssignedTo() }
-                withAnimation(.easeInOut(duration: 0.15)) { step = 3 }
-            } label: {
-                Text("Next")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity).frame(height: 50)
-                    .background(CozyTheme.accent)
-                    .cornerRadius(14)
-            }
         }
     }
 
@@ -241,64 +199,10 @@ struct AddChoreView: View {
         }
     }
 
-    private var memberPicker: some View {
-        // Resolve a clean display name — never "Me" or empty
-        let rawName = appState.profile?.displayName ?? ""
-        let trimmed = rawName.trimmingCharacters(in: .whitespaces)
-        let myName = (trimmed.isEmpty || trimmed.lowercased() == "me") ? "You" : trimmed
-        let myEmoji = appState.profile?.avatarEmoji ?? "🙋"
-        let householdMembers = appState.profile?.members ?? []
-        let currentAssigned = assignedTo.isEmpty ? myName : assignedTo
-        // Label shows real name + "(Me)" so it's always clear who "Me" is
-        let myLabel = "\(myName) (Me)"
-        return VStack(alignment: .leading, spacing: 16) {
-            Text("Assign to")
-                .font(.system(size: 22, weight: .bold, design: .serif))
-                .foregroundColor(CozyTheme.primary)
-            assignOption(name: myName, displayLabel: myLabel, emoji: myEmoji, currentValue: currentAssigned)
-            ForEach(householdMembers) { member in
-                assignOption(name: member.name, displayLabel: member.name, emoji: member.emoji, currentValue: currentAssigned)
-            }
-            if householdMembers.isEmpty {
-                Text("Add household members in Profile → Household to assign chores to others.")
-                    .font(.system(size: 13))
-                    .foregroundColor(CozyTheme.mutedText)
-                    .multilineTextAlignment(.center)
-                    .padding(.top, 4)
-            }
-        }
-        .onAppear {
-            if assignedTo.isEmpty { assignedTo = myName }
-        }
-    }
-
-    private func assignOption(name: String, displayLabel: String, emoji: String, currentValue: String) -> some View {
-        let isOn = currentValue == name
-        return Button { assignedTo = name } label: {
-            HStack(spacing: 12) {
-                Text(emoji).font(.system(size: 24))
-                Text(displayLabel)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(CozyTheme.primary)
-                Spacer()
-                if isOn {
-                    Image(systemName: "checkmark.circle.fill").foregroundColor(CozyTheme.accent)
-                }
-            }
-            .padding(16)
-            .background(isOn ? CozyTheme.accent.opacity(0.1) : CozyTheme.card)
-            .cornerRadius(14)
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(isOn ? CozyTheme.accent : CozyTheme.border, lineWidth: 1)
-            )
-        }
-    }
-
     // MARK: - Confirm Button
     private var confirmButton: some View {
         Group {
-            if step == 3 {
+            if step == 2 {
                 Button(action: saveChore) {
                     Text("Add Chore")
                         .font(.system(size: 17, weight: .semibold))
@@ -320,19 +224,14 @@ struct AddChoreView: View {
     private func saveChore() {
         let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"
         let dayFmt = DateFormatter(); dayFmt.dateFormat = "EEEE"
-        let finalAssignedTo = assignedTo.isEmpty ? defaultAssignedTo() : assignedTo
-
-        // Map selected day pills to the next matching calendar date
         let scheduledDate = nextDate(for: selectedDays.first)
         let scheduledDayName = dayFmt.string(from: scheduledDate)
-
         let chore = Chore(
             id: UUID(),
-            userId: UUID(), // local placeholder
+            userId: UUID(),
             roomId: selectedRoom,
             choreName: selectedChore,
             dayOfWeek: scheduledDayName,
-            assignedTo: finalAssignedTo,
             isDone: false,
             scheduledDate: fmt.string(from: scheduledDate)
         )
@@ -340,7 +239,6 @@ struct AddChoreView: View {
         dismiss()
     }
 
-    /// Returns the next date matching the given 2-letter day abbreviation (SU/MO/…), or today if none.
     private func nextDate(for dayAbbrev: String?) -> Date {
         let map = ["SU": 1, "MO": 2, "TU": 3, "WE": 4, "TH": 5, "FR": 6, "SA": 7]
         guard let abbrev = dayAbbrev, let target = map[abbrev] else { return Date() }

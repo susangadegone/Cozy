@@ -221,13 +221,6 @@ struct ChoreRow: View {
                 Text(room?.name ?? chore.roomId)
                     .font(.system(size: 13))
                     .foregroundColor(CozyTheme.mutedText)
-                if chore.assignedTo != "Me" && chore.assignedTo != "You" && !chore.assignedTo.isEmpty {
-                    Text("·")
-                        .foregroundColor(CozyTheme.border)
-                    Text(chore.assignedTo)
-                        .font(.system(size: 13))
-                        .foregroundColor(CozyTheme.mutedText)
-                }
             }
         }
     }
