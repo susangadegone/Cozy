@@ -12,30 +12,27 @@ struct CozyApp: App {
     }
 }
 
-/// Decides whether to show onboarding or the main app
+/// Decides whether to show onboarding or the main app.
+/// Uses a computed property so SwiftUI re-renders reactively whenever profile changes.
 struct AppEntryView: View {
     @EnvironmentObject var appState: AppState
-    @State private var showOnboarding: Bool = false
+
+    private var onboardingCompleted: Bool {
+        appState.profile?.onboardingCompleted ?? false
+    }
 
     var body: some View {
         Group {
-            if showOnboarding {
-                OnboardingView()
+            if onboardingCompleted {
+                RootView()
                     .environmentObject(appState)
                     .transition(.opacity)
             } else {
-                RootView()
+                OnboardingView()
                     .environmentObject(appState)
                     .transition(.opacity)
             }
         }
-        .animation(.easeInOut(duration: 0.4), value: showOnboarding)
-        .onAppear {
-            let completed = appState.profile?.onboardingCompleted ?? false
-            showOnboarding = !completed
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .onboardingCompleted)) { _ in
-            withAnimation { showOnboarding = false }
-        }
+        .animation(.easeInOut(duration: 0.4), value: onboardingCompleted)
     }
 }

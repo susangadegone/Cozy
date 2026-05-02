@@ -200,7 +200,12 @@ struct OnboardingView: View {
             OnboardingFinale(name: name)
             Spacer()
             Button(action: {
-                NotificationCenter.default.post(name: .onboardingCompleted, object: nil)
+                // Mark onboarding complete in profile so routing flips permanently
+                if var p = appState.profile {
+                    p.onboardingCompleted = true
+                    appState.profile = p
+                    LocalStore.shared.saveProfile(p)
+                }
             }) {
                 Text("Open Cozy")
                     .font(.custom("DMSans-SemiBold", size: 18))

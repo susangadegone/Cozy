@@ -2,7 +2,6 @@ import SwiftUI
 
 struct OnboardingFinale: View {
     let name: String
-    @EnvironmentObject var appRouter: AppRouter
     @EnvironmentObject var appState: AppState
     @State private var showConfetti = false
     @State private var scale: CGFloat = 0.7
@@ -70,9 +69,8 @@ struct OnboardingFinale: View {
             if var p = appState.profile {
                 p.onboardingCompleted = true
                 appState.profile = p
-                Task { try? await DataService.shared.updateProfile(p) }
+                LocalStore.shared.saveProfile(p)
             }
-            appRouter.navigate(to: .dashboard)
         } label: {
             ZStack {
                 RoundedRectangle(cornerRadius: CozyTheme.pillRadius)
