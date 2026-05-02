@@ -13,6 +13,7 @@ struct ChoresView: View {
     @State private var filter: ChoresFilter = .today
     @State private var showAddChore = false
     @State private var selectedChore: Chore? = nil
+    @State private var showLibrary = false
 
     var body: some View {
         NavigationStack {
@@ -21,6 +22,7 @@ struct ChoresView: View {
                 VStack(spacing: 0) {
                     filterBar
                     Divider().background(CozyTheme.border).opacity(0.5)
+                    libraryButton
                     choreList
                 }
                 ChoreFAB { showAddChore = true }
@@ -40,6 +42,10 @@ struct ChoresView: View {
                 .presentationDetents([.fraction(0.7)])
                 .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $showLibrary) {
+            ChoreLibraryView()
+                .environmentObject(appState)
+        }
     }
 
     // MARK: - Filter Bar
@@ -53,6 +59,34 @@ struct ChoresView: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
+    }
+
+    // MARK: - Library Button
+    private var libraryButton: some View {
+        VStack(spacing: 0) {
+            Button {
+                showLibrary = true
+            } label: {
+                Text("Browse chore library")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(CozyTheme.primary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(CozyTheme.background)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(CozyTheme.primary, lineWidth: 1.5)
+                    )
+                    .cornerRadius(12)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+            .padding(.bottom, 16)
+            
+            Divider()
+                .background(CozyTheme.border.opacity(0.5))
+        }
     }
 
     // MARK: - Chore List

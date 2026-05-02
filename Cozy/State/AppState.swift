@@ -187,6 +187,16 @@ final class AppState: ObservableObject {
         profile = store.loadProfile() ?? profile
     }
 
+    /// DEV ONLY — wipes all local data and resets to fresh state so onboarding shows again.
+    func devResetAll() {
+        store.saveChores([])
+        chores = []
+        activityLog = []
+        let fresh = store.defaultProfile()
+        store.saveProfile(fresh)
+        profile = fresh
+    }
+
     func savePreferences() {
         saveLocalPreferences()
         guard var p = profile else { return }

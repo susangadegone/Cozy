@@ -27,12 +27,15 @@
 		5B95BE7E3A05CEC14ED07957 /* ChoreTrayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEA7142AF91D5CBAE6C81D6 /* ChoreTrayView.swift */; };
 		5F2C930980429932F256E13F /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F72CD998737E99C59F15A4C9 /* SupabaseConfig.swift */; };
 		5F7BC1CD477E600D2010417D /* PresetChoreLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13E9F742C6C9C5ACC39D4FEB /* PresetChoreLibrary.swift */; };
+		662106F7C8C9C942AB1FC7FB /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 134EA5B1F5696832F25794FC /* README.md */; };
 		68362E21237049111F1D9C90 /* OnboardingFinale.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26DCE7F72815D4D734B4126 /* OnboardingFinale.swift */; };
 		6898E2F45C0C7DFEE2F53B51 /* BadgeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9501FBEDA9BEFDDD17CE1D7 /* BadgeService.swift */; };
+		6C228A772CB1E1B8E8E78FBC /* GIT_QUICKREF.md in Resources */ = {isa = PBXBuildFile; fileRef = CAA3C01671CBBB08BC08B2DB /* GIT_QUICKREF.md */; };
 		6DE14890CCB6A436DD901920 /* OnboardingStep4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3328C29606F144AC5DC5EE98 /* OnboardingStep4.swift */; };
 		6FC7358723EEF5B466C9456D /* OnboardingQ2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = D125F051AADC8FE2B391CDC4 /* OnboardingQ2View.swift */; };
 		74D6E26A096BBB05158080A3 /* ChoreDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26F66028700C4B400AEF136 /* ChoreDetailView.swift */; };
 		76169137FD2D4B18AFF823D6 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAA9EA36A6984ACCACA3C7C /* RootView.swift */; };
+		7BCD42C72B9747AEA64071BC /* GITHUB_SETUP.md in Resources */ = {isa = PBXBuildFile; fileRef = 24BEB00595ED84E2DC730F32 /* GITHUB_SETUP.md */; };
 		7C4EC61596374C0273AFB7A1 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BAAF789037C2180EC18D703 /* SettingsView.swift */; };
 		87B332465754EF7D655A938E /* PartnerInviteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04C439911253436E9F80C581 /* PartnerInviteView.swift */; };
 		8B0D8D1E2A202696F99F5B58 /* AuthFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2137E0C63B37D3B3E93B7CBF /* AuthFormView.swift */; };
@@ -62,10 +65,12 @@
 		DA78B3B67F82835BA2E5B590 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C03D8179A77DA4367A00E492 /* ProfileView.swift */; };
 		DC8545F459BAF19887AE373B /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = EAF6C221C06125222A791AD1 /* Supabase */; };
 		E2D1CE6FE89C599A01F9C234 /* OnboardingStep5.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0B2E525114F96C2DA2996F /* OnboardingStep5.swift */; };
+		EE4E3CA661D4FEA53CD2065A /* ChoreLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76F571B99800365F365053D /* ChoreLibraryView.swift */; };
 		EEB49F4C50FDB7BF4D0F2B9A /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB2588917122D4F60EA3660 /* OnboardingViewModel.swift */; };
 		F1CFC925F7176622381CEDB4 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C67D63080E0EB972BAC3198 /* SignUpView.swift */; };
 		F8588D15CE46B8312D02AEC9 /* LocalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0D99B4BBC12440095F31A9B /* LocalStore.swift */; };
 		F9084DBCF7562EA4EA386B4B /* ScheduleReadyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B1170808E3FF4F4954EF62 /* ScheduleReadyView.swift */; };
+		FA9B5D5E552691183D991C61 /* AppFlowPreviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC04CBCA8A6F7E681C50490 /* AppFlowPreviews.swift */; };
 		FFAFCEF0E890CA193DB83BF7 /* OnboardingComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94A952BF18DD21FEDE41062 /* OnboardingComponents.swift */; };
 /* End PBXBuildFile section */
 
@@ -74,10 +79,12 @@
 		04C439911253436E9F80C581 /* PartnerInviteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerInviteView.swift; sourceTree = "<group>"; };
 		09D9F7C7ABD764041E0C51B2 /* BadgeGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeGridView.swift; sourceTree = "<group>"; };
 		09DE828A909208CF43FFBCF9 /* ChoresView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoresView.swift; sourceTree = "<group>"; };
+		134EA5B1F5696832F25794FC /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		13E9F742C6C9C5ACC39D4FEB /* PresetChoreLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetChoreLibrary.swift; sourceTree = "<group>"; };
 		1B0B2E525114F96C2DA2996F /* OnboardingStep5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep5.swift; sourceTree = "<group>"; };
 		1EC5A77FBE93BD5AB344AE77 /* MonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthView.swift; sourceTree = "<group>"; };
 		2137E0C63B37D3B3E93B7CBF /* AuthFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthFormView.swift; sourceTree = "<group>"; };
+		24BEB00595ED84E2DC730F32 /* GITHUB_SETUP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GITHUB_SETUP.md; sourceTree = "<group>"; };
 		2C67D63080E0EB972BAC3198 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
 		2CAA9EA36A6984ACCACA3C7C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		3328C29606F144AC5DC5EE98 /* OnboardingStep4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep4.swift; sourceTree = "<group>"; };
@@ -95,6 +102,7 @@
 		612F00D5A618CDE804A96CDC /* CozyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyApp.swift; sourceTree = "<group>"; };
 		616C9B61556E6F41E912D812 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		643C63405702E848DC8BDBED /* EditChoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditChoreView.swift; sourceTree = "<group>"; };
+		6DC04CBCA8A6F7E681C50490 /* AppFlowPreviews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppFlowPreviews.swift; sourceTree = "<group>"; };
 		71D037AA57F9C56F60AA7E40 /* CalendarHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarHelpers.swift; sourceTree = "<group>"; };
 		78C0776E7767DC8F5484E49A /* WeekStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekStripView.swift; sourceTree = "<group>"; };
 		819737D6BB603362F0AC4AF6 /* CozyTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyTheme.swift; sourceTree = "<group>"; };
@@ -105,6 +113,7 @@
 		9071A204A6DFD1DD0D005916 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		96B1170808E3FF4F4954EF62 /* ScheduleReadyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleReadyView.swift; sourceTree = "<group>"; };
 		9BB2588917122D4F60EA3660 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
+		9CFE8F830F071EB9612DEFF0 /* .gitignore */ = {isa = PBXFileReference; path = .gitignore; sourceTree = "<group>"; };
 		9F748F412D2AB9A2EA205B2C /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		A04DCD7141588AFEAD32864A /* OnboardingStep3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep3.swift; sourceTree = "<group>"; };
 		A254716DA90B17E9E5CFA1F7 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
@@ -114,8 +123,10 @@
 		C0D99B4BBC12440095F31A9B /* LocalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStore.swift; sourceTree = "<group>"; };
 		C31991E75960A024F2603E43 /* OnboardingQ4View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingQ4View.swift; sourceTree = "<group>"; };
 		C9501FBEDA9BEFDDD17CE1D7 /* BadgeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeService.swift; sourceTree = "<group>"; };
+		CAA3C01671CBBB08BC08B2DB /* GIT_QUICKREF.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GIT_QUICKREF.md; sourceTree = "<group>"; };
 		D125F051AADC8FE2B391CDC4 /* OnboardingQ2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingQ2View.swift; sourceTree = "<group>"; };
 		D33F0C390C1673B21023FAFD /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		D76F571B99800365F365053D /* ChoreLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoreLibraryView.swift; sourceTree = "<group>"; };
 		D87F09F579827D7305F63B7B /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		DD973002C83193782DC45391 /* ScienceTrustView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScienceTrustView.swift; sourceTree = "<group>"; };
 		DEAF991B7E5BE6BDD153B61D /* AddChoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddChoreView.swift; sourceTree = "<group>"; };
@@ -221,10 +232,13 @@
 		8AE942FD4FBFD46118EC72F0 /* Home */ = {
 			isa = PBXGroup;
 			children = (
+				9CFE8F830F071EB9612DEFF0 /* .gitignore */,
 				DEAF991B7E5BE6BDD153B61D /* AddChoreView.swift */,
+				6DC04CBCA8A6F7E681C50490 /* AppFlowPreviews.swift */,
 				71D037AA57F9C56F60AA7E40 /* CalendarHelpers.swift */,
 				A254716DA90B17E9E5CFA1F7 /* CalendarView.swift */,
 				F26F66028700C4B400AEF136 /* ChoreDetailView.swift */,
+				D76F571B99800365F365053D /* ChoreLibraryView.swift */,
 				09DE828A909208CF43FFBCF9 /* ChoresView.swift */,
 				3EEA7142AF91D5CBAE6C81D6 /* ChoreTrayView.swift */,
 				5E026455FA8CB87877B7FB00 /* ConfettiOverlay.swift */,
@@ -232,8 +246,11 @@
 				8E5740F17F6A570A318B64D3 /* DragDropManager.swift */,
 				643C63405702E848DC8BDBED /* EditChoreView.swift */,
 				EE2714606E01035824B61B8E /* FloatingDragChip.swift */,
+				CAA3C01671CBBB08BC08B2DB /* GIT_QUICKREF.md */,
+				24BEB00595ED84E2DC730F32 /* GITHUB_SETUP.md */,
 				3D279CE06BA349D3086F948A /* HomeView.swift */,
 				1EC5A77FBE93BD5AB344AE77 /* MonthView.swift */,
+				134EA5B1F5696832F25794FC /* README.md */,
 				78C0776E7767DC8F5484E49A /* WeekStripView.swift */,
 			);
 			path = Home;
@@ -360,7 +377,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				ABD228A423639A2E4FD83250 /* Assets.xcassets in Resources */,
+				7BCD42C72B9747AEA64071BC /* GITHUB_SETUP.md in Resources */,
+				6C228A772CB1E1B8E8E78FBC /* GIT_QUICKREF.md in Resources */,
 				1CAB5A32C3B766544D4ABDFC /* LaunchScreen.storyboard in Resources */,
+				662106F7C8C9C942AB1FC7FB /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -372,6 +392,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A2F28210A24361EFD4FBEC24 /* AddChoreView.swift in Sources */,
+				FA9B5D5E552691183D991C61 /* AppFlowPreviews.swift in Sources */,
 				43F50225D6FF026CF85A3C6C /* AppRouter.swift in Sources */,
 				B68D1E896F1DF06E42E0C5A1 /* AppState.swift in Sources */,
 				8B0D8D1E2A202696F99F5B58 /* AuthFormView.swift in Sources */,
@@ -382,6 +403,7 @@
 				328778127023E1E5BD6BA007 /* CalendarView.swift in Sources */,
 				74D6E26A096BBB05158080A3 /* ChoreDetailView.swift in Sources */,
 				CC67EC560804A1F31673C556 /* ChoreHistoryView.swift in Sources */,
+				EE4E3CA661D4FEA53CD2065A /* ChoreLibraryView.swift in Sources */,
 				5B95BE7E3A05CEC14ED07957 /* ChoreTrayView.swift in Sources */,
 				0367AF9E3D363460AA0E528D /* ChoresView.swift in Sources */,
 				1D8162A9B651E8049A3BCE4C /* ConfettiOverlay.swift in Sources */,

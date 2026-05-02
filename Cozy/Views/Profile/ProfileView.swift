@@ -2,7 +2,6 @@ import SwiftUI
 
 struct ProfileView: View {
     @EnvironmentObject var appState: AppState
-    @EnvironmentObject var authManager: AuthManager
     @State private var isEditingName = false
     @State private var editedName = ""
     @State private var showAllHistory = false
@@ -49,7 +48,7 @@ struct ProfileView: View {
             InsightsView().environmentObject(appState)
         }
         .sheet(isPresented: $showSettings) {
-            SettingsView().environmentObject(appState).environmentObject(authManager)
+            SettingsView().environmentObject(appState)
         }
         .onChange(of: appState.newlyEarnedBadge) { badge in
             if badge != nil { withAnimation(.spring()) { showBadgeToast = true } }

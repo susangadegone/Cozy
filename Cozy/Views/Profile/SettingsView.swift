@@ -4,7 +4,6 @@ import UserNotifications
 // MARK: - SettingsView
 struct SettingsView: View {
     @EnvironmentObject var appState: AppState
-    @EnvironmentObject var authManager: AuthManager
     @Environment(\.dismiss) private var dismiss
 
     @State private var showDeleteConfirm = false
@@ -41,7 +40,8 @@ struct SettingsView: View {
         }
         .confirmationDialog("Delete Account?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
             Button("Delete my account", role: .destructive) {
-                Task { try? await authManager.signOut() }
+                appState.devResetAll()
+                dismiss()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -146,22 +146,9 @@ struct SettingsView: View {
     // MARK: - Danger Zone
     private var dangerZone: some View {
         VStack(spacing: 10) {
-            Button {
-                Task { try? await authManager.signOut() }
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "rectangle.portrait.and.arrow.right")
-                    Text("Sign Out")
-                }
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.red.opacity(0.85))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color.red.opacity(0.07))
-                .cornerRadius(CozyTheme.cornerRadius)
-                .overlay(RoundedRectangle(cornerRadius: CozyTheme.cornerRadius).stroke(Color.red.opacity(0.15), lineWidth: 1))
-            }
-            .buttonStyle(.plain)
+            #if targetEnvironment(simulator)
+            devResetSection
+            #endif
 
             Button { showDeleteConfirm = true } label: {
                 Text("Delete Account")
@@ -174,6 +161,38 @@ struct SettingsView: View {
         }
         .padding(.top, 4)
     }
+
+    #if targetEnvironment(simulator)
+    private var devResetSection: some View {
+        SettingsCard(title: "Developer", icon: "wrench.and.screwdriver.fill") {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Only visible in Simulator builds")
+                    .font(.system(size: 12))
+                    .foregroundColor(CozyTheme.mutedText)
+                    .padding(.top, 8)
+                Button {
+                    appState.devResetAll()
+                    dismiss()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.counterclockwise")
+                        Text("Restart Onboarding")
+                    }
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.orange)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Color.orange.opacity(0.08))
+                    .cornerRadius(CozyTheme.cornerRadius)
+                    .overlay(RoundedRectangle(cornerRadius: CozyTheme.cornerRadius)
+                        .stroke(Color.orange.opacity(0.2), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .padding(.bottom, 8)
+            }
+        }
+    }
+    #endif
 
     // MARK: - Helpers
     private func save() {
