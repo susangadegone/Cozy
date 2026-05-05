@@ -45,7 +45,8 @@ struct ChoreDetailView: View {
         }
         .confirmationDialog("Delete \(chore.choreName)?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
             Button("Delete chore", role: .destructive) {
-                Task { await appState.deleteChore(chore); dismiss() }
+                appState.deleteChore(chore)
+                dismiss()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -187,7 +188,7 @@ struct ChoreDetailView: View {
                     .tint(CozyTheme.accent)
                     .padding(.horizontal, 16)
                 Button {
-                    Task { await appState.rescheduleChore(chore, to: rescheduleDate) }
+                    appState.rescheduleChore(chore, to: rescheduleDate)
                     showReschedule = false
                 } label: {
                     Text("Confirm")

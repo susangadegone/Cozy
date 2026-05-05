@@ -1,5 +1,34 @@
 import Foundation
 
+// MARK: - Shared Date Formatters (expensive to create, reuse them)
+enum DateFormatters {
+    static let yearMonthDay: DateFormatter = {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd"
+        return fmt
+    }()
+    
+    static let dayOfWeek: DateFormatter = {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "EEEE"
+        return fmt
+    }()
+    
+    static let monthDay: DateFormatter = {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "MMM d"
+        return fmt
+    }()
+    
+    static let fullDate: DateFormatter = {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "EEEE, MMM d"
+        return fmt
+    }()
+    
+    static let iso8601 = ISO8601DateFormatter()
+}
+
 @MainActor
 final class AppState: ObservableObject {
     @Published var profile: Profile?
@@ -21,9 +50,7 @@ final class AppState: ObservableObject {
 
     // MARK: - Date helpers
     func dateString(from date: Date) -> String {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "yyyy-MM-dd"
-        return fmt.string(from: date)
+        DateFormatters.yearMonthDay.string(from: date)
     }
 
     var todayString: String { dateString(from: Date()) }
@@ -125,8 +152,7 @@ final class AppState: ObservableObject {
         chores[i].isDone.toggle()
         let nowDone = chores[i].isDone
         if nowDone {
-            let fmt = ISO8601DateFormatter()
-            chores[i].completedAt = fmt.string(from: Date())
+            chores[i].completedAt = DateFormatters.iso8601.string(from: Date())
             logActivity(.choreDone, "\(chore.choreName) marked done")
             let s = currentStreak
             if s > 0 && s % 7 == 0 { logActivity(.streakMilestone, "\(s)-day streak!") }
@@ -161,10 +187,22 @@ final class AppState: ObservableObject {
 
     func rescheduleChore(_ chore: Chore, to date: Date) {
         guard let i = chores.firstIndex(where: { $0.id == chore.id }) else { return }
-        let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"
-        chores[i].scheduledDate = fmt.string(from: date)
-        let df = DateFormatter(); df.dateFormat = "EEEE"
-        chores[i].dayOfWeek = df.string(from: date)
+        chores[i].scheduledDate = DateFormatters.yearMonthDay.string(from: date)
+        chores[i].dayOfWeek = DateFormatters.dayOfWeek.string(from: date)
+        store.saveChores(chores)
+    }
+
+    /// Batch reschedule multiple chores — more efficient than calling rescheduleChore() in a loop
+    func rescheduleChores(_ choresToReschedule: [Chore], to date: Date) {
+        let dateString = DateFormatters.yearMonthDay.string(from: date)
+        let dayString = DateFormatters.dayOfWeek.string(from: date)
+        
+        for chore in choresToReschedule {
+            guard let i = chores.firstIndex(where: { $0.id == chore.id }) else { continue }
+            chores[i].scheduledDate = dateString
+            chores[i].dayOfWeek = dayString
+        }
+        // Save once after all updates
         store.saveChores(chores)
     }
 

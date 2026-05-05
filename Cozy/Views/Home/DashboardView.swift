@@ -67,9 +67,7 @@ struct DashboardView: View {
 
     // MARK: Greeting Header
     private var greetingHeader: some View {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEEE, MMM d"
-        return Text(formatter.string(from: Date()))
+        Text(DateFormatters.fullDate.string(from: Date()))
             .font(.system(size: 22, weight: .bold, design: .serif))
             .foregroundColor(CozyTheme.primary)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -188,9 +186,8 @@ struct DashboardView: View {
         let all = appState.todayChores.filter { !$0.isDone }
         let toSnooze = mood == .overwhelming ? Array(all.dropFirst(1)) : Array(all.dropFirst(3))
         let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
-        for chore in toSnooze {
-            appState.rescheduleChore(chore, to: tomorrow)
-        }
+        // Use batch operation instead of loop to save disk I/O
+        appState.rescheduleChores(toSnooze, to: tomorrow)
     }
 
     // MARK: Week Progress
