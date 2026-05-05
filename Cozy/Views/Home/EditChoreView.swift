@@ -204,10 +204,8 @@ struct EditChoreView: View {
         updated.roomId = selectedRoom
 
         let scheduled = nextDate(for: selectedDays.first)
-        let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"
-        let dayFmt = DateFormatter(); dayFmt.dateFormat = "EEEE"
-        updated.scheduledDate = fmt.string(from: scheduled)
-        updated.dayOfWeek = dayFmt.string(from: scheduled)
+        updated.scheduledDate = DateFormatters.yearMonthDay.string(from: scheduled)
+        updated.dayOfWeek = DateFormatters.dayOfWeek.string(from: scheduled)
 
         appState.updateChore(updated)
         dismiss()

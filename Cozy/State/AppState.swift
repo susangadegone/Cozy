@@ -14,15 +14,45 @@ enum DateFormatters {
         return fmt
     }()
     
+    static let shortDayOfWeek: DateFormatter = {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "EEE"
+        return fmt
+    }()
+    
     static let monthDay: DateFormatter = {
         let fmt = DateFormatter()
         fmt.dateFormat = "MMM d"
         return fmt
     }()
     
+    static let monthDayYear: DateFormatter = {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "MMM d, yyyy"
+        return fmt
+    }()
+    
+    static let timeOnly: DateFormatter = {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "h:mm a"
+        return fmt
+    }()
+    
     static let fullDate: DateFormatter = {
         let fmt = DateFormatter()
         fmt.dateFormat = "EEEE, MMM d"
+        return fmt
+    }()
+    
+    static let monthOnly: DateFormatter = {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "MMM"
+        return fmt
+    }()
+    
+    static let monthYear: DateFormatter = {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "MMMM yyyy"
         return fmt
     }()
     

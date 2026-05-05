@@ -214,10 +214,10 @@ struct ChoreDetailView: View {
     }
 
     private var formattedScheduledDate: String {
-        let df = DateFormatter(); df.dateFormat = "yyyy-MM-dd"
-        guard let d = df.date(from: chore.scheduledDate) else { return chore.scheduledDate }
-        let out = DateFormatter(); out.dateFormat = "MMM d, yyyy"
-        return out.string(from: d)
+        guard let d = DateFormatters.yearMonthDay.date(from: chore.scheduledDate) else { 
+            return chore.scheduledDate 
+        }
+        return DateFormatters.monthDayYear.string(from: d)
     }
 }
 
@@ -257,22 +257,20 @@ private struct HistoryEntryRow: View {
     let userName: String
 
     private var formattedDate: String {
-        let df = DateFormatter(); df.dateFormat = "yyyy-MM-dd"
-        let iso = ISO8601DateFormatter()
         let date: Date?
-        if let ct = chore.completedAt { date = iso.date(from: ct) ?? df.date(from: ct) }
-        else { date = df.date(from: chore.scheduledDate) }
+        if let ct = chore.completedAt { 
+            date = DateFormatters.iso8601.date(from: ct) ?? DateFormatters.yearMonthDay.date(from: ct)
+        } else { 
+            date = DateFormatters.yearMonthDay.date(from: chore.scheduledDate) 
+        }
         guard let d = date else { return chore.scheduledDate }
-        let out = DateFormatter(); out.dateFormat = "MMM d"
-        return out.string(from: d)
+        return DateFormatters.monthDay.string(from: d)
     }
 
     private var formattedTime: String {
         guard let ct = chore.completedAt else { return "" }
-        let iso = ISO8601DateFormatter()
-        guard let d = iso.date(from: ct) else { return "" }
-        let fmt = DateFormatter(); fmt.dateFormat = "h:mm a"
-        return fmt.string(from: d)
+        guard let d = DateFormatters.iso8601.date(from: ct) else { return "" }
+        return DateFormatters.timeOnly.string(from: d)
     }
 
     var body: some View {

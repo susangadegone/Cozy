@@ -46,6 +46,20 @@ enum PresetChoreLibrary {
         PresetChore(name: "Wipe the TV",                 roomId: "living_room", isDefaultAdded: false),
         PresetChore(name: "Tidy entryway",               roomId: "living_room", isDefaultAdded: false),
         PresetChore(name: "Vacuum",                      roomId: "living_room", isDefaultAdded: false),
+        // OUTDOOR — 2 auto-add + 4 library
+        PresetChore(name: "Water plants",                roomId: "outdoor",     isDefaultAdded: true),
+        PresetChore(name: "Sweep porch",                 roomId: "outdoor",     isDefaultAdded: true),
+        PresetChore(name: "Check mailbox",               roomId: "outdoor",     isDefaultAdded: false),
+        PresetChore(name: "Wipe outdoor furniture",      roomId: "outdoor",     isDefaultAdded: false),
+        PresetChore(name: "Clear walkway",               roomId: "outdoor",     isDefaultAdded: false),
+        PresetChore(name: "Take out recycling",          roomId: "outdoor",     isDefaultAdded: false),
+        // HOME OFFICE — 2 auto-add + 4 library
+        PresetChore(name: "Clear desk",                  roomId: "office",      isDefaultAdded: true),
+        PresetChore(name: "File loose papers",           roomId: "office",      isDefaultAdded: true),
+        PresetChore(name: "Dust keyboard",               roomId: "office",      isDefaultAdded: false),
+        PresetChore(name: "Organize cables",             roomId: "office",      isDefaultAdded: false),
+        PresetChore(name: "Empty trash",                 roomId: "office",      isDefaultAdded: false),
+        PresetChore(name: "Wipe monitor",                roomId: "office",      isDefaultAdded: false),
     ]
 
     /// Auto-add presets for a specific room

@@ -64,8 +64,7 @@ struct WeekCalendarView: View {
 
     private var weekLabel: String {
         guard let first = days.first, let last = days.last else { return "" }
-        let fmt = DateFormatter(); fmt.dateFormat = "MMM d"
-        return "\(fmt.string(from: first)) – \(fmt.string(from: last))"
+        return "\(DateFormatters.monthDay.string(from: first)) – \(DateFormatters.monthDay.string(from: last))"
     }
 
     // MARK: - Day chore list

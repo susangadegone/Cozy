@@ -78,8 +78,6 @@ enum DropResult {
 
 extension String {
     func toDate() -> Date? {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "yyyy-MM-dd"
-        return fmt.date(from: self)
+        DateFormatters.yearMonthDay.date(from: self)
     }
 }

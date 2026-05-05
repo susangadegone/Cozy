@@ -295,12 +295,10 @@ struct DashboardView: View {
 
     // MARK: Upcoming Chores
     private var upcomingChores: [Chore] {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "yyyy-MM-dd"
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         return appState.chores.filter { !$0.isDone }.filter {
-            guard let d = fmt.date(from: $0.scheduledDate) else { return false }
+            guard let d = DateFormatters.yearMonthDay.date(from: $0.scheduledDate) else { return false }
             let diff = cal.dateComponents([.day], from: today, to: cal.startOfDay(for: d)).day ?? 0
             return diff > 0 && diff <= 3
         }
@@ -324,17 +322,15 @@ struct DashboardView: View {
     }
 
     private func upcomingChip(_ chore: Chore) -> some View {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "yyyy-MM-dd"
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         let dayLabel: String = {
-            guard let d = fmt.date(from: chore.scheduledDate) else { return chore.dayOfWeek }
+            guard let d = DateFormatters.yearMonthDay.date(from: chore.scheduledDate) else { 
+                return chore.dayOfWeek 
+            }
             let diff = cal.dateComponents([.day], from: today, to: cal.startOfDay(for: d)).day ?? 0
             if diff == 1 { return "Tomorrow" }
-            let df = DateFormatter()
-            df.dateFormat = "EEE"
-            return df.string(from: d)
+            return DateFormatters.shortDayOfWeek.string(from: d)
         }()
         return VStack(alignment: .leading, spacing: 3) {
             Text(chore.choreName)
@@ -473,7 +469,7 @@ struct DashChoreRow: View {
     @ViewBuilder
     private var lastDoneLine: some View {
         if let cat = chore.completedAt,
-           let parsed = ISO8601DateFormatter().date(from: cat) {
+           let parsed = DateFormatters.iso8601.date(from: cat) {
             let days = Calendar.current.dateComponents([.day], from: parsed, to: Date()).day ?? 0
             Text("Last done \(days) days ago")
                 .font(.system(size: 11))

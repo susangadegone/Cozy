@@ -114,7 +114,7 @@ struct AddChoreView: View {
                     .cornerRadius(12)
                     .overlay(RoundedRectangle(cornerRadius: 12)
                         .stroke(showNameError ? Color.red.opacity(0.6) : CozyTheme.border, lineWidth: 1))
-                    .onChange(of: choreNameInput) { _ in
+                    .onChange(of: choreNameInput) {
                         if showNameError && !choreNameInput.isEmpty { showNameError = false }
                     }
                 if showNameError {
@@ -222,10 +222,8 @@ struct AddChoreView: View {
     }
 
     private func saveChore() {
-        let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"
-        let dayFmt = DateFormatter(); dayFmt.dateFormat = "EEEE"
         let scheduledDate = nextDate(for: selectedDays.first)
-        let scheduledDayName = dayFmt.string(from: scheduledDate)
+        let scheduledDayName = DateFormatters.dayOfWeek.string(from: scheduledDate)
         let chore = Chore(
             id: UUID(),
             userId: UUID(),
@@ -233,7 +231,7 @@ struct AddChoreView: View {
             choreName: selectedChore,
             dayOfWeek: scheduledDayName,
             isDone: false,
-            scheduledDate: fmt.string(from: scheduledDate)
+            scheduledDate: DateFormatters.yearMonthDay.string(from: scheduledDate)
         )
         appState.addChore(chore)
         dismiss()

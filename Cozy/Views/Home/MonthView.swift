@@ -161,8 +161,7 @@ struct DayChoresSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     private var dateLabel: String {
-        let fmt = DateFormatter(); fmt.dateFormat = "EEEE, MMM d"
-        return fmt.string(from: date)
+        DateFormatters.fullDate.string(from: date)
     }
 
     private var chores: [Chore] {

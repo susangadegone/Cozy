@@ -106,6 +106,7 @@ struct Room: Identifiable, Hashable {
         Room(id: "bathroom", name: "Bathroom", icon: "shower", color: "E0F2F1"),
         Room(id: "living_room", name: "Living Room", icon: "sofa", color: "FFFDE7"),
         Room(id: "outdoor", name: "Outdoor", icon: "leaf", color: "E8F5E9"),
+        Room(id: "office", name: "Home Office", icon: "desktopcomputer", color: "E3F2FD"),
         Room(id: "other", name: "Other", icon: "archivebox", color: "F1F8E9"),
     ]
 

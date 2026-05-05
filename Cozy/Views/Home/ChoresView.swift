@@ -274,11 +274,10 @@ struct ChoreRow: View {
     }
 
     private var formattedDate: String {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "yyyy-MM-dd"
-        guard let d = fmt.date(from: chore.scheduledDate) else { return chore.scheduledDate }
-        let out = DateFormatter(); out.dateFormat = "MMM d"
-        return out.string(from: d)
+        guard let d = DateFormatters.yearMonthDay.date(from: chore.scheduledDate) else { 
+            return chore.scheduledDate 
+        }
+        return DateFormatters.monthDay.string(from: d)
     }
 }
 

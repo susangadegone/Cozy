@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -44,6 +44,7 @@
 		90D01C3CECCD81D633C9FA21 /* OnboardingStep2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8293F2BF25E38C4D35EF3493 /* OnboardingStep2.swift */; };
 		9EB96C99A24EEA97CB740584 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 616C9B61556E6F41E912D812 /* WelcomeView.swift */; };
 		9F09307CF720B101FA76829B /* HouseholdPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED2D9F725A479E126A5990E /* HouseholdPanelView.swift */; };
+		A06E1B552FAA52CC0050B727 /* FIXES_APPLIED.md in Resources */ = {isa = PBXBuildFile; fileRef = A06E1B542FAA52CC0050B727 /* FIXES_APPLIED.md */; };
 		A2F28210A24361EFD4FBEC24 /* AddChoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEAF991B7E5BE6BDD153B61D /* AddChoreView.swift */; };
 		A55194DBB8E69D62C75425A0 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87F09F579827D7305F63B7B /* OnboardingView.swift */; };
 		ABD228A423639A2E4FD83250 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9071A204A6DFD1DD0D005916 /* Assets.xcassets */; };
@@ -117,9 +118,10 @@
 		96B1170808E3FF4F4954EF62 /* ScheduleReadyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleReadyView.swift; sourceTree = "<group>"; };
 		9B7EF337E2FE18D48DEA1562 /* TESTING_GUIDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TESTING_GUIDE.md; sourceTree = "<group>"; };
 		9BB2588917122D4F60EA3660 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
-		9CFE8F830F071EB9612DEFF0 /* .gitignore */ = {isa = PBXFileReference; path = .gitignore; sourceTree = "<group>"; };
+		9CFE8F830F071EB9612DEFF0 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		9F748F412D2AB9A2EA205B2C /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		A04DCD7141588AFEAD32864A /* OnboardingStep3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep3.swift; sourceTree = "<group>"; };
+		A06E1B542FAA52CC0050B727 /* FIXES_APPLIED.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FIXES_APPLIED.md; sourceTree = "<group>"; };
 		A254716DA90B17E9E5CFA1F7 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		A7F888FC5F7F45390693E254 /* DataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataService.swift; sourceTree = "<group>"; };
 		AF4A1D4E01A7B9FE6D132BE1 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
@@ -299,6 +301,7 @@
 				C9501FBEDA9BEFDDD17CE1D7 /* BadgeService.swift */,
 				A7F888FC5F7F45390693E254 /* DataService.swift */,
 				C0D99B4BBC12440095F31A9B /* LocalStore.swift */,
+				A06E1B542FAA52CC0050B727 /* FIXES_APPLIED.md */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -368,7 +371,6 @@
 			packageReferences = (
 				E69AA39EDB0E9BEE05AA6F73 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 			);
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -386,6 +388,7 @@
 				7BCD42C72B9747AEA64071BC /* GITHUB_SETUP.md in Resources */,
 				6C228A772CB1E1B8E8E78FBC /* GIT_QUICKREF.md in Resources */,
 				1CAB5A32C3B766544D4ABDFC /* LaunchScreen.storyboard in Resources */,
+				A06E1B552FAA52CC0050B727 /* FIXES_APPLIED.md in Resources */,
 				662106F7C8C9C942AB1FC7FB /* README.md in Resources */,
 				8BD813D8FE26F0547B4C1963 /* SIMULATION_QUICK_START.md in Resources */,
 				746614A1FAB6E25468EB2948 /* TESTING_GUIDE.md in Resources */,

@@ -14,8 +14,7 @@ enum CalendarHelpers {
     }
 
     static func dateString(_ date: Date) -> String {
-        let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"
-        return fmt.string(from: date)
+        DateFormatters.yearMonthDay.string(from: date)
     }
 
     static func isToday(_ date: Date) -> Bool {

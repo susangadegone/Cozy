@@ -69,13 +69,12 @@ struct CalendarView: View {
     private var headerTitle: String {
         if mode == .week {
             let days = CalendarHelpers.weekDays(offset: weekOffset)
-            let fmt = DateFormatter(); fmt.dateFormat = "MMM"
             guard let first = days.first, let last = days.last else { return "Calendar" }
-            let m1 = fmt.string(from: first); let m2 = fmt.string(from: last)
+            let m1 = DateFormatters.monthOnly.string(from: first)
+            let m2 = DateFormatters.monthOnly.string(from: last)
             return m1 == m2 ? m1 : "\(m1) – \(m2)"
         } else {
-            let fmt = DateFormatter(); fmt.dateFormat = "MMMM yyyy"
-            return fmt.string(from: displayMonth)
+            return DateFormatters.monthYear.string(from: displayMonth)
         }
     }
 }
