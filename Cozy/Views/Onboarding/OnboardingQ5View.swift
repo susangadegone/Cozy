@@ -91,7 +91,7 @@ struct OnboardingQ5View: View {
             "Bathroom": "bathroom",
             "Living room": "living_room",
             "Outdoor/yard": "outdoor",
-            "Home office": "office",
+            "Home office": "home_office",
             "Other": "other"
         ]
         let roomIds = onboardingVM.selectedRooms.compactMap { roomIdMap[$0] }
