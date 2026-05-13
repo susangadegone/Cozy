@@ -63,7 +63,7 @@ struct NotificationPrefsView: View {
 
     private func save() {
         requestPermissionIfNeeded()
-        Task { await appState.savePreferences() }
+        appState.savePreferences()
     }
 
     private func requestPermissionIfNeeded() {

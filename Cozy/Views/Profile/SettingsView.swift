@@ -199,7 +199,7 @@ struct SettingsView: View {
     // MARK: - Helpers
     private func save() {
         requestNotifPermIfNeeded()
-        Task { await appState.savePreferences() }
+        Task { appState.savePreferences() }
     }
 
     private func requestNotifPermIfNeeded() {

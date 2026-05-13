@@ -28,13 +28,13 @@ struct HomeView: View {
             CalendarView()
                 .environmentObject(appState)
         }
-        .onChange(of: appState.pendingConfettiEvent) { event in
-            guard let event else { return }
+        .onChange(of: appState.pendingConfettiEvent) { oldValue, newValue in
+            guard let event = newValue else { return }
             appState.pendingConfettiEvent = nil
             fireConfetti(event)
         }
-        .onChange(of: appState.newlyEarnedBadge) { badge in
-            guard let badge else { return }
+        .onChange(of: appState.newlyEarnedBadge) { oldValue, newValue in
+            guard let badge = newValue else { return }
             showBadgeToast(badge)
         }
     }

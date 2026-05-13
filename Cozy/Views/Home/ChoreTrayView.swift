@@ -42,10 +42,8 @@ struct ChoreTrayView: View {
     private var choreList: some View {
         ForEach(appState.todayChores) { chore in
             TrayChoreRow(chore: chore, onToggle: {
-                Task {
-                    await appState.toggleChore(chore)
-                    if !chore.isDone { onComplete() }
-                }
+                appState.toggleChore(chore)
+                if !chore.isDone { onComplete() }
             }, onDragStart: { loc in
                 dragManager.startDrag(chore: chore, at: loc)
             })

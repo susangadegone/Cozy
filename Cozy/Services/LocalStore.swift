@@ -37,55 +37,15 @@ final class LocalStore {
         Profile(
             id: UUID(),
             displayName: "You",
+            avatarEmoji: "👤",
             homeName: "My Home",
             rooms: [],
             notificationPreference: "in_app",
             onboardingCompleted: false,
             joinedAt: nil,
-            earnedBadgeIds: [],
             preferences: UserPreferences(),
-            avatarEmoji: nil
+            earnedBadgeIds: []
         )
-    }
-
-    // MARK: - Chore Seeding
-    /// Seeds preset chores across the next 7 days for the given rooms. Skips if chores already exist.
-    func seedChoresIfNeeded(for rooms: [String], userId: UUID) -> [Chore] {
-        let existing = loadChores()
-        guard existing.isEmpty else { return existing }
-
-        let cal = Calendar.current
-        let today = cal.startOfDay(for: Date())
-        let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"
-        let dowFmt = DateFormatter(); dowFmt.dateFormat = "EEEE"
-
-        let dayOffsets: [Int] = [0, 1, 2, 3, 4, 5, 6]
-        var offset = 0
-        var seeded: [Chore] = []
-
-        for roomId in rooms {
-            let allNames = Room.defaultChores[roomId] ?? []
-            let picks = Array(allNames.prefix(3))
-            for (i, name) in picks.enumerated() {
-                let dayOff = dayOffsets[(offset + i) % dayOffsets.count]
-                guard let date = cal.date(byAdding: .day, value: dayOff, to: today) else { continue }
-                let chore = Chore(
-                    id: UUID(),
-                    userId: userId,
-                    roomId: roomId,
-                    choreName: name,
-                    dayOfWeek: dowFmt.string(from: date),
-                    isDone: false,
-                    scheduledDate: fmt.string(from: date),
-                    completedAt: nil
-                )
-                seeded.append(chore)
-            }
-            offset += 3
-        }
-
-        saveChores(seeded)
-        return seeded
     }
 
     // MARK: - Preset Seeding

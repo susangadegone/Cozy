@@ -51,8 +51,8 @@ struct ProfileView: View {
         .sheet(isPresented: $showSettings) {
             SettingsView().environmentObject(appState).environmentObject(appRouter)
         }
-        .onChange(of: appState.newlyEarnedBadge) { badge in
-            if badge != nil { withAnimation(.spring()) { showBadgeToast = true } }
+        .onChange(of: appState.newlyEarnedBadge) { oldValue, newValue in
+            if newValue != nil { withAnimation(.spring()) { showBadgeToast = true } }
         }
     }
 
@@ -123,10 +123,8 @@ struct ProfileView: View {
             Button {
                 let name = editedName.trimmingCharacters(in: .whitespaces)
                 guard !name.isEmpty else { return }
-                Task {
-                    await appState.updateProfileName(name)
-                    withAnimation { isEditingName = false }
-                }
+                appState.updateProfileName(name)
+                withAnimation { isEditingName = false }
             } label: {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 30))
@@ -202,8 +200,8 @@ struct ProfileView: View {
                     }
                     .pickerStyle(.segmented)
                     .frame(width: 150)
-                    .onChange(of: appState.preferences.weekStartsOnSunday) { _ in
-                        Task { await appState.savePreferences() }
+                    .onChange(of: appState.preferences.weekStartsOnSunday) { oldValue, newValue in
+                        appState.savePreferences()
                     }
                 }
                 .padding(.vertical, 10)

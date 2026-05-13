@@ -122,7 +122,7 @@ struct OnboardingStep3: View {
         guard !trimmed.isEmpty, members.count < 6 else { return }
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-            members.append(HouseholdMember(name: trimmed, emoji: selectedEmoji))
+            members.append(HouseholdMember(name: trimmed, avatarEmoji: selectedEmoji))
         }
         newName = ""
         selectedEmoji = avatarEmojis.randomElement() ?? "😊"
@@ -136,7 +136,7 @@ struct MemberChip: View {
     var body: some View {
         VStack(spacing: 6) {
             ZStack(alignment: .topTrailing) {
-                Text(member.emoji)
+                Text(member.avatarEmoji)
                     .font(.system(size: 36))
                     .frame(width: 60, height: 60)
                     .background(CozyTheme.card)

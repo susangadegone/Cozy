@@ -11,7 +11,7 @@ struct PresetChore: Identifiable {
 
 // MARK: - PresetChoreLibrary
 enum PresetChoreLibrary {
-    static let all: [PresetChore] = [
+    static let allChores: [PresetChore] = [
         // KITCHEN — 2 auto-add + 6 library
         PresetChore(name: "Clear the sink",              roomId: "kitchen",     isDefaultAdded: true),
         PresetChore(name: "Wipe counters",               roomId: "kitchen",     isDefaultAdded: true),
@@ -38,14 +38,14 @@ enum PresetChoreLibrary {
         PresetChore(name: "Wipe shower glass",           roomId: "bathroom",    isDefaultAdded: false),
         PresetChore(name: "Sweep the floor",             roomId: "bathroom",    isDefaultAdded: false),
         // LIVING ROOM — 2 auto-add + 6 library
-        PresetChore(name: "Quick floor pickup",          roomId: "living_room", isDefaultAdded: true),
-        PresetChore(name: "Reset the couch",             roomId: "living_room", isDefaultAdded: true),
-        PresetChore(name: "Wipe surfaces",               roomId: "living_room", isDefaultAdded: false),
-        PresetChore(name: "Fold throw blankets",         roomId: "living_room", isDefaultAdded: false),
-        PresetChore(name: "Clear coffee table",          roomId: "living_room", isDefaultAdded: false),
-        PresetChore(name: "Wipe the TV",                 roomId: "living_room", isDefaultAdded: false),
-        PresetChore(name: "Tidy entryway",               roomId: "living_room", isDefaultAdded: false),
-        PresetChore(name: "Vacuum",                      roomId: "living_room", isDefaultAdded: false),
+        PresetChore(name: "Quick floor pickup",          roomId: "living", isDefaultAdded: true),
+        PresetChore(name: "Reset the couch",             roomId: "living", isDefaultAdded: true),
+        PresetChore(name: "Wipe surfaces",               roomId: "living", isDefaultAdded: false),
+        PresetChore(name: "Fold throw blankets",         roomId: "living", isDefaultAdded: false),
+        PresetChore(name: "Clear coffee table",          roomId: "living", isDefaultAdded: false),
+        PresetChore(name: "Wipe the TV",                 roomId: "living", isDefaultAdded: false),
+        PresetChore(name: "Tidy entryway",               roomId: "living", isDefaultAdded: false),
+        PresetChore(name: "Vacuum",                      roomId: "living", isDefaultAdded: false),
         // OUTDOOR — 2 auto-add + 4 library
         PresetChore(name: "Water plants",                roomId: "outdoor",     isDefaultAdded: true),
         PresetChore(name: "Sweep porch",                 roomId: "outdoor",     isDefaultAdded: true),
@@ -53,22 +53,22 @@ enum PresetChoreLibrary {
         PresetChore(name: "Wipe outdoor furniture",      roomId: "outdoor",     isDefaultAdded: false),
         PresetChore(name: "Clear walkway",               roomId: "outdoor",     isDefaultAdded: false),
         PresetChore(name: "Take out recycling",          roomId: "outdoor",     isDefaultAdded: false),
-        // HOME OFFICE — 2 auto-add + 4 library
-        PresetChore(name: "Clear desk",                  roomId: "office",      isDefaultAdded: true),
-        PresetChore(name: "File loose papers",           roomId: "office",      isDefaultAdded: true),
-        PresetChore(name: "Dust keyboard",               roomId: "office",      isDefaultAdded: false),
-        PresetChore(name: "Organize cables",             roomId: "office",      isDefaultAdded: false),
-        PresetChore(name: "Empty trash",                 roomId: "office",      isDefaultAdded: false),
-        PresetChore(name: "Wipe monitor",                roomId: "office",      isDefaultAdded: false),
+        // LAUNDRY — 2 auto-add + 4 library
+        PresetChore(name: "Sort laundry",                roomId: "laundry",     isDefaultAdded: true),
+        PresetChore(name: "Fold clothes",                roomId: "laundry",     isDefaultAdded: true),
+        PresetChore(name: "Clean lint trap",             roomId: "laundry",     isDefaultAdded: false),
+        PresetChore(name: "Wipe machines",               roomId: "laundry",     isDefaultAdded: false),
+        PresetChore(name: "Empty hamper",                roomId: "laundry",     isDefaultAdded: false),
+        PresetChore(name: "Organize supplies",           roomId: "laundry",     isDefaultAdded: false),
     ]
 
     /// Auto-add presets for a specific room
     static func defaults(for roomId: String) -> [PresetChore] {
-        all.filter { $0.roomId == roomId && $0.isDefaultAdded }
+        allChores.filter { $0.roomId == roomId && $0.isDefaultAdded }
     }
 
     /// All presets for a specific room (for browse library)
     static func all(for roomId: String) -> [PresetChore] {
-        all.filter { $0.roomId == roomId }
+        allChores.filter { $0.roomId == roomId }
     }
 }

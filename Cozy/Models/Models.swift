@@ -1,64 +1,46 @@
 import Foundation
 
-// MARK: - UserPreferences
-struct UserPreferences: Codable {
-    var dailyReminders: Bool = true
-    var overdueAlerts: Bool = true
-    var streakReminders: Bool = true
-    var weekStartsOnSunday: Bool = true
-
-    enum CodingKeys: String, CodingKey {
-        case dailyReminders = "daily_reminders"
-        case overdueAlerts = "overdue_alerts"
-        case streakReminders = "streak_reminders"
-        case weekStartsOnSunday = "week_starts_sunday"
-    }
-}
-
 // MARK: - Profile
 struct Profile: Codable, Identifiable {
-    let id: UUID
+    var id: UUID
     var displayName: String
+    var avatarEmoji: String
     var homeName: String
     var rooms: [String]
     var notificationPreference: String
     var onboardingCompleted: Bool
+    var createdAt: String
     var joinedAt: String?
-    var earnedBadgeIds: [String]?
     var preferences: UserPreferences?
-    var avatarEmoji: String?
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case displayName = "display_name"
-        case homeName = "home_name"
-        case rooms
-        case notificationPreference = "notification_preference"
-        case onboardingCompleted = "onboarding_completed"
-        case joinedAt = "joined_at"
-        case earnedBadgeIds = "earned_badge_ids"
-        case preferences
-        case avatarEmoji = "avatar_emoji"
+    var earnedBadgeIds: [String]?
+    
+    init(id: UUID = UUID(),
+         displayName: String = "",
+         avatarEmoji: String = "👤",
+         homeName: String = "",
+         rooms: [String] = [],
+         notificationPreference: String = "Off",
+         onboardingCompleted: Bool = false,
+         createdAt: String = ISO8601DateFormatter().string(from: Date()),
+         joinedAt: String? = nil,
+         preferences: UserPreferences? = nil,
+         earnedBadgeIds: [String]? = nil) {
+        self.id = id
+        self.displayName = displayName
+        self.avatarEmoji = avatarEmoji
+        self.homeName = homeName
+        self.rooms = rooms
+        self.notificationPreference = notificationPreference
+        self.onboardingCompleted = onboardingCompleted
+        self.createdAt = createdAt
+        self.joinedAt = joinedAt ?? createdAt
+        self.preferences = preferences
+        self.earnedBadgeIds = earnedBadgeIds
     }
-
-    var initials: String {
-        let parts = displayName.split(separator: " ")
-        if parts.count >= 2 {
-            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
-        }
-        return String(displayName.prefix(2)).uppercased()
-    }
-}
-
-// MARK: - HouseholdMember (legacy stub — kept for compile compatibility)
-struct HouseholdMember: Codable, Identifiable, Hashable {
-    var id: String { name }
-    let name: String
-    let emoji: String
 }
 
 // MARK: - Chore
-struct Chore: Codable, Identifiable {
+struct Chore: Identifiable, Codable, Equatable {
     var id: UUID
     var userId: UUID
     var roomId: String
@@ -67,55 +49,90 @@ struct Chore: Codable, Identifiable {
     var isDone: Bool
     var scheduledDate: String
     var completedAt: String?
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case userId = "user_id"
-        case roomId = "room_id"
-        case choreName = "chore_name"
-        case dayOfWeek = "day_of_week"
-        case isDone = "is_done"
-        case scheduledDate = "scheduled_date"
-        case completedAt = "completed_at"
-    }
-}
-
-// MARK: - ActivityLog
-struct ActivityLog: Identifiable {
-    let id: UUID
-    let type: ActivityType
-    let text: String
-    let timestamp: Date
-    let userId: String
-
-    enum ActivityType {
-        case choreAdded, choreDone, streakMilestone, badgeEarned
+    
+    init(id: UUID = UUID(),
+         userId: UUID,
+         roomId: String,
+         choreName: String,
+         dayOfWeek: String,
+         isDone: Bool = false,
+         scheduledDate: String,
+         completedAt: String? = nil) {
+        self.id = id
+        self.userId = userId
+        self.roomId = roomId
+        self.choreName = choreName
+        self.dayOfWeek = dayOfWeek
+        self.isDone = isDone
+        self.scheduledDate = scheduledDate
+        self.completedAt = completedAt
     }
 }
 
 // MARK: - Room
-struct Room: Identifiable, Hashable {
+struct Room: Identifiable, Codable {
     let id: String
     let name: String
     let icon: String
     let color: String
-
+    
     static let defaults: [Room] = [
-        Room(id: "kitchen", name: "Kitchen", icon: "fork.knife", color: "FFF3E0"),
-        Room(id: "bedroom", name: "Bedroom", icon: "bed.double", color: "F3E5F5"),
-        Room(id: "bathroom", name: "Bathroom", icon: "shower", color: "E0F2F1"),
-        Room(id: "living_room", name: "Living Room", icon: "sofa", color: "FFFDE7"),
-        Room(id: "outdoor", name: "Outdoor", icon: "leaf", color: "E8F5E9"),
-        Room(id: "office", name: "Home Office", icon: "desktopcomputer", color: "E3F2FD"),
-        Room(id: "other", name: "Other", icon: "archivebox", color: "F1F8E9"),
-    ]
-
-    static let defaultChores: [String: [String]] = [
-        "kitchen": ["Wash dishes", "Wipe counters", "Take out trash", "Mop floor", "Clean fridge"],
-        "bedroom": ["Make bed", "Vacuum", "Dust shelves", "Organize closet", "Change sheets"],
-        "bathroom": ["Scrub toilet", "Clean mirror", "Wipe sink", "Mop floor", "Clean shower"],
-        "living_room": ["Vacuum carpet", "Dust TV", "Fluff pillows", "Organize books", "Wipe windows"],
-        "outdoor": ["Water plants", "Mow lawn", "Sweep porch", "Clean grill", "Pick up leaves"],
-        "other": ["Sort mail", "Organize garage", "Clean laundry", "Take out recycling"],
+        Room(id: "kitchen", name: "Kitchen", icon: "fork.knife", color: "FFF3DC"),
+        Room(id: "bedroom", name: "Bedroom", icon: "bed.double", color: "F0E8E0"),
+        Room(id: "bathroom", name: "Bathroom", icon: "shower", color: "E4EEF2"),
+        Room(id: "living", name: "Living Room", icon: "sofa", color: "FDF3E3"),
+        Room(id: "outdoor", name: "Outdoor", icon: "leaf", color: "E5EDDF"),
+        Room(id: "laundry", name: "Laundry", icon: "washer", color: "F5F5DC")
     ]
 }
+
+// MARK: - UserPreferences
+struct UserPreferences: Codable {
+    var theme: String = "light"
+    var notificationsEnabled: Bool = false
+    var soundEnabled: Bool = true
+    var hapticEnabled: Bool = true
+    var confettiEnabled: Bool = true
+    
+    // Settings view preferences
+    var dailyReminders: Bool = false
+    var overdueAlerts: Bool = false
+    var streakReminders: Bool = false
+    var weekStartsOnSunday: Bool = true
+}
+
+// MARK: - HouseholdMember
+struct HouseholdMember: Identifiable, Codable {
+    var id: UUID
+    var name: String
+    var avatarEmoji: String
+    var role: String
+    
+    init(id: UUID = UUID(),
+         name: String,
+         avatarEmoji: String = "👤",
+         role: String = "Member") {
+        self.id = id
+        self.name = name
+        self.avatarEmoji = avatarEmoji
+        self.role = role
+    }
+}
+
+// MARK: - ActivityLog
+struct ActivityLog: Identifiable, Codable {
+    enum ActivityType: String, Codable {
+        case choreDone
+        case choreAdded
+        case streakMilestone
+        case badgeEarned
+    }
+    
+    var id: UUID
+    var type: ActivityType
+    var text: String
+    var timestamp: Date
+    var userId: String
+}
+
+

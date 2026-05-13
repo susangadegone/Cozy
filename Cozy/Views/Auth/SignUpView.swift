@@ -207,7 +207,7 @@ struct SignUpView: View {
             let trimmedName = name.trimmingCharacters(in: .whitespaces)
             onboardingVM.userName = trimmedName
             // Create a profile row immediately so onboarding data has a home
-            if let userId = authManager.currentUserId {
+            if authManager.currentUserId != nil {
                 let p = LocalStore.shared.defaultProfile()
                 try? await DataService.shared.createProfile(p)
             }
