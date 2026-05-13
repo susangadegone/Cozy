@@ -50,6 +50,7 @@
 		9F09307CF720B101FA76829B /* HouseholdPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED2D9F725A479E126A5990E /* HouseholdPanelView.swift */; };
 		A2F28210A24361EFD4FBEC24 /* AddChoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEAF991B7E5BE6BDD153B61D /* AddChoreView.swift */; };
 		A55194DBB8E69D62C75425A0 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87F09F579827D7305F63B7B /* OnboardingView.swift */; };
+		A7538E22D020539E4C6BDC49 /* HowCozyWorksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC291709126C7C3DF2CB84E7 /* HowCozyWorksView.swift */; };
 		ABD228A423639A2E4FD83250 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9071A204A6DFD1DD0D005916 /* Assets.xcassets */; };
 		AC0813DD4AB7B7266DB26080 /* CozyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 612F00D5A618CDE804A96CDC /* CozyApp.swift */; };
 		AE75ACC45AD6A8B219F74005 /* FILES_CREATED_README.md in Resources */ = {isa = PBXBuildFile; fileRef = F467337E9ECB03DC877993F8 /* FILES_CREATED_README.md */; };
@@ -145,6 +146,7 @@
 		E1E10FF744EEB9816E3E14EE /* OnboardingQ5View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingQ5View.swift; sourceTree = "<group>"; };
 		E3162A133E5D9D87D907AA2C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		E94A952BF18DD21FEDE41062 /* OnboardingComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingComponents.swift; sourceTree = "<group>"; };
+		EC291709126C7C3DF2CB84E7 /* HowCozyWorksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HowCozyWorksView.swift; sourceTree = "<group>"; };
 		EE2714606E01035824B61B8E /* FloatingDragChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingDragChip.swift; sourceTree = "<group>"; };
 		F26DCE7F72815D4D734B4126 /* OnboardingFinale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFinale.swift; sourceTree = "<group>"; };
 		F26F66028700C4B400AEF136 /* ChoreDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoreDetailView.swift; sourceTree = "<group>"; };
@@ -228,6 +230,7 @@
 		7296CA6D5F0109FBA416F471 /* Onboarding */ = {
 			isa = PBXGroup;
 			children = (
+				EC291709126C7C3DF2CB84E7 /* HowCozyWorksView.swift */,
 				E94A952BF18DD21FEDE41062 /* OnboardingComponents.swift */,
 				F26DCE7F72815D4D734B4126 /* OnboardingFinale.swift */,
 				377DB9E362D49E868CAE1EA6 /* OnboardingQ1View.swift */,
@@ -441,6 +444,7 @@
 				26701BD811E88E5F283B8AD8 /* FloatingDragChip.swift in Sources */,
 				5864AED484F4398CDE7092EC /* HomeView.swift in Sources */,
 				9F09307CF720B101FA76829B /* HouseholdPanelView.swift in Sources */,
+				A7538E22D020539E4C6BDC49 /* HowCozyWorksView.swift in Sources */,
 				CAB97C1BB4CCF02143B92AC8 /* InsightsView.swift in Sources */,
 				F8588D15CE46B8312D02AEC9 /* LocalStore.swift in Sources */,
 				3F895CB94DB94F6D3CCF51A5 /* LoginView.swift in Sources */,

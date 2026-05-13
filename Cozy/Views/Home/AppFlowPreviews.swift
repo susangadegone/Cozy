@@ -33,7 +33,7 @@ struct DashboardPreview: View {
                 profile.onboardingCompleted = true
                 profile.displayName = "Sarah"
                 profile.homeName = "Sarah's Place"
-                profile.rooms = ["kitchen", "bedroom", "bathroom", "living_room"]
+                profile.rooms = ["kitchen", "bedroom", "bathroom", "living"]
                 appState.profile = profile
                 
                 // Add sample chores
@@ -99,7 +99,7 @@ struct ChoresViewPreview: View {
                 // Set up profile
                 var profile = appState.profile ?? LocalStore.shared.defaultProfile()
                 profile.onboardingCompleted = true
-                profile.rooms = ["kitchen", "bedroom", "bathroom", "living_room"]
+                profile.rooms = ["kitchen", "bedroom", "bathroom", "living"]
                 appState.profile = profile
             }
     }
@@ -121,7 +121,7 @@ struct ChoreLibraryPreview: View {
                 var profile = appState.profile ?? LocalStore.shared.defaultProfile()
                 profile.onboardingCompleted = true
                 profile.displayName = "Alex"
-                profile.rooms = ["kitchen", "bedroom", "bathroom", "living_room"]
+                profile.rooms = ["kitchen", "bedroom", "bathroom", "living"]
                 appState.profile = profile
                 
                 // Add one sample chore so we can see Add/Added states

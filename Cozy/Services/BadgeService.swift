@@ -61,7 +61,7 @@ enum BadgeService {
             icon: "🏠",
             description: "Complete a chore in every room",
             check: { _, chores, _ in
-                let rooms = Set(["kitchen", "bedroom", "bathroom", "living_room", "outdoor"])
+                let rooms = Set(["kitchen", "bedroom", "bathroom", "living", "outdoor"])
                 let doneRooms = Set(chores.filter(\.isDone).map(\.roomId))
                 return rooms.isSubset(of: doneRooms)
             }
