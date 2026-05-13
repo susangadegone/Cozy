@@ -4,13 +4,16 @@ struct AddChoreView: View {
     @EnvironmentObject var appState: AppState
     @Environment(\.dismiss) private var dismiss
 
+    /// The calendar date the user had selected when they tapped "+".
+    /// Defaults to today if not provided.
+    var initialDate: Date = Date()
+
     @State private var step = 0
     @State private var selectedRoom: String = ""
     @State private var selectedChore: String = ""
     @State private var choreNameInput: String = ""
     @State private var selectedFrequency: String = "Weekly"
     @State private var selectedDays: Set<String> = []
-    @State private var selectedDate: Date = Date()
     @State private var showNameError: Bool = false
 
     private let frequencies = ["Daily", "2–3 times/week", "Weekly", "Every 2 weeks", "Monthly"]
@@ -222,7 +225,11 @@ struct AddChoreView: View {
     }
 
     private func saveChore() {
-        let scheduledDate = nextDate(for: selectedDays.first)
+        // Use the calendar's selected date as the anchor.
+        // If the user also picked specific weekdays, find the nearest occurrence
+        // on or after the anchor. Otherwise just use the anchor date itself.
+        let anchor = Calendar.current.startOfDay(for: initialDate)
+        let scheduledDate = nextDate(for: selectedDays.first, from: anchor)
         let scheduledDayName = DateFormatters.dayOfWeek.string(from: scheduledDate)
         let chore = Chore(
             id: UUID(),
@@ -237,15 +244,18 @@ struct AddChoreView: View {
         dismiss()
     }
 
-    private func nextDate(for dayAbbrev: String?) -> Date {
+    /// Returns the nearest date on or after `anchor` that matches the given weekday abbreviation.
+    /// If no abbreviation is given, returns the anchor date itself.
+    private func nextDate(for dayAbbrev: String?, from anchor: Date) -> Date {
+        guard let abbrev = dayAbbrev else { return anchor }
         let map = ["SU": 1, "MO": 2, "TU": 3, "WE": 4, "TH": 5, "FR": 6, "SA": 7]
-        guard let abbrev = dayAbbrev, let target = map[abbrev] else { return Date() }
+        guard let target = map[abbrev] else { return anchor }
         let cal = Calendar.current
-        var check = cal.startOfDay(for: Date())
+        var check = cal.startOfDay(for: anchor)
         for _ in 0..<8 {
             if cal.component(.weekday, from: check) == target { return check }
             check = cal.date(byAdding: .day, value: 1, to: check) ?? check
         }
-        return Date()
+        return anchor
     }
 }

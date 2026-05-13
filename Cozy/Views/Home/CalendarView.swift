@@ -40,7 +40,7 @@ struct CalendarView: View {
             .navigationBarTitleDisplayMode(.inline)
         }
         .sheet(isPresented: $showAddChore) {
-            AddChoreView()
+            AddChoreView(initialDate: appState.selectedDate)
                 .environmentObject(appState)
                 .presentationDetents([.fraction(0.85)])
                 .presentationDragIndicator(.visible)
