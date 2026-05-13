@@ -50,6 +50,8 @@ struct DashboardView: View {
     var body: some View {
         VStack(spacing: 16) {
             greetingHeader
+            StreakFlameCard()
+                .environmentObject(appState)
             moodRow
             moodBanner
             if mood != .overwhelming { weekProgressCard }

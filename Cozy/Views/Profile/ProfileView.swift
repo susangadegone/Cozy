@@ -230,8 +230,11 @@ struct ProfileView: View {
     }
 
     private var badgesSection: some View {
-        PSection(title: "Badges", icon: "rosette") {
-            BadgeGridView().environmentObject(appState)
+        VStack(spacing: 14) {
+            NextBadgeCard().environmentObject(appState)
+            PSection(title: "Badges", icon: "rosette") {
+                BadgeGridView().environmentObject(appState)
+            }
         }
     }
 
