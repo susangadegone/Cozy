@@ -12,8 +12,7 @@ struct ChorePreviewSheet: View {
         "Bathroom": "bathroom",
         "Living room": "living",
         "Outdoor/yard": "outdoor",
-        "Home office": "laundry",
-        "Other": "laundry"
+        "Home office": "laundry"
     ]
 
     private var roomIds: [String] {
@@ -175,8 +174,7 @@ struct OnboardingQ4View: View {
         RoomTile(id: "Bathroom",     label: "Bathroom",    icon: "shower"),
         RoomTile(id: "Living room",  label: "Living room", icon: "sofa"),
         RoomTile(id: "Outdoor/yard", label: "Outdoor",     icon: "leaf"),
-        RoomTile(id: "Home office",  label: "Office",      icon: "desktopcomputer"),
-        RoomTile(id: "Other",        label: "Other",       icon: "plus.circle")
+        RoomTile(id: "Home office",  label: "Office",      icon: "desktopcomputer")
     ]
 
     private let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
