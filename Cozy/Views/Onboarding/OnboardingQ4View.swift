@@ -192,11 +192,6 @@ struct OnboardingQ4View: View {
                 .offset(y: appeared ? 0 : 14)
             hint
                 .padding(.top, 10)
-            if !selected.isEmpty {
-                chorePreviewButton
-                    .padding(.top, 8)
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
-            }
             Spacer()
             OnboardingNextButton(isEnabled: !selected.isEmpty) {
                 onboardingVM.selectedRooms = Array(selected)
@@ -235,7 +230,7 @@ struct OnboardingQ4View: View {
 
     private func roomTile(_ room: RoomTile) -> some View {
         let on = selected.contains(room.id)
-        return ZStack(alignment: .topTrailing) {
+        return ZStack(alignment: .bottom) {
             VStack(spacing: 8) {
                 Image(systemName: room.icon)
                     .font(.system(size: 26))
@@ -253,35 +248,43 @@ struct OnboardingQ4View: View {
                 RoundedRectangle(cornerRadius: 14)
                     .stroke(on ? CozyTheme.accent : CozyTheme.border, lineWidth: on ? 2 : 1)
             )
+            .overlay(alignment: .topTrailing) {
+                if on {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.white)
+                        .font(.system(size: 14))
+                        .padding(5)
+                }
+            }
+            // "Ideas" badge appears on selected tiles
             if on {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.white)
-                    .font(.system(size: 14))
-                    .padding(5)
+                Button {
+                    showChorePreview = true
+                } label: {
+                    HStack(spacing: 3) {
+                        Image(systemName: "eye.fill")
+                            .font(.system(size: 9, weight: .semibold))
+                        Text("Ideas")
+                            .font(.system(size: 9, weight: .semibold))
+                    }
+                    .foregroundColor(CozyTheme.accent)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .background(.white)
+                    .clipShape(Capsule())
+                    .shadow(color: .black.opacity(0.12), radius: 4, x: 0, y: 2)
+                }
+                .offset(y: 10)
+                .transition(.scale.combined(with: .opacity))
             }
         }
+        .padding(.bottom, on ? 8 : 0)
     }
 
     private var hint: some View {
         Text("Select all that apply — you can add more later")
             .font(.system(size: 12))
             .foregroundColor(CozyTheme.mutedText)
-    }
-
-    private var chorePreviewButton: some View {
-        Button {
-            showChorePreview = true
-        } label: {
-            HStack(spacing: 6) {
-                Image(systemName: "list.bullet.rectangle")
-                    .font(.system(size: 13))
-                Text("See chore ideas for these rooms")
-                    .font(.system(size: 13, weight: .medium))
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 11, weight: .semibold))
-            }
-            .foregroundColor(CozyTheme.accent)
-        }
     }
 
     private func toggle(_ id: String) {

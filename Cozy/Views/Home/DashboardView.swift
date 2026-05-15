@@ -50,13 +50,13 @@ struct DashboardView: View {
     var body: some View {
         VStack(spacing: 16) {
             greetingHeader
+            quoteCard
             StreakFlameCard()
                 .environmentObject(appState)
             moodRow
             moodBanner
             if mood != .overwhelming { weekProgressCard }
             todaySection
-            if !upcomingChores.isEmpty && mood != .overwhelming { upcomingCard }
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
@@ -76,7 +76,48 @@ struct DashboardView: View {
             .padding(.top, 4)
     }
 
-    // MARK: Mood Row — word pills
+    // MARK: Daily Quote Card
+    private static let homeQuotes: [(text: String, author: String)] = [
+        ("Outer order contributes to inner calm.", "Gretchen Rubin"),
+        ("The objective of cleaning is not just to clean, but to feel happiness living within that environment.", "Marie Kondo"),
+        ("A clean home is a happy home.", "Louisa May Alcott"),
+        ("Cleaning and organizing is a practice, not a project.", "Meagan Francis"),
+        ("Have nothing in your house that you do not know to be useful, or believe to be beautiful.", "William Morris"),
+        ("A tidy space is a gift you give yourself every morning.", "Cozy"),
+        ("Hospitality starts with cleanliness.", "Shoukei Matsumoto"),
+        ("Small daily actions create the home you dream of.", "Cozy"),
+        ("The best way to find out what we really need is to get rid of what we don't.", "Marie Kondo"),
+        ("When your environment is clean, you feel happy, motivated, and healthy.", "Lailah Gifty Akita"),
+        ("A peaceful home is built one small habit at a time.", "Cozy"),
+        ("Every chore done is an act of care for yourself and the people you love.", "Cozy")
+    ]
+
+    private var quoteCard: some View {
+        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
+        let quote = Self.homeQuotes[dayOfYear % Self.homeQuotes.count]
+        return HStack(spacing: 0) {
+            RoundedRectangle(cornerRadius: 3)
+                .fill(CozyTheme.teal)
+                .frame(width: 4)
+                .padding(.vertical, 2)
+            VStack(alignment: .leading, spacing: 5) {
+                Text("\u{201C}\(quote.text)\u{201D}")
+                    .font(.system(size: 14, weight: .regular, design: .serif))
+                    .italic()
+                    .foregroundColor(CozyTheme.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text("— \(quote.author)")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(CozyTheme.mutedText)
+            }
+            .padding(.leading, 12)
+            Spacer()
+        }
+        .padding(14)
+        .cardStyle()
+    }
+
+
     private var moodRow: some View {
         HStack(spacing: 8) {
             ForEach(["Fine", "Manageable", "Too much"], id: \.self) { m in
@@ -293,61 +334,6 @@ struct DashboardView: View {
             .padding(.vertical, 16)
             Spacer()
         }
-    }
-
-    // MARK: Upcoming Chores
-    private var upcomingChores: [Chore] {
-        let cal = Calendar.current
-        let today = cal.startOfDay(for: Date())
-        return appState.chores.filter { !$0.isDone }.filter {
-            guard let d = DateFormatters.yearMonthDay.date(from: $0.scheduledDate) else { return false }
-            let diff = cal.dateComponents([.day], from: today, to: cal.startOfDay(for: d)).day ?? 0
-            return diff > 0 && diff <= 3
-        }
-    }
-
-    private var upcomingCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Coming up")
-                .font(.system(size: 14, weight: .semibold, design: .serif))
-                .foregroundColor(CozyTheme.primary)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(upcomingChores) { chore in
-                        upcomingChip(chore)
-                    }
-                }
-            }
-        }
-        .padding(14)
-        .cardStyle()
-    }
-
-    private func upcomingChip(_ chore: Chore) -> some View {
-        let cal = Calendar.current
-        let today = cal.startOfDay(for: Date())
-        let dayLabel: String = {
-            guard let d = DateFormatters.yearMonthDay.date(from: chore.scheduledDate) else { 
-                return chore.dayOfWeek 
-            }
-            let diff = cal.dateComponents([.day], from: today, to: cal.startOfDay(for: d)).day ?? 0
-            if diff == 1 { return "Tomorrow" }
-            return DateFormatters.shortDayOfWeek.string(from: d)
-        }()
-        return VStack(alignment: .leading, spacing: 3) {
-            Text(chore.choreName)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundColor(CozyTheme.primary)
-                .lineLimit(1)
-            Text(dayLabel)
-                .font(.system(size: 10))
-                .foregroundColor(CozyTheme.mutedText)
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(CozyTheme.card)
-        .cornerRadius(10)
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(CozyTheme.border, lineWidth: 1))
     }
 
     // MARK: Activity Feed (retained, not shown in body per spec)
