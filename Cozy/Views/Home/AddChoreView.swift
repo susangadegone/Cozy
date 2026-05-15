@@ -14,6 +14,7 @@ struct AddChoreView: View {
     @State private var choreNameInput: String = ""
     @State private var selectedFrequency: String = "Weekly"
     @State private var selectedDays: Set<String> = []
+    @State private var showBrowse = false
     @State private var showNameError: Bool = false
 
     private let frequencies = ["Daily", "2–3 times/week", "Weekly", "Every 2 weeks", "Monthly"]
@@ -104,9 +105,27 @@ struct AddChoreView: View {
     // MARK: - Step 2: Chore Details
     private var choreDetails: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("What needs doing?")
-                .font(.system(size: 22, weight: .bold, design: .serif))
-                .foregroundColor(CozyTheme.primary)
+            HStack(alignment: .firstTextBaseline) {
+                Text("What needs doing?")
+                    .font(.system(size: 22, weight: .bold, design: .serif))
+                    .foregroundColor(CozyTheme.primary)
+                Spacer()
+                Button {
+                    showBrowse = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "list.bullet.rectangle")
+                            .font(.system(size: 12))
+                        Text("Browse ideas")
+                            .font(.system(size: 13, weight: .medium))
+                    }
+                    .foregroundColor(CozyTheme.accent)
+                }
+                .sheet(isPresented: $showBrowse) {
+                    BrowseChoresView(previewMode: false, limitToRooms: selectedRoom.isEmpty ? [] : [selectedRoom])
+                        .environmentObject(appState)
+                }
+            }
 
             VStack(alignment: .leading, spacing: 6) {
                 TextField("Chore name", text: $choreNameInput)

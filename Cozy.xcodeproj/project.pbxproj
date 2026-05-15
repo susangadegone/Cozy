@@ -67,6 +67,7 @@
 		CC67EC560804A1F31673C556 /* ChoreHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EF8F802A1AEB90F78016D2 /* ChoreHistoryView.swift */; };
 		D5F32BBCA8AFAB14477DBEF1 /* CozyTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 819737D6BB603362F0AC4AF6 /* CozyTheme.swift */; };
 		D78BC9CF6C4C8ABF32B595EA /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55467CD7AAA96BBBAF6C956 /* AuthManager.swift */; };
+		D7B3830D04E089449FD68594 /* BrowseChoresView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FE166BEABA7282DB9F7E81A /* BrowseChoresView.swift */; };
 		D8C2B24CEE8711EE03FD2C61 /* OnboardingQ3View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E2BA0AE4C53E265D4D4F0EC /* OnboardingQ3View.swift */; };
 		D9FB39CC93745FCC86A58D9F /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4A1D4E01A7B9FE6D132BE1 /* Models.swift */; };
 		DA6246FBFB66C4E26FCDAB99 /* BadgeGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09D9F7C7ABD764041E0C51B2 /* BadgeGridView.swift */; };
@@ -100,6 +101,7 @@
 		3D279CE06BA349D3086F948A /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		3D3895B1461A128909ADA42D /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		3EEA7142AF91D5CBAE6C81D6 /* ChoreTrayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoreTrayView.swift; sourceTree = "<group>"; };
+		3FE166BEABA7282DB9F7E81A /* BrowseChoresView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowseChoresView.swift; sourceTree = "<group>"; };
 		415D986C78A01A4B4A3B3B7A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		51A9AB9CCC9FBE8CFB9F0A23 /* NotificationPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPrefsView.swift; sourceTree = "<group>"; };
 		5BAAF789037C2180EC18D703 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -255,6 +257,7 @@
 				9CFE8F830F071EB9612DEFF0 /* .gitignore */,
 				DEAF991B7E5BE6BDD153B61D /* AddChoreView.swift */,
 				6DC04CBCA8A6F7E681C50490 /* AppFlowPreviews.swift */,
+				3FE166BEABA7282DB9F7E81A /* BrowseChoresView.swift */,
 				71D037AA57F9C56F60AA7E40 /* CalendarHelpers.swift */,
 				A254716DA90B17E9E5CFA1F7 /* CalendarView.swift */,
 				F26F66028700C4B400AEF136 /* ChoreDetailView.swift */,
@@ -427,6 +430,7 @@
 				D78BC9CF6C4C8ABF32B595EA /* AuthManager.swift in Sources */,
 				DA6246FBFB66C4E26FCDAB99 /* BadgeGridView.swift in Sources */,
 				6898E2F45C0C7DFEE2F53B51 /* BadgeService.swift in Sources */,
+				D7B3830D04E089449FD68594 /* BrowseChoresView.swift in Sources */,
 				B9C28C184F13570576BCCAAD /* CalendarHelpers.swift in Sources */,
 				328778127023E1E5BD6BA007 /* CalendarView.swift in Sources */,
 				74D6E26A096BBB05158080A3 /* ChoreDetailView.swift in Sources */,
