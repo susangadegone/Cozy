@@ -1,17 +1,17 @@
 import SwiftUI
 
 enum CozyTheme {
-    // MARK: - Core Colors (warm, human-intentional)
-    static let background  = Color(hex: "FBF8F3")  // unbleached linen
-    static let card        = Color(hex: "FFFFFF")
-    static let border      = Color(hex: "EAE5DE")  // pencil-on-paper hairline
-    static let primary     = Color(hex: "2B2520")  // warm brown — reads "sophisticated home"
-    static let mutedText   = Color(hex: "9B9489")  // warm gray — quiet and readable
-    static let accent      = Color(hex: "BA7517")  // beeswax amber — inviting not urgent
-    static let teal        = Color(hex: "5C9B8D")  // sage — calm earthy completion
-    static let yellow      = Color(hex: "D4A574")  // terracotta — cozy rewards
+    // MARK: - Core Colors (Broadsheet — newsprint grey paper, near-black ink, front-page red)
+    static let background  = Color(hex: "E6E3DB")  // newsprint grey
+    static let card        = Color(hex: "F1EEE6")  // raised surface, one notch above the paper
+    static let border      = Color(hex: "B6B2A4")  // hairline rule
+    static let primary     = Color(hex: "161512")  // near-black ink
+    static let mutedText   = Color(hex: "787567")  // soft grey — captions, hints
+    static let accent      = Color(hex: "B41E1E")  // front-page red — used sparingly
+    static let teal        = Color(hex: "1F5C42")  // forest green — completion / done
+    static let yellow      = Color(hex: "3B3A33")  // soft ink — secondary text (was warm yellow)
 
-    // MARK: - Room Colors (warmed)
+    // MARK: - Room Colors (kept; warm tints harmonize with newsprint grey)
     static let kitchenColor    = Color(hex: "FFF3DC")  // buttery
     static let bedroomColor    = Color(hex: "F0E8E0")  // warm taupe
     static let bathroomColor   = Color(hex: "E4EEF2")  // cool mist
@@ -20,9 +20,9 @@ enum CozyTheme {
     static let otherColor      = Color(hex: "EDE6F5")  // soft violet
 
     // MARK: - Shape
-    static let cornerRadius: CGFloat = 12
+    static let cornerRadius: CGFloat = 4         // square corners — editorial
     static let pillRadius:   CGFloat = 28
-    static let cardCornerRadius: CGFloat = 12
+    static let cardCornerRadius: CGFloat = 4
     static let padding: CGFloat = 16
 }
 

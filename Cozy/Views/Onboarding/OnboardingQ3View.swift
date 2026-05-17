@@ -32,7 +32,7 @@ struct OnboardingQ3View: View {
             OnboardingNextButton(isEnabled: selection != nil) {
                 if let s = selection {
                     onboardingVM.cleaningRhythm = s
-                    appRouter.navigate(to: .onboardingQ4)
+                    appRouter.navigate(to: .cleanlinessType)
                 }
             }
         }

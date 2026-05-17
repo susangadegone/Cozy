@@ -10,6 +10,8 @@ enum AppRoute: Equatable {
     case onboardingQ1
     case onboardingQ2
     case onboardingQ3
+    case cleanlinessType
+    case cleanlinessGoal
     case onboardingQ4
     case onboardingQ5
     case scheduleReady
@@ -29,8 +31,10 @@ final class AppRouter: ObservableObject {
         switch route {
         case .onboardingQ1:  route = .onboardingName
         case .onboardingQ2:  route = .onboardingQ1
-        case .onboardingQ3:  route = .onboardingQ2
-        case .onboardingQ4:  route = .onboardingQ3
+        case .onboardingQ3:     route = .onboardingQ2
+        case .cleanlinessType:  route = .onboardingQ3
+        case .cleanlinessGoal:  route = .cleanlinessType
+        case .onboardingQ4:     route = .cleanlinessGoal
         case .onboardingQ5:  route = .onboardingQ4
         case .scheduleReady: route = .onboardingQ5
         case .login, .signUp: route = .welcome

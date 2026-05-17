@@ -23,7 +23,7 @@ struct OnboardingQ5View: View {
     ]
 
     var body: some View {
-        OnboardingShell(step: 5, total: 6, onBack: { appRouter.navigate(to: .onboardingQ4) }) {
+        OnboardingShell(step: 7, total: 7, onBack: { appRouter.navigate(to: .onboardingQ4) }) {
             questionHeader
                 .padding(.bottom, 24)
                 .opacity(appeared ? 1 : 0)
@@ -105,6 +105,13 @@ struct OnboardingQ5View: View {
         )
 
         onboardingVM.generateSchedule()
+        // Persist cleanliness types for dashboard journey badge
+        if let ct = onboardingVM.currentType {
+            UserDefaults.standard.set(ct.rawValue, forKey: "cozy_currentType")
+        }
+        if let gt = onboardingVM.goalType {
+            UserDefaults.standard.set(gt.rawValue, forKey: "cozy_goalType")
+        }
         isBuilding = false
         appRouter.navigate(to: .scheduleReady)
     }

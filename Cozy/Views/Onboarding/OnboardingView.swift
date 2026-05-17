@@ -31,6 +31,10 @@ struct OnboardingView: View {
             OnboardingQ2View()
         case .onboardingQ3:
             OnboardingQ3View()
+        case .cleanlinessType:
+            CleanlinessTypeView()
+        case .cleanlinessGoal:
+            CleanlinessGoalView()
         case .onboardingQ4:
             OnboardingQ4View()
         case .onboardingQ5:

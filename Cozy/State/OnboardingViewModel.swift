@@ -16,6 +16,8 @@ final class OnboardingViewModel: ObservableObject {
     @Published var cleaningRhythm: String = ""
     @Published var selectedRooms: [String] = []
     @Published var reminderStyle: String = ""
+    @Published var currentType: CleanlinessType? = nil
+    @Published var goalType: CleanlinessType? = nil
     @Published var generatedSchedule: [ScheduledChore] = []
 
     // MARK: - Schedule Generation
@@ -30,14 +32,19 @@ final class OnboardingViewModel: ObservableObject {
             "Other": ["Sort mail", "Clean laundry", "Take out recycling"]
         ]
 
+        let cap = currentType?.dailyChoreCap ?? 4
         var result: [ScheduledChore] = []
         let days = dayIndices(for: cleaningRhythm)
+        var dayChoreCount: [Int: Int] = [:]
 
         for room in selectedRooms {
             let chores = choreMap[room] ?? ["Tidy up"]
             for (i, chore) in chores.prefix(2).enumerated() {
                 let day = days[i % days.count]
+                let count = dayChoreCount[day, default: 0]
+                guard count < cap else { continue }
                 result.append(ScheduledChore(name: chore, room: room, dayIndex: day))
+                dayChoreCount[day] = count + 1
             }
         }
 

@@ -1,65 +1,87 @@
 import SwiftUI
 
-// MARK: - Dashboard
+// MARK: - Dashboard · Morning Paper Today screen
+// Masthead date + italic lead + chores grouped by Smart Departments.
+// Capped at 5 chores per day so nothing feels overwhelming.
 struct DashboardView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var dragManager: DragDropManager
     var onChoreComplete: () -> Void
 
     @State private var selectedChore: Chore? = nil
-    @State private var selectedMood: String = ""
-    @State private var showAllChores: Bool = false
-    @State private var snoozeConfirmed: Bool = false
 
-    // MARK: - Mood Logic
-    private enum Mood: String {
-        case allGood = "Fine"
-        case manageable = "Manageable"
-        case overwhelming = "Too much"
-        case none = ""
-    }
-    private var mood: Mood { Mood(rawValue: selectedMood) ?? .none }
+    private let dayChoreCap = 5
 
-    /// Sort undone chores by name length (shorter = quicker wins) then append done chores
-    private var prioritizedChores: [Chore] {
-        let undone = appState.todayChores.filter { !$0.isDone }
+    // MARK: Data helpers
+
+    /// Today's chores, capped, undone first.
+    private var capped: [Chore] {
+        let all = appState.todayChores
+        let undone = all.filter { !$0.isDone }
             .sorted { $0.choreName.count < $1.choreName.count }
-        let done = appState.todayChores.filter { $0.isDone }
-        return undone + done
+        let done = all.filter { $0.isDone }
+        return Array((undone + done).prefix(dayChoreCap))
     }
 
-    /// Chores shown based on mood — overwhelming = 1 quick win, manageable = top 3
-    private var visibleChores: [Chore] {
-        let sorted = prioritizedChores
-        switch mood {
-        case .overwhelming: return showAllChores ? sorted : Array(sorted.prefix(1))
-        case .manageable:   return showAllChores ? sorted : Array(sorted.prefix(3))
-        default:            return sorted
+    private var allDone: Bool {
+        !capped.isEmpty && capped.allSatisfy { $0.isDone }
+    }
+
+    /// Group chores by room. Rooms with 2+ chores get their own department;
+    /// single-chore rooms collapse into "Loose ends".
+    private struct Department: Identifiable {
+        let id: String
+        let name: String
+        let chores: [Chore]
+        let isLooseEnds: Bool
+    }
+
+    private var departments: [Department] {
+        let grouped = Dictionary(grouping: capped, by: { $0.roomId })
+        let multi = grouped.filter { $0.value.count >= 2 }
+        let singles = grouped.filter { $0.value.count == 1 }.flatMap { $0.value }
+
+        var out: [Department] = []
+        for (roomId, items) in multi.sorted(by: { roomName($0.key) < roomName($1.key) }) {
+            out.append(Department(id: roomId, name: roomName(roomId), chores: items, isLooseEnds: false))
+        }
+        if !singles.isEmpty {
+            out.append(Department(id: "__loose", name: "Loose ends", chores: singles, isLooseEnds: true))
+        }
+        return out
+    }
+
+    private func roomName(_ id: String) -> String {
+        Room.defaults.first(where: { $0.id == id })?.name ?? id.capitalized
+    }
+
+    private func roomDot(_ id: String) -> Color {
+        // Editorial dots — saturated room colors tuned for newsprint grey.
+        switch id {
+        case "kitchen":  return Color(hex: "D49758")
+        case "bedroom":  return Color(hex: "B084A8")
+        case "bathroom": return Color(hex: "7BA3B6")
+        case "living":   return Color(hex: "C58163")
+        case "outdoor":  return Color(hex: "85A56F")
+        case "laundry":  return Color(hex: "B8A172")
+        default:         return Color(hex: "8E8675")
         }
     }
 
-    private var hiddenCount: Int {
-        let undone = appState.todayChores.filter { !$0.isDone }.count
-        switch mood {
-        case .overwhelming: return showAllChores ? 0 : max(0, undone - 1)
-        case .manageable:   return showAllChores ? 0 : max(0, undone - 3)
-        default:            return 0
-        }
-    }
+    // MARK: Body
 
     var body: some View {
-        VStack(spacing: 16) {
-            greetingHeader
-            quoteCard
-            StreakFlameCard()
-                .environmentObject(appState)
-            moodRow
-            moodBanner
-            if mood != .overwhelming { weekProgressCard }
-            todaySection
+        VStack(alignment: .leading, spacing: 0) {
+            masthead
+            if capped.isEmpty {
+                emptyState
+            } else {
+                departmentsList
+            }
+            footer
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 12)
+        .padding(.horizontal, 24)
+        .padding(.top, 16)
         .padding(.bottom, 120)
         .sheet(item: $selectedChore) { chore in
             ChoreDetailView(chore: chore)
@@ -67,486 +89,266 @@ struct DashboardView: View {
         }
     }
 
-    // MARK: Greeting Header
-    private var greetingHeader: some View {
-        Text(DateFormatters.fullDate.string(from: Date()))
-            .font(.system(size: 22, weight: .bold, design: .serif))
-            .foregroundColor(CozyTheme.primary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.top, 4)
-    }
+    // MARK: Masthead
 
-    // MARK: Daily Quote Card
-    private static let homeQuotes: [(text: String, author: String)] = [
-        ("Outer order contributes to inner calm.", "Gretchen Rubin"),
-        ("The objective of cleaning is not just to clean, but to feel happiness living within that environment.", "Marie Kondo"),
-        ("A clean home is a happy home.", "Louisa May Alcott"),
-        ("Cleaning and organizing is a practice, not a project.", "Meagan Francis"),
-        ("Have nothing in your house that you do not know to be useful, or believe to be beautiful.", "William Morris"),
-        ("A tidy space is a gift you give yourself every morning.", "Cozy"),
-        ("Hospitality starts with cleanliness.", "Shoukei Matsumoto"),
-        ("Small daily actions create the home you dream of.", "Cozy"),
-        ("The best way to find out what we really need is to get rid of what we don't.", "Marie Kondo"),
-        ("When your environment is clean, you feel happy, motivated, and healthy.", "Lailah Gifty Akita"),
-        ("A peaceful home is built one small habit at a time.", "Cozy"),
-        ("Every chore done is an act of care for yourself and the people you love.", "Cozy")
-    ]
-
-    private var quoteCard: some View {
-        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
-        let quote = Self.homeQuotes[dayOfYear % Self.homeQuotes.count]
-        return HStack(spacing: 0) {
-            RoundedRectangle(cornerRadius: 3)
-                .fill(CozyTheme.teal)
-                .frame(width: 4)
-                .padding(.vertical, 2)
-            VStack(alignment: .leading, spacing: 5) {
-                Text("\u{201C}\(quote.text)\u{201D}")
-                    .font(.system(size: 14, weight: .regular, design: .serif))
-                    .italic()
-                    .foregroundColor(CozyTheme.primary)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text("— \(quote.author)")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(CozyTheme.mutedText)
-            }
-            .padding(.leading, 12)
-            Spacer()
-        }
-        .padding(14)
-        .cardStyle()
-    }
-
-
-    private var moodRow: some View {
-        HStack(spacing: 8) {
-            ForEach(["Fine", "Manageable", "Too much"], id: \.self) { m in
-                let isOn = selectedMood == m
-                Button {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                        selectedMood = isOn ? "" : m
-                        showAllChores = false
-                        snoozeConfirmed = false
-                    }
-                } label: {
-                    Text(m)
-                        .font(.system(size: 12, weight: isOn ? .semibold : .regular))
-                        .foregroundColor(isOn ? .white : CozyTheme.primary)
-                        .padding(.horizontal, 12).padding(.vertical, 7)
-                        .background(isOn ? moodColor(m) : Color.clear)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(isOn ? moodColor(m) : CozyTheme.border, lineWidth: 1))
-                }
-                .buttonStyle(.plain)
-                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isOn)
-            }
-            Spacer()
-            if !selectedMood.isEmpty {
-                Button {
-                    withAnimation { selectedMood = ""; showAllChores = false; snoozeConfirmed = false }
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(CozyTheme.mutedText).font(.system(size: 16))
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-
-    private func moodColor(_ m: String) -> Color {
-        switch m {
-        case "Fine":     return Color(hex: "4CAF82")
-        case "Manageable":   return CozyTheme.accent
-        case "Too much": return Color(hex: "E57373")
-        default:             return CozyTheme.accent
-        }
-    }
-
-    // MARK: Mood Banner — empathetic, functional
-    @ViewBuilder
-    private var moodBanner: some View {
-        switch mood {
-        case .allGood:
-            HStack(spacing: 8) {
-                Circle().fill(moodColor("Fine")).frame(width: 7, height: 7)
-                Text("\(appState.todayChores.count) chores today. That's it.")
-                    .font(.system(size: 12)).foregroundColor(CozyTheme.mutedText)
-                Spacer()
-            }
-            .transition(.opacity)
-        case .manageable:
-            let total = appState.todayChores.filter { !$0.isDone }.count
-            HStack(spacing: 8) {
-                Circle().fill(moodColor("Manageable")).frame(width: 7, height: 7)
-                Text(total <= 3 ? "\(total) left today. You're close." : "Showing your top 3 of \(total) remaining.")
-                    .font(.system(size: 12)).foregroundColor(CozyTheme.mutedText)
-                Spacer()
-            }
-            .transition(.opacity)
-        case .overwhelming:
-            VStack(alignment: .leading, spacing: 8) {
-                let total = appState.todayChores.filter { !$0.isDone }.count
-                HStack(spacing: 8) {
-                    Circle().fill(moodColor("Too much")).frame(width: 7, height: 7)
-                    Text(total <= 1 ? "Just one thing. You can do this." : "Pick one. The rest waits.")
-                        .font(.system(size: 12)).foregroundColor(CozyTheme.mutedText)
-                    Spacer()
-                }
-                if !snoozeConfirmed && hiddenCount > 0 {
-                    Button {
-                        withAnimation { snoozeChores(); snoozeConfirmed = true }
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "moon.zzz.fill").font(.system(size: 12))
-                            Text("Push \(hiddenCount) to tomorrow")
-                                .font(.system(size: 13, weight: .medium))
-                        }
-                        .foregroundColor(Color(hex: "E57373"))
-                        .padding(.horizontal, 14).padding(.vertical, 9)
-                        .frame(maxWidth: .infinity)
-                        .background(Color(hex: "E57373").opacity(0.08))
-                        .cornerRadius(10)
-                        .overlay(RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color(hex: "E57373").opacity(0.25), lineWidth: 1))
-                    }
-                    .buttonStyle(.plain)
-                } else if snoozeConfirmed {
-                    HStack(spacing: 6) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(Color(hex: "4CAF82")).font(.system(size: 13))
-                        Text("\(hiddenCount) chore\(hiddenCount == 1 ? "" : "s") moved to tomorrow — take it easy.")
-                            .font(.system(size: 12)).foregroundColor(CozyTheme.mutedText)
-                    }
-                }
-            }
-            .transition(.opacity)
-        default:
-            EmptyView()
-        }
-    }
-
-    private func snoozeChores() {
-        let all = appState.todayChores.filter { !$0.isDone }
-        let toSnooze = mood == .overwhelming ? Array(all.dropFirst(1)) : Array(all.dropFirst(3))
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
-        // Use batch operation instead of loop to save disk I/O
-        appState.rescheduleChores(toSnooze, to: tomorrow)
-    }
-
-    // MARK: Week Progress
-    private var weekProgressCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
+    private var masthead: some View {
+        VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("This week")
-                    .font(.system(size: 14, weight: .semibold, design: .serif))
-                    .foregroundColor(CozyTheme.primary)
+                Text("The morning edition")
+                    .font(.system(size: 10, weight: .medium))
+                    .tracking(2.5)
+                    .textCase(.uppercase)
+                    .foregroundColor(CozyTheme.mutedText)
+                Spacer()
                 if appState.currentStreak > 0 {
-                    Text("\(appState.currentStreak)-day streak")
-                        .font(.system(size: 11))
-                        .foregroundColor(CozyTheme.accent)
-                }
-                Spacer()
-                Text("\(Int(appState.weekProgress * 100))%")
-                    .font(.system(size: 14, weight: .bold))
+                    HStack(spacing: 5) {
+                        Text("\(appState.currentStreak)-day streak")
+                            .font(.system(size: 10, weight: .semibold))
+                            .tracking(1.4)
+                            .textCase(.uppercase)
+                    }
                     .foregroundColor(CozyTheme.accent)
-            }
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(CozyTheme.border).frame(height: 10)
-                    Capsule()
-                        .fill(LinearGradient(colors: [CozyTheme.accent, Color(hex: "E09A5A")],
-                                             startPoint: .leading, endPoint: .trailing))
-                        .frame(width: max(0, geo.size.width * appState.weekProgress), height: 10)
-                        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: appState.weekProgress)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .overlay(Rectangle().stroke(CozyTheme.accent, lineWidth: 1))
                 }
             }
-            .frame(height: 10)
-        }
-        .padding(14)
-        .cardStyle()
-    }
+            .padding(.top, 4)
 
-    // MARK: Today
-    private var todaySection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                let title: String = {
-                    switch mood {
-                    case .overwhelming: return "Start here"
-                    case .manageable: return "Today"
-                    default: return "Today's Chores"
-                    }
-                }()
-                Text(title)
-                    .font(.system(size: 14, weight: .semibold, design: .serif))
-                    .foregroundColor(CozyTheme.primary)
-                Spacer()
-                if mood == .manageable && appState.todayChores.filter({ !$0.isDone }).count > 3 {
-                    Text("\(appState.totalToday) total")
-                        .font(.system(size: 11))
-                        .foregroundColor(CozyTheme.mutedText)
-                }
-            }
-            let shown = visibleChores
-            if shown.isEmpty {
-                emptyTodayState
-            } else {
-                ForEach(shown) { chore in
-                    DashChoreRow(chore: chore) { appState.toggleChore(chore) }
-                        .contentShape(Rectangle())
-                        .onTapGesture { selectedChore = chore }
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) { appState.deleteChore(chore) }
-                                label: { Label("Delete", systemImage: "trash") }
-                        }
-                }
-                if hiddenCount > 0 && !showAllChores {
-                    Button { withAnimation(.spring()) { showAllChores = true } } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.down.circle")
-                                .font(.system(size: 12))
-                            Text("+ \(hiddenCount) more chore\(hiddenCount == 1 ? "" : "s")")
-                                .font(.system(size: 12, weight: .medium))
-                        }
-                        .foregroundColor(CozyTheme.mutedText)
-                        .padding(.top, 4)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-        .padding(14)
-        .cardStyle()
-    }
-
-    private var emptyTodayState: some View {
-        HStack {
-            Spacer()
-            VStack(spacing: 6) {
-                Text("Nothing due today.")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(CozyTheme.primary)
-                Text("Set up your first chore to get started.")
-                    .font(.system(size: 12))
-                    .foregroundColor(CozyTheme.mutedText)
-                    .multilineTextAlignment(.center)
-            }
-            .padding(.vertical, 16)
-            Spacer()
-        }
-    }
-
-    // MARK: Activity Feed (retained, not shown in body per spec)
-    private var activityFeedCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Recent Activity")
-                .font(.system(size: 14, weight: .semibold, design: .serif))
+            Text(DateFormatters.fullDate.string(from: Date()))
+                .font(.system(size: 38, weight: .regular, design: .serif))
+                .tracking(-0.8)
                 .foregroundColor(CozyTheme.primary)
-            if appState.activityLog.isEmpty {
-                Text("No activity yet.")
-                    .font(.system(size: 13)).foregroundColor(CozyTheme.mutedText)
-                    .padding(.vertical, 10)
-            } else {
-                ForEach(appState.activityLog.prefix(10)) { entry in
-                    ActivityFeedRow(entry: entry)
-                    if entry.id != appState.activityLog.prefix(10).last?.id {
-                        Divider().opacity(0.4)
+                .padding(.top, 6)
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
+
+            Text(leadSentence)
+                .font(.system(size: 16, weight: .regular, design: .serif))
+                .italic()
+                .foregroundColor(CozyTheme.mutedText)
+                .padding(.top, 10)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Rectangle()
+                .fill(CozyTheme.border)
+                .frame(height: 1)
+                .padding(.top, 16)
+                .padding(.bottom, 18)
+            journeyBadge
+        }
+    }
+
+    /// One short editorial sentence summarising today.
+    private var leadSentence: String {
+        let undone = capped.filter { !$0.isDone }.count
+        if allDone {
+            return "Closing edition. The paper goes to bed."
+        }
+        if undone == 0 {
+            return "Nothing scheduled. A quiet morning."
+        }
+        let roomCount = Set(capped.map { $0.roomId }).count
+        if undone == 1 {
+            return "One thing this morning. Won't take long."
+        }
+        if roomCount == 1 {
+            let only = roomName(capped.first!.roomId).lowercased()
+            return "\(undone) chores this morning, all in the \(only)."
+        }
+        return "\(undone) chores this morning, across \(roomCount) rooms."
+    }
+
+    @ViewBuilder
+    private var journeyBadge: some View {
+        let goalRaw = UserDefaults.standard.string(forKey: "cozy_goalType") ?? ""
+        let currentRaw = UserDefaults.standard.string(forKey: "cozy_currentType") ?? ""
+        let goal = CleanlinessType(rawValue: goalRaw)
+        let current = CleanlinessType(rawValue: currentRaw)
+        if let goal = goal {
+            let weekNum = max(1, appState.currentStreak / 7 + 1)
+            let sameType = current == goal
+            let label = sameType
+                ? "Maintaining your \(goal.rawValue) home \(goal.icon)"
+                : "Week \(weekNum) toward \(goal.rawValue) \(goal.icon)"
+            HStack(spacing: 8) {
+                Image(systemName: "leaf.fill")
+                    .font(.system(size: 11))
+                    .foregroundColor(goal.accentColor)
+                Text(label)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(goal.accentColor)
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(goal.accentColor.opacity(0.1))
+            .cornerRadius(8)
+            .padding(.bottom, 12)
+        }
+    }
+
+    // MARK: Departments list
+
+    private var departmentsList: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            ForEach(departments) { dept in
+                VStack(alignment: .leading, spacing: 0) {
+                    departmentHeader(dept)
+                    ForEach(dept.chores) { chore in
+                        choreRow(chore)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) { appState.deleteChore(chore) } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
                     }
                 }
             }
         }
-        .padding(14)
-        .cardStyle()
     }
-}
 
-// MARK: - Stat Card
-struct DashStatCard: View {
-    let label: String
-    let value: String
-    let icon: String
-    let color: Color
-    var suffix: String = ""
+    private func departmentHeader(_ dept: Department) -> some View {
+        HStack {
+            Text(dept.name)
+                .font(.system(size: 11, weight: .semibold))
+                .tracking(2)
+                .textCase(.uppercase)
+                .foregroundColor(CozyTheme.primary)
+            Spacer()
+            let done = dept.chores.filter { $0.isDone }.count
+            Text("\(done) / \(dept.chores.count)")
+                .font(.system(size: 11))
+                .tracking(1.2)
+                .textCase(.uppercase)
+                .foregroundColor(CozyTheme.mutedText)
+                .monospacedDigit()
+        }
+        .padding(.bottom, 6)
+        .overlay(
+            Rectangle()
+                .fill(CozyTheme.primary)
+                .frame(height: 1.5)
+                .padding(.top, 6),
+            alignment: .bottom
+        )
+    }
 
-    var body: some View {
-        VStack(spacing: 5) {
-            Image(systemName: icon)
-                .font(.system(size: 15, weight: .medium))
-                .foregroundColor(color)
-            HStack(spacing: 1) {
-                Text(value)
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(CozyTheme.primary)
-                if !suffix.isEmpty {
-                    Text(suffix).font(.system(size: 12))
-                }
+    @ViewBuilder
+    private func choreRow(_ chore: Chore) -> some View {
+        HStack(spacing: 12) {
+            Button {
+                let wasDone = chore.isDone
+                appState.toggleChore(chore)
+                if !wasDone { onChoreComplete() }
+            } label: {
+                squareMark(done: chore.isDone)
             }
-            Text(label)
-                .font(.system(size: 10, weight: .medium))
+            .buttonStyle(.plain)
+
+            Button {
+                selectedChore = chore
+            } label: {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(chore.choreName)
+                        .font(.system(size: 17, weight: .regular, design: .serif))
+                        .foregroundColor(chore.isDone ? CozyTheme.mutedText : CozyTheme.primary)
+                        .strikethrough(chore.isDone, color: CozyTheme.mutedText)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(roomDot(chore.roomId))
+                            .frame(width: 6, height: 6)
+                        Text(roomName(chore.roomId))
+                            .font(.system(size: 10, weight: .medium))
+                            .tracking(1.4)
+                            .textCase(.uppercase)
+                            .foregroundColor(CozyTheme.mutedText)
+                        if let line = lastDoneText(chore) {
+                            Text("·")
+                                .font(.system(size: 10))
+                                .foregroundColor(CozyTheme.mutedText)
+                            Text(line)
+                                .font(.system(size: 10, weight: .medium))
+                                .tracking(1.2)
+                                .textCase(.uppercase)
+                                .foregroundColor(CozyTheme.mutedText)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.vertical, 12)
+        .overlay(
+            Rectangle()
+                .fill(CozyTheme.border)
+                .frame(height: 1)
+                .padding(.top, 0.5),
+            alignment: .bottom
+        )
+    }
+
+    private func squareMark(done: Bool) -> some View {
+        ZStack {
+            Rectangle()
+                .strokeBorder(done ? CozyTheme.teal : CozyTheme.border, lineWidth: 1.5)
+                .background(Rectangle().fill(done ? CozyTheme.teal : Color.clear))
+                .frame(width: 22, height: 22)
+            if done {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.white)
+            }
+        }
+        .animation(.easeInOut(duration: 0.15), value: done)
+    }
+
+    private func lastDoneText(_ chore: Chore) -> String? {
+        guard let cat = chore.completedAt,
+              let parsed = DateFormatters.iso8601.date(from: cat) else { return nil }
+        let days = Calendar.current.dateComponents([.day], from: parsed, to: Date()).day ?? 0
+        if days <= 0 { return nil }
+        if days > 7 { return "overdue \(days)d" }
+        return "last \(days)d ago"
+    }
+
+    // MARK: Empty + Footer
+
+    private var emptyState: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("No edition today.")
+                .font(.system(size: 22, weight: .regular, design: .serif))
+                .foregroundColor(CozyTheme.primary)
+            Text("Add a chore to begin your week.")
+                .font(.system(size: 14, design: .serif))
+                .italic()
                 .foregroundColor(CozyTheme.mutedText)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(CozyTheme.card)
-        .cornerRadius(CozyTheme.cornerRadius)
-        .overlay(RoundedRectangle(cornerRadius: CozyTheme.cornerRadius).stroke(CozyTheme.border, lineWidth: 1))
-        .shadow(color: CozyTheme.primary.opacity(0.05), radius: 4, x: 0, y: 2)
-    }
-}
-
-// MARK: - Chore Row
-struct DashChoreRow: View {
-    let chore: Chore
-    let onToggle: () -> Void
-    @State private var bouncing = false
-
-    private var room: Room? { Room.defaults.first { $0.id == chore.roomId } }
-
-    var body: some View {
-        HStack(spacing: 12) {
-            checkButton
-            choreInfo
-            Spacer()
-            assigneeAvatar
-        }
-        .padding(.vertical, 3)
-        .opacity(chore.isDone ? 0.55 : 1.0)
-        .animation(.easeInOut(duration: 0.2), value: chore.isDone)
+        .padding(.vertical, 40)
     }
 
-    private var checkButton: some View {
-        Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { bouncing = true }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { bouncing = false; onToggle() }
-        } label: {
-            ZStack {
-                Circle()
-                    .strokeBorder(chore.isDone ? Color(hex: "4CAF82") : CozyTheme.border, lineWidth: 2)
-                    .frame(width: 26, height: 26)
-                if chore.isDone {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(Color(hex: "4CAF82"))
-                }
-            }
-            .scaleEffect(bouncing ? 1.25 : 1.0)
-        }
-        .buttonStyle(.plain)
-    }
-
-    private var choreInfo: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(chore.choreName)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(chore.isDone ? CozyTheme.mutedText : CozyTheme.primary)
-                .strikethrough(chore.isDone, color: CozyTheme.mutedText)
-            if let r = room {
-                HStack(spacing: 4) {
-                    Image(systemName: r.icon)
-                        .font(.system(size: 10, weight: .light))
-                        .foregroundColor(CozyTheme.mutedText)
-                    Text(r.name)
-                        .font(.system(size: 11))
-                        .foregroundColor(CozyTheme.mutedText)
-                }
-            }
-            lastDoneLine
+    private var footer: some View {
+        VStack(spacing: 0) {
+            Rectangle()
+                .fill(CozyTheme.border)
+                .frame(height: 1)
+                .padding(.top, 28)
+            Text(footerText)
+                .font(.system(size: 11, design: .serif))
+                .italic()
+                .foregroundColor(CozyTheme.mutedText)
+                .padding(.top, 12)
+                .frame(maxWidth: .infinity, alignment: .center)
         }
     }
 
-    @ViewBuilder
-    private var lastDoneLine: some View {
-        if let cat = chore.completedAt,
-           let parsed = DateFormatters.iso8601.date(from: cat) {
-            let days = Calendar.current.dateComponents([.day], from: parsed, to: Date()).day ?? 0
-            Text("Last done \(days) days ago")
-                .font(.system(size: 11))
-                .foregroundColor(days > 7 ? Color(hex: "A03A1A") : CozyTheme.mutedText)
-        }
-    }
-
-    @ViewBuilder
-    private var assigneeAvatar: some View {
-        EmptyView()
-    }
-}
-
-// MARK: - Member Row
-struct MemberRow: View {
-    let emoji: String
-    let name: String
-    let done: Int
-    let total: Int
-    var progress: Double { total > 0 ? Double(done) / Double(total) : 0 }
-
-    var body: some View {
-        HStack(spacing: 10) {
-            Text(emoji).font(.system(size: 22))
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(name)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(CozyTheme.primary)
-                    Spacer()
-                    Text("\(done)/\(total)")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(CozyTheme.mutedText)
-                }
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(CozyTheme.border).frame(height: 5)
-                        Capsule().fill(Color(hex: "4CAF82"))
-                            .frame(width: max(0, geo.size.width * progress), height: 5)
-                            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: progress)
-                    }
-                }
-                .frame(height: 5)
-            }
-        }
-        .padding(.vertical, 2)
-    }
-}
-
-// MARK: - Activity Feed Row
-struct ActivityFeedRow: View {
-    let entry: ActivityLog
-
-    private var trailingEmoji: String {
-        switch entry.type {
-        case .choreDone: return "✅"
-        case .choreAdded: return "➕"
-        case .streakMilestone: return "🔥"
-        case .badgeEarned: return "🏅"
-        }
-    }
-    private var timeAgo: String {
-        let s = Int(Date().timeIntervalSince(entry.timestamp))
-        if s < 60 { return "just now" }
-        if s < 3600 { return "\(s/60)m ago" }
-        return "\(s/3600)h ago"
-    }
-
-    var body: some View {
-        HStack(spacing: 4) {
-            Text(entry.text)
-                .font(.system(size: 13))
-                .foregroundColor(CozyTheme.primary)
-            Text(trailingEmoji)
-                .font(.system(size: 13))
-            Spacer()
-            Text(timeAgo).font(.system(size: 11)).foregroundColor(CozyTheme.mutedText)
-        }
-        .padding(.vertical, 3)
-    }
-}
-
-// MARK: - Card Style Modifier
-private extension View {
-    func cardStyle() -> some View {
-        self
-            .background(CozyTheme.card)
-            .cornerRadius(CozyTheme.cardCornerRadius)
-            .overlay(RoundedRectangle(cornerRadius: CozyTheme.cardCornerRadius).stroke(CozyTheme.border, lineWidth: 1))
-            .shadow(color: CozyTheme.primary.opacity(0.05), radius: 6, x: 0, y: 2)
+    private var footerText: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        if hour < 12 { return "— filed at half past eight —" }
+        if hour < 17 { return "— afternoon edition —" }
+        return "— evening edition, lamp lit —"
     }
 }
