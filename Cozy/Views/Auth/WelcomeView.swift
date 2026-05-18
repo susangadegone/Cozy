@@ -21,12 +21,15 @@ struct WelcomeView: View {
 
     // MARK: - Wordmark
     private var wordmark: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Cozy")
-                .font(.system(size: 42, weight: .bold))
-                .foregroundColor(CozyTheme.primary)
+        VStack(alignment: .leading, spacing: 12) {
+            Image("CozyLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: 200)
+                .blendMode(.multiply)
             Text("A calmer home starts here.")
-                .font(.system(size: 17, weight: .regular))
+                .font(.system(size: 16, weight: .regular, design: .serif))
+                .italic()
                 .foregroundColor(CozyTheme.mutedText)
         }
     }

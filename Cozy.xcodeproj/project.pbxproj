@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -49,6 +49,7 @@
 		90D01C3CECCD81D633C9FA21 /* OnboardingStep2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8293F2BF25E38C4D35EF3493 /* OnboardingStep2.swift */; };
 		9EB96C99A24EEA97CB740584 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 616C9B61556E6F41E912D812 /* WelcomeView.swift */; };
 		9F09307CF720B101FA76829B /* HouseholdPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED2D9F725A479E126A5990E /* HouseholdPanelView.swift */; };
+		A00E3AF32FBA67D0004E64C3 /* CozyLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00E3AF22FBA67D0004E64C3 /* CozyLogo.swift */; };
 		A2F28210A24361EFD4FBEC24 /* AddChoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEAF991B7E5BE6BDD153B61D /* AddChoreView.swift */; };
 		A55194DBB8E69D62C75425A0 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87F09F579827D7305F63B7B /* OnboardingView.swift */; };
 		A7538E22D020539E4C6BDC49 /* HowCozyWorksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC291709126C7C3DF2CB84E7 /* HowCozyWorksView.swift */; };
@@ -131,8 +132,9 @@
 		9793A5B72DF06A6ECEAC10DC /* CleanlinessTypeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanlinessTypeView.swift; sourceTree = "<group>"; };
 		9B7EF337E2FE18D48DEA1562 /* TESTING_GUIDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TESTING_GUIDE.md; sourceTree = "<group>"; };
 		9BB2588917122D4F60EA3660 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
-		9CFE8F830F071EB9612DEFF0 /* .gitignore */ = {isa = PBXFileReference; path = .gitignore; sourceTree = "<group>"; };
+		9CFE8F830F071EB9612DEFF0 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		9F748F412D2AB9A2EA205B2C /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		A00E3AF22FBA67D0004E64C3 /* CozyLogo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyLogo.swift; sourceTree = "<group>"; };
 		A04DCD7141588AFEAD32864A /* OnboardingStep3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep3.swift; sourceTree = "<group>"; };
 		A254716DA90B17E9E5CFA1F7 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		A7F888FC5F7F45390693E254 /* DataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataService.swift; sourceTree = "<group>"; };
@@ -309,6 +311,7 @@
 				8AE942FD4FBFD46118EC72F0 /* Home */,
 				7296CA6D5F0109FBA416F471 /* Onboarding */,
 				49F581916C03157F9244A970 /* Profile */,
+				A00E3AF22FBA67D0004E64C3 /* CozyLogo.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -398,7 +401,6 @@
 			packageReferences = (
 				E69AA39EDB0E9BEE05AA6F73 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 			);
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -432,6 +434,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A2F28210A24361EFD4FBEC24 /* AddChoreView.swift in Sources */,
+				A00E3AF32FBA67D0004E64C3 /* CozyLogo.swift in Sources */,
 				FA9B5D5E552691183D991C61 /* AppFlowPreviews.swift in Sources */,
 				43F50225D6FF026CF85A3C6C /* AppRouter.swift in Sources */,
 				B68D1E896F1DF06E42E0C5A1 /* AppState.swift in Sources */,

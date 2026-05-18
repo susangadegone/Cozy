@@ -31,7 +31,7 @@ final class AppRouter: ObservableObject {
         switch route {
         case .onboardingQ1:  route = .onboardingName
         case .onboardingQ2:  route = .onboardingQ1
-        case .onboardingQ3:     route = .onboardingQ2
+        case .onboardingQ3:     route = .onboardingQ1
         case .cleanlinessType:  route = .onboardingQ3
         case .cleanlinessGoal:  route = .cleanlinessType
         case .onboardingQ4:     route = .cleanlinessGoal

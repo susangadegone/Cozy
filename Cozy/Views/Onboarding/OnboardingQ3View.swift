@@ -20,7 +20,7 @@ struct OnboardingQ3View: View {
     ]
 
     var body: some View {
-        OnboardingShell(step: 3, total: 6, onBack: { appRouter.navigate(to: .onboardingQ2) }) {
+        OnboardingShell(step: 2, total: 5, onBack: { appRouter.navigate(to: .onboardingQ1) }) {
             questionHeader
                 .padding(.bottom, 24)
                 .opacity(appeared ? 1 : 0)
@@ -42,11 +42,14 @@ struct OnboardingQ3View: View {
     }
 
     private var questionHeader: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             Text("How do you prefer\nto handle chores?")
                 .font(.system(size: 26, weight: .bold))
                 .foregroundColor(CozyTheme.primary)
                 .lineSpacing(2)
+            Text("We'll pace your schedule to fit your rhythm.")
+                .font(.system(size: 14))
+                .foregroundColor(CozyTheme.mutedText)
         }
     }
 

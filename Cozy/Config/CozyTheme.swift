@@ -1,47 +1,45 @@
 import SwiftUI
 
 enum CozyTheme {
-    // MARK: - Core Colors (Broadsheet — newsprint grey paper, near-black ink, front-page red)
-    static let background  = Color(hex: "E6E3DB")  // newsprint grey
-    static let card        = Color(hex: "F1EEE6")  // raised surface, one notch above the paper
-    static let border      = Color(hex: "B6B2A4")  // hairline rule
-    static let primary     = Color(hex: "161512")  // near-black ink
-    static let mutedText   = Color(hex: "787567")  // soft grey — captions, hints
-    static let accent      = Color(hex: "B41E1E")  // front-page red — used sparingly
-    static let teal        = Color(hex: "1F5C42")  // forest green — completion / done
-    static let yellow      = Color(hex: "3B3A33")  // soft ink — secondary text (was warm yellow)
+    // MARK: - Core (Claude warm palette: cream paper, ink, terracotta)
+    static let background  = Color(hex: "F8F7F3")  // warm cream
+    static let card        = Color(hex: "FFFFFF")  // white
+    static let border      = Color(hex: "E0DED6")  // soft taupe
+    static let primary     = Color(hex: "191915")  // near-black ink
+    static let mutedText   = Color(hex: "8A8071")  // warm grey
+    static let accent      = Color(hex: "B5A8D9")  // lavender — primary
+    static let lavender    = Color(hex: "B5A8D9")  // alias
+    static let lavenderDeep = Color(hex: "9285C2") // hover/pressed
+    static let teal        = Color(hex: "6F9B7B")  // sage — done
+    static let yellow      = Color(hex: "EFE5DA")  // peach cream — tile
 
-    // MARK: - Room Colors (kept; warm tints harmonize with newsprint grey)
-    static let kitchenColor    = Color(hex: "FFF3DC")  // buttery
-    static let bedroomColor    = Color(hex: "F0E8E0")  // warm taupe
-    static let bathroomColor   = Color(hex: "E4EEF2")  // cool mist
-    static let livingRoomColor = Color(hex: "FDF3E3")  // amber cream
-    static let outdoorColor    = Color(hex: "E5EDDF")  // sage green
-    static let otherColor      = Color(hex: "EDE6F5")  // soft violet
+    // MARK: - Room tints (soft pastels)
+    static let kitchenColor    = Color(hex: "D9CFEC")  // lavender tile
+    static let bedroomColor    = Color(hex: "D9CFEC")
+    static let bathroomColor   = Color(hex: "D9CFEC")
+    static let livingRoomColor = Color(hex: "EFE5DA")  // peach cream tile
+    static let outdoorColor    = Color(hex: "EFE5DA")
+    static let otherColor      = Color(hex: "EFE5DA")
 
     // MARK: - Shape
-    static let cornerRadius: CGFloat = 4         // square corners — editorial
+    static let cornerRadius: CGFloat = 14
     static let pillRadius:   CGFloat = 28
-    static let cardCornerRadius: CGFloat = 4
+    static let cardCornerRadius: CGFloat = 18
     static let padding: CGFloat = 16
 }
 
-// MARK: - Hex initialiser
 extension Color {
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
         Scanner(string: hex).scanHexInt64(&int)
-        let a: UInt64 = 255
         let r = (int >> 16) & 0xFF
         let g = (int >> 8)  & 0xFF
         let b =  int        & 0xFF
-        self.init(
-            .sRGB,
-            red:     Double(r) / 255,
-            green:   Double(g) / 255,
-            blue:    Double(b) / 255,
-            opacity: Double(a) / 255
-        )
+        self.init(.sRGB,
+                  red: Double(r)/255,
+                  green: Double(g)/255,
+                  blue: Double(b)/255,
+                  opacity: 1)
     }
 }

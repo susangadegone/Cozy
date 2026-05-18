@@ -13,8 +13,14 @@ struct OnboardingView: View {
         }
         .animation(.easeInOut(duration: 0.3), value: appRouter.route)
         .onAppear {
-            // Always start fresh at the name-entry step
-            if appRouter.route == .splash || appRouter.route == .welcome {
+            // If we landed here from a pre-auth route, drop to name entry
+            let onboardingRoutes: [AppRoute] = [
+                .science, .onboardingName,
+                .onboardingQ1, .onboardingQ2, .onboardingQ3,
+                .cleanlinessType, .cleanlinessGoal,
+                .onboardingQ4, .onboardingQ5, .scheduleReady, .recap
+            ]
+            if !onboardingRoutes.contains(appRouter.route) {
                 appRouter.navigate(to: .onboardingName)
             }
         }
@@ -23,6 +29,8 @@ struct OnboardingView: View {
     @ViewBuilder
     private var currentScreen: some View {
         switch appRouter.route {
+        case .science:
+            ScienceTrustView()
         case .onboardingName:
             OnboardingNameView()
         case .onboardingQ1:
@@ -81,8 +89,6 @@ struct OnboardingNameView: View {
 
     private var headerBlock: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("🏡")
-                .font(.system(size: 48))
             Text("Welcome to Cozy")
                 .font(.system(size: 28, weight: .bold))
                 .foregroundColor(CozyTheme.primary)

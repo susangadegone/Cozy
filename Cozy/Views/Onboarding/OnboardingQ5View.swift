@@ -23,7 +23,7 @@ struct OnboardingQ5View: View {
     ]
 
     var body: some View {
-        OnboardingShell(step: 7, total: 7, onBack: { appRouter.navigate(to: .onboardingQ4) }) {
+        OnboardingShell(step: 5, total: 5, onBack: { appRouter.navigate(to: .onboardingQ4) }) {
             questionHeader
                 .padding(.bottom, 24)
                 .opacity(appeared ? 1 : 0)
@@ -47,13 +47,14 @@ struct OnboardingQ5View: View {
     }
 
     private var questionHeader: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("🔔")
-                .font(.system(size: 36))
+        VStack(alignment: .leading, spacing: 8) {
             Text("How do you want\nCozy to remind you?")
                 .font(.system(size: 26, weight: .bold))
                 .foregroundColor(CozyTheme.primary)
                 .lineSpacing(2)
+            Text("We'll only nudge you the way you choose.")
+                .font(.system(size: 14))
+                .foregroundColor(CozyTheme.mutedText)
         }
     }
 

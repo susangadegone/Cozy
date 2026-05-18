@@ -20,7 +20,7 @@ struct OnboardingQ1View: View {
     ]
 
     var body: some View {
-        OnboardingShell(step: 1, total: 6, onBack: { appRouter.navigate(to: .onboardingName) }) {
+        OnboardingShell(step: 1, total: 5, onBack: { appRouter.navigate(to: .onboardingName) }) {
             questionHeader
                 .padding(.bottom, 24)
                 .opacity(appeared ? 1 : 0)
@@ -32,7 +32,9 @@ struct OnboardingQ1View: View {
             OnboardingNextButton(isEnabled: selection != nil) {
                 if let s = selection {
                     onboardingVM.homeType = s
-                    appRouter.navigate(to: .onboardingQ2)
+                    onboardingVM.householdType = "Just me"
+                    onboardingVM.isSolo = true
+                    appRouter.navigate(to: .onboardingQ3)
                 }
             }
         }
@@ -42,11 +44,14 @@ struct OnboardingQ1View: View {
     }
 
     private var questionHeader: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             Text("What kind of home\ndo you live in?")
                 .font(.system(size: 26, weight: .bold))
                 .foregroundColor(CozyTheme.primary)
                 .lineSpacing(2)
+            Text("So we know how much there is to keep up with.")
+                .font(.system(size: 14))
+                .foregroundColor(CozyTheme.mutedText)
         }
     }
 

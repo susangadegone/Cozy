@@ -180,7 +180,7 @@ struct OnboardingQ4View: View {
     private let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
-        OnboardingShell(step: 6, total: 7, onBack: { appRouter.navigate(to: .cleanlinessGoal) }) {
+        OnboardingShell(step: 4, total: 5, onBack: { appRouter.navigate(to: .cleanlinessGoal) }) {
             questionHeader
                 .padding(.bottom, 20)
                 .opacity(appeared ? 1 : 0)
@@ -205,13 +205,14 @@ struct OnboardingQ4View: View {
     }
 
     private var questionHeader: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("🛋️")
-                .font(.system(size: 36))
+        VStack(alignment: .leading, spacing: 8) {
             Text("Which rooms do you\nwant to keep on top of?")
                 .font(.system(size: 26, weight: .bold))
                 .foregroundColor(CozyTheme.primary)
                 .lineSpacing(2)
+            Text("We'll build your starter chore list around these.")
+                .font(.system(size: 14))
+                .foregroundColor(CozyTheme.mutedText)
         }
     }
 

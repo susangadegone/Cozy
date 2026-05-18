@@ -1,24 +1,31 @@
 import SwiftUI
 
 struct SplashView: View {
-    @EnvironmentObject var appState: AppState
+    let onContinue: () -> Void
     @State private var opacity: Double = 0
 
     var body: some View {
         ZStack {
             CozyTheme.background.ignoresSafeArea()
-            VStack(spacing: 12) {
-                Text("Cozy")
-                    .font(.system(size: 36, weight: .bold))
-                    .foregroundColor(CozyTheme.primary)
-                Image(systemName: "sparkles")
-                    .font(.system(size: 22, weight: .regular))
-                    .foregroundColor(CozyTheme.accent)
+            VStack(spacing: 0) {
+                Spacer()
+                Image("CozyLogo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: 280)
+                    .blendMode(.multiply)
+                Spacer()
+                Text("Tap to continue")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(CozyTheme.mutedText)
+                    .padding(.bottom, 56)
             }
             .opacity(opacity)
-            .onAppear {
-                withAnimation(.easeIn(duration: 0.8)) { opacity = 1 }
-            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { onContinue() }
+        .onAppear {
+            withAnimation(.easeIn(duration: 0.6)) { opacity = 1 }
         }
     }
 }
