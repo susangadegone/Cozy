@@ -242,16 +242,15 @@ struct EditChoreView: View {
             updated.dayOfWeek = DateFormatters.dayOfWeek.string(from: today)
             appState.updateChore(updated)
 
-            // Generate the next 29 days so "Daily" actually means every day on the calendar.
-            // Skip dates that already have an instance with the same name + room.
-            for offset in 1...29 {
-                guard let date = cal.date(byAdding: .day, value: offset, to: today) else { continue }
+            // Generate next 29 days as a single batch to avoid 29 separate disk writes.
+            let existingDates = Set(appState.chores
+                .filter { $0.choreName == trimmed && $0.roomId == selectedRoom }
+                .map { $0.scheduledDate })
+            let newInstances: [Chore] = (1...29).compactMap { offset in
+                guard let date = cal.date(byAdding: .day, value: offset, to: today) else { return nil }
                 let ds = DateFormatters.yearMonthDay.string(from: date)
-                let exists = appState.chores.contains {
-                    $0.choreName == trimmed && $0.roomId == selectedRoom && $0.scheduledDate == ds
-                }
-                if exists { continue }
-                let instance = Chore(
+                guard !existingDates.contains(ds) else { return nil }
+                return Chore(
                     userId: chore.userId,
                     roomId: selectedRoom,
                     choreName: trimmed,
@@ -261,8 +260,8 @@ struct EditChoreView: View {
                     frequency: "Daily",
                     preferredTimeMinutes: timeMinutes
                 )
-                appState.addChore(instance)
             }
+            if !newInstances.isEmpty { appState.addChores(newInstances) }
         } else {
             updated.preferredTimeMinutes = nil
             let scheduled = nextDate(for: selectedDays.first)
