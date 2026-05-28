@@ -91,25 +91,35 @@ struct ChoresView: View {
 
     @ViewBuilder
     private var choreList: some View {
-        let grouped = groupedChores
-        if grouped.isEmpty {
+        if filteredChores.isEmpty {
             EmptyState(filter: filter)
         } else {
             ScrollView {
                 LazyVStack(spacing: 8, pinnedViews: [.sectionHeaders]) {
-                    ForEach(grouped, id: \.room.id) { section in
-                        Section {
-                            ForEach(section.chores) { chore in
-                                ChoreRow(chore: chore)
-                                    .onTapGesture { selectedChore = chore }
-                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                        Button(role: .destructive) {
-                                            appState.deleteChore(chore)
-                                        } label: { Label("Delete", systemImage: "trash") }
-                                    }
+                    switch filter {
+                    case .today:
+                        ForEach(groupedChores, id: \.room.id) { section in
+                            Section {
+                                ForEach(section.chores) { chore in choreRow(chore) }
+                            } header: {
+                                RoomHeader(room: section.room, count: section.chores.count)
                             }
-                        } header: {
-                            RoomHeader(room: section.room, count: section.chores.count)
+                        }
+                    case .upcoming:
+                        ForEach(groupedByDay, id: \.dateString) { section in
+                            Section {
+                                ForEach(section.chores) { chore in choreRow(chore) }
+                            } header: {
+                                TimeHeader(label: section.label, count: section.chores.count)
+                            }
+                        }
+                    case .all:
+                        ForEach(groupedByWeek, id: \.label) { section in
+                            Section {
+                                ForEach(section.chores) { chore in choreRow(chore) }
+                            } header: {
+                                TimeHeader(label: section.label, count: section.chores.count)
+                            }
                         }
                     }
                 }
@@ -117,6 +127,17 @@ struct ChoresView: View {
                 .padding(.bottom, 120)
             }
         }
+    }
+
+    @ViewBuilder
+    private func choreRow(_ chore: Chore) -> some View {
+        ChoreRow(chore: chore)
+            .onTapGesture { selectedChore = chore }
+            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                Button(role: .destructive) {
+                    appState.deleteChore(chore)
+                } label: { Label("Delete", systemImage: "trash") }
+            }
     }
 
     private var filteredChores: [Chore] {
@@ -129,6 +150,8 @@ struct ChoresView: View {
     }
 
     private struct RoomSection { let room: Room; let chores: [Chore] }
+    private struct DaySection { let dateString: String; let label: String; let chores: [Chore] }
+    private struct WeekSection { let label: String; let chores: [Chore] }
 
     private var groupedChores: [RoomSection] {
         let chores = filteredChores
@@ -145,6 +168,57 @@ struct ChoresView: View {
                 chores: other
             ))
         }
+        return result
+    }
+
+    private var groupedByDay: [DaySection] {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        var result: [DaySection] = []
+        var indexMap: [String: Int] = [:]
+        for chore in filteredChores {
+            let ds = chore.scheduledDate
+            if let idx = indexMap[ds] {
+                result[idx] = DaySection(dateString: ds, label: result[idx].label,
+                                         chores: result[idx].chores + [chore])
+            } else {
+                let label = dayLabel(for: ds, today: today, cal: cal)
+                indexMap[ds] = result.count
+                result.append(DaySection(dateString: ds, label: label, chores: [chore]))
+            }
+        }
+        return result
+    }
+
+    private func dayLabel(for dateString: String, today: Date, cal: Calendar) -> String {
+        guard let date = DateFormatters.yearMonthDay.date(from: dateString) else { return dateString }
+        let diff = cal.dateComponents([.day], from: today, to: cal.startOfDay(for: date)).day ?? 0
+        if diff == 1 { return "Tomorrow" }
+        let fmt = DateFormatter()
+        fmt.dateFormat = "EEEE · MMM d"
+        return fmt.string(from: date)
+    }
+
+    private var groupedByWeek: [WeekSection] {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        var overdue: [Chore] = []
+        var thisWeek: [Chore] = []
+        var nextWeek: [Chore] = []
+        var later: [Chore] = []
+        for chore in filteredChores {
+            guard let date = DateFormatters.yearMonthDay.date(from: chore.scheduledDate) else { continue }
+            let diff = cal.dateComponents([.day], from: today, to: cal.startOfDay(for: date)).day ?? 0
+            if diff < 0       { overdue.append(chore) }
+            else if diff < 7  { thisWeek.append(chore) }
+            else if diff < 14 { nextWeek.append(chore) }
+            else              { later.append(chore) }
+        }
+        var result: [WeekSection] = []
+        if !overdue.isEmpty  { result.append(WeekSection(label: "Overdue",    chores: overdue)) }
+        if !thisWeek.isEmpty { result.append(WeekSection(label: "This week",  chores: thisWeek)) }
+        if !nextWeek.isEmpty { result.append(WeekSection(label: "Next week",  chores: nextWeek)) }
+        if !later.isEmpty    { result.append(WeekSection(label: "Later",      chores: later)) }
         return result
     }
 }
@@ -193,6 +267,28 @@ private struct RoomHeader: View {
     }
 }
 
+private struct TimeHeader: View {
+    let label: String
+    let count: Int
+
+    var body: some View {
+        HStack {
+            Text(label)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(CozyTheme.primary)
+            Spacer()
+            Text("\(count)")
+                .font(.system(size: 12))
+                .foregroundColor(CozyTheme.mutedText)
+                .monospacedDigit()
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 14)
+        .padding(.bottom, 6)
+        .background(CozyTheme.background)
+    }
+}
+
 struct ChoreRow: View {
     @EnvironmentObject var appState: AppState
     let chore: Chore
@@ -217,12 +313,28 @@ struct ChoreRow: View {
                 }
             }
             Spacer()
+            if let timeLabel = preferredTimeLabel {
+                Text(timeLabel)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(CozyTheme.accent)
+                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .background(CozyTheme.accent.opacity(0.14))
+                    .cornerRadius(8)
+                    .monospacedDigit()
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(CozyTheme.card)
         .cornerRadius(14)
         .padding(.horizontal, 20)
+    }
+
+    private var preferredTimeLabel: String? {
+        guard let mins = chore.preferredTimeMinutes else { return nil }
+        var comps = DateComponents(); comps.hour = mins / 60; comps.minute = mins % 60
+        guard let d = Calendar.current.date(from: comps) else { return nil }
+        return DateFormatters.timeOnly.string(from: d)
     }
 
     private var checkBtn: some View {

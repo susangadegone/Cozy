@@ -50,6 +50,7 @@
 		9EB96C99A24EEA97CB740584 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 616C9B61556E6F41E912D812 /* WelcomeView.swift */; };
 		9F09307CF720B101FA76829B /* HouseholdPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED2D9F725A479E126A5990E /* HouseholdPanelView.swift */; };
 		A00E3AF32FBA67D0004E64C3 /* CozyLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00E3AF22FBA67D0004E64C3 /* CozyLogo.swift */; };
+		A0479BD72FC291820039ED99 /* QuoteCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0479BD62FC291820039ED99 /* QuoteCard.swift */; };
 		A2F28210A24361EFD4FBEC24 /* AddChoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEAF991B7E5BE6BDD153B61D /* AddChoreView.swift */; };
 		A55194DBB8E69D62C75425A0 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87F09F579827D7305F63B7B /* OnboardingView.swift */; };
 		A7538E22D020539E4C6BDC49 /* HowCozyWorksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC291709126C7C3DF2CB84E7 /* HowCozyWorksView.swift */; };
@@ -135,6 +136,7 @@
 		9CFE8F830F071EB9612DEFF0 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		9F748F412D2AB9A2EA205B2C /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		A00E3AF22FBA67D0004E64C3 /* CozyLogo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyLogo.swift; sourceTree = "<group>"; };
+		A0479BD62FC291820039ED99 /* QuoteCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteCard.swift; sourceTree = "<group>"; };
 		A04DCD7141588AFEAD32864A /* OnboardingStep3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep3.swift; sourceTree = "<group>"; };
 		A254716DA90B17E9E5CFA1F7 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		A7F888FC5F7F45390693E254 /* DataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataService.swift; sourceTree = "<group>"; };
@@ -289,6 +291,7 @@
 				D323B04E27705768B92BA697 /* StreakFlameCard.swift */,
 				9B7EF337E2FE18D48DEA1562 /* TESTING_GUIDE.md */,
 				78C0776E7767DC8F5484E49A /* WeekStripView.swift */,
+				A0479BD62FC291820039ED99 /* QuoteCard.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -449,6 +452,7 @@
 				CC67EC560804A1F31673C556 /* ChoreHistoryView.swift in Sources */,
 				EE4E3CA661D4FEA53CD2065A /* ChoreLibraryView.swift in Sources */,
 				5B95BE7E3A05CEC14ED07957 /* ChoreTrayView.swift in Sources */,
+				A0479BD72FC291820039ED99 /* QuoteCard.swift in Sources */,
 				0367AF9E3D363460AA0E528D /* ChoresView.swift in Sources */,
 				B999744C0A28D4E45B020943 /* CleanlinessGoalView.swift in Sources */,
 				F27AF48C1DE893210261B133 /* CleanlinessType.swift in Sources */,

@@ -11,6 +11,9 @@ struct BrowseChoresView: View {
     var previewMode: Bool = false
     /// Filter to specific roomIds. Empty = show all rooms.
     var limitToRooms: [String] = []
+    /// Set when opened from Add Chore. Tapping a preset returns it to the caller
+    /// (name + default schedule) instead of immediately adding to the schedule.
+    var onPick: ((PresetChore) -> Void)? = nil
 
     @State private var selectedRoomIndex: Int = 0
     @State private var showToast = false
@@ -117,7 +120,7 @@ struct BrowseChoresView: View {
                         ForEach(currentPresets) { preset in
                             BrowseChoreRow(
                                 preset: preset,
-                                isAdded: isAdded(preset),
+                                isAdded: onPick == nil ? isAdded(preset) : false,
                                 isPreviewMode: previewMode,
                                 onAdd: { addPreset(preset) }
                             )
@@ -198,6 +201,11 @@ struct BrowseChoresView: View {
     }
 
     private func addPreset(_ preset: PresetChore) {
+        if let pick = onPick {
+            pick(preset)
+            dismiss()
+            return
+        }
         guard let userId = appState.profile?.id else { return }
         let scheduledDate = findLeastLoadedDay()
         let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"

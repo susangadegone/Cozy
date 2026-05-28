@@ -8,7 +8,7 @@ struct CleanlinessGoalView: View {
     @State private var appeared = false
 
     var body: some View {
-        OnboardingShell(step: 5, total: 7, onBack: { appRouter.navigate(to: .cleanlinessType) }) {
+        OnboardingShell(step: 4, total: 6, onBack: { appRouter.navigate(to: .cleanlinessType) }) {
             header
                 .opacity(appeared ? 1 : 0)
                 .offset(y: appeared ? 0 : 10)
@@ -72,12 +72,6 @@ private struct GoalTypeCard: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 14) {
-                Text(type.icon)
-                    .font(.system(size: 28))
-                    .frame(width: 44, height: 44)
-                    .background(isSelected ? type.accentColor.opacity(0.15) : CozyTheme.background)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
                         Text(type.rawValue)
@@ -100,7 +94,7 @@ private struct GoalTypeCard: View {
                 Spacer()
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(type.accentColor)
+                        .foregroundColor(CozyTheme.accent)
                         .font(.system(size: 20))
                 }
             }
@@ -109,7 +103,7 @@ private struct GoalTypeCard: View {
             .cornerRadius(CozyTheme.cornerRadius)
             .overlay(
                 RoundedRectangle(cornerRadius: CozyTheme.cornerRadius)
-                    .stroke(isSelected ? type.accentColor : CozyTheme.border, lineWidth: isSelected ? 2 : 1)
+                    .stroke(isSelected ? CozyTheme.accent : CozyTheme.border, lineWidth: isSelected ? 2 : 1)
             )
         }
         .buttonStyle(.plain)

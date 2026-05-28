@@ -1,5 +1,19 @@
 import SwiftUI
 
+enum TodayEnergy: String, CaseIterable {
+    case light, normal, big
+    var label: String {
+        switch self {
+        case .light:  return "Tired"
+        case .normal: return "So-so"
+        case .big:    return "Good to go"
+        }
+    }
+    var cap: Int {
+        switch self { case .light: return 1; case .normal: return 2; case .big: return 100 }
+    }
+}
+
 struct HomeView: View {
     @EnvironmentObject var appState: AppState
     @StateObject private var dragManager = DragDropManager()
@@ -9,6 +23,10 @@ struct HomeView: View {
     @State private var activeConfetti: ConfettiEvent? = nil
     @State private var toastMessage: String?
     @State private var toastIcon: String?
+    @State private var todayEnergy: TodayEnergy = .normal
+
+    private let energyDateKey = "cozy.todayEnergy.date"
+    private let energyValueKey = "cozy.todayEnergy.value"
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -16,16 +34,21 @@ struct HomeView: View {
             VStack(spacing: 0) {
                 header
                 Divider().background(CozyTheme.border).opacity(0.5)
+                energyPicker
                 ScrollView(showsIndicators: false) {
-                    DashboardView(onChoreComplete: { fireConfetti(.choreDone) })
-                        .environmentObject(appState)
-                        .environmentObject(dragManager)
+                    DashboardView(
+                        energy: todayEnergy,
+                        onChoreComplete: { fireConfetti(.choreDone) }
+                    )
+                    .environmentObject(appState)
+                    .environmentObject(dragManager)
                 }
             }
             CalFAB { showAddChore = true }
             confettiLayer
             toastLayer
         }
+        .onAppear(perform: loadEnergy)
         .sheet(isPresented: $showAddChore) {
             AddChoreView()
                 .presentationDetents([.fraction(0.85)])
@@ -56,23 +79,80 @@ struct HomeView: View {
                     .foregroundColor(CozyTheme.mutedText)
             }
             Spacer()
-            if appState.currentStreak > 0 {
-                streakChip
-            }
             calendarBtn
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 14)
     }
 
-    private var streakChip: some View {
-        Text("\(appState.currentStreak)d")
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundColor(.white)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(CozyTheme.accent)
-            .cornerRadius(14)
+    private var energyPicker: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("How are you feeling?")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(CozyTheme.primary)
+            HStack(spacing: 8) {
+                ForEach(TodayEnergy.allCases, id: \.self) { e in
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.18)) { todayEnergy = e }
+                        saveEnergy()
+                    } label: {
+                        Text(e.label)
+                            .font(.system(size: 14, weight: .semibold))
+                            .minimumScaleFactor(0.85)
+                            .lineLimit(1)
+                            .foregroundColor(todayEnergy == e ? .white : CozyTheme.primary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(todayEnergy == e ? CozyTheme.accent : CozyTheme.card)
+                            .cornerRadius(14)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(todayEnergy == e ? CozyTheme.accent : CozyTheme.border, lineWidth: 1)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            Text(energyHint)
+                .font(.system(size: 12))
+                .foregroundColor(CozyTheme.mutedText)
+                .transition(.opacity)
+                .id(todayEnergy)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
+        .padding(.bottom, 6)
+    }
+
+    private var energyHint: String {
+        let total = appState.todayChores.count
+        switch todayEnergy {
+        case .light:
+            return total == 0 ? "Nothing due — rest easy." : "Just 1 chore today. Every bit counts."
+        case .normal:
+            let n = min(2, total)
+            return total == 0 ? "Nothing due today." : "We'll show you \(n == 1 ? "1 chore" : "1–2 chores"). See how you feel."
+        case .big:
+            return total == 0 ? "Nothing due today." : "Let's tackle all \(total) chore\(total == 1 ? "" : "s")."
+        }
+    }
+
+    private func loadEnergy() {
+        let today = DateFormatters.yearMonthDay.string(from: Date())
+        let savedDate = UserDefaults.standard.string(forKey: energyDateKey)
+        if savedDate == today,
+           let raw = UserDefaults.standard.string(forKey: energyValueKey),
+           let e = TodayEnergy(rawValue: raw) {
+            todayEnergy = e
+        } else {
+            todayEnergy = .normal
+        }
+    }
+
+    private func saveEnergy() {
+        let today = DateFormatters.yearMonthDay.string(from: Date())
+        UserDefaults.standard.set(today, forKey: energyDateKey)
+        UserDefaults.standard.set(todayEnergy.rawValue, forKey: energyValueKey)
     }
 
     private var calendarBtn: some View {

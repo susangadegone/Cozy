@@ -49,7 +49,13 @@ struct Chore: Identifiable, Codable, Equatable {
     var isDone: Bool
     var scheduledDate: String
     var completedAt: String?
-    
+    /// How often this chore repeats. Free-form string from the picker
+    /// (e.g. "Daily", "Weekly"). Optional for backward compatibility.
+    var frequency: String?
+    /// Preferred time of day, stored as minutes since midnight. Only
+    /// meaningful for frequency == "Daily".
+    var preferredTimeMinutes: Int?
+
     init(id: UUID = UUID(),
          userId: UUID,
          roomId: String,
@@ -57,7 +63,9 @@ struct Chore: Identifiable, Codable, Equatable {
          dayOfWeek: String,
          isDone: Bool = false,
          scheduledDate: String,
-         completedAt: String? = nil) {
+         completedAt: String? = nil,
+         frequency: String? = nil,
+         preferredTimeMinutes: Int? = nil) {
         self.id = id
         self.userId = userId
         self.roomId = roomId
@@ -66,6 +74,8 @@ struct Chore: Identifiable, Codable, Equatable {
         self.isDone = isDone
         self.scheduledDate = scheduledDate
         self.completedAt = completedAt
+        self.frequency = frequency
+        self.preferredTimeMinutes = preferredTimeMinutes
     }
 }
 

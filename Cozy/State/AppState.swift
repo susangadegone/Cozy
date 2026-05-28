@@ -93,9 +93,19 @@ final class AppState: ObservableObject {
     var completedToday: Int { todayChores.filter(\.isDone).count }
     var totalToday: Int { todayChores.count }
 
-    /// Chores for the currently selected calendar date
+    /// Chores for the currently selected calendar date, sorted by
+    /// preferred time-of-day (nil times sink to the bottom).
     var selectedDateChores: [Chore] {
-        chores.filter { $0.scheduledDate == selectedDateString }
+        chores
+            .filter { $0.scheduledDate == selectedDateString }
+            .sorted { lhs, rhs in
+                switch (lhs.preferredTimeMinutes, rhs.preferredTimeMinutes) {
+                case (nil, nil): return false
+                case (nil, _):   return false
+                case (_, nil):   return true
+                case (let l?, let r?): return l < r
+                }
+            }
     }
 
     // MARK: - Week stats
@@ -112,15 +122,24 @@ final class AppState: ObservableObject {
     var weekProgress: Double { weekTotal > 0 ? Double(weekDone) / Double(weekTotal) : 0 }
 
     // MARK: - Streak
+    /// Streak with one grace day — walk backward, allow exactly one missed day
+    /// before breaking. Lets users miss a day without losing their progress.
     var currentStreak: Int {
         let cal = Calendar.current
         var streak = 0
+        var graceUsed = false
+        var safety = 0
         var check = cal.startOfDay(for: Date())
-        while true {
+        while safety < 365 {
+            safety += 1
             let ds = dateString(from: check)
             let hasAnyDone = chores.contains { $0.scheduledDate == ds && $0.isDone }
-            guard hasAnyDone else { break }
-            streak += 1
+            if hasAnyDone {
+                streak += 1
+            } else {
+                if graceUsed { break }
+                graceUsed = true
+            }
             guard let prev = cal.date(byAdding: .day, value: -1, to: check) else { break }
             check = prev
         }
@@ -197,6 +216,15 @@ final class AppState: ObservableObject {
     func addChore(_ chore: Chore) {
         chores.append(chore)
         logActivity(.choreAdded, "\(chore.choreName) added")
+        pendingConfettiEvent = .choreAdded
+        store.saveChores(chores)
+    }
+
+    func addChores(_ newChores: [Chore]) {
+        chores.append(contentsOf: newChores)
+        if let first = newChores.first {
+            logActivity(.choreAdded, "\(first.choreName) scheduled \(newChores.count)x")
+        }
         pendingConfettiEvent = .choreAdded
         store.saveChores(chores)
     }

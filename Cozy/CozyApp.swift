@@ -24,9 +24,6 @@ struct AppEntryView: View {
     @EnvironmentObject var appRouter: AppRouter
     @EnvironmentObject var authManager: AuthManager
     @State private var showSplash = true
-    @State private var showHowItWorks = false
-
-    private static let howItWorksKey = "cozy.howItWorksDismissed"
 
     private var onboardingCompleted: Bool {
         appState.profile?.onboardingCompleted ?? false
@@ -43,12 +40,6 @@ struct AppEntryView: View {
             } else if onboardingCompleted {
                 RootView()
                     .transition(.opacity)
-                    .fullScreenCover(isPresented: $showHowItWorks) {
-                        HowCozyWorksView {
-                            UserDefaults.standard.set(true, forKey: Self.howItWorksKey)
-                            showHowItWorks = false
-                        }
-                    }
             } else {
                 OnboardingView()
                     .transition(.opacity)
@@ -61,17 +52,6 @@ struct AppEntryView: View {
             if !authManager.isAuthenticated &&
                (appRouter.route == .splash || appRouter.route == .welcome) {
                 appRouter.navigate(to: .welcome)
-            }
-        }
-        .onChange(of: onboardingCompleted) { _, completed in
-            if completed {
-                let dismissed = UserDefaults.standard.bool(forKey: Self.howItWorksKey)
-                if !dismissed {
-                    // Brief delay lets the home screen settle before presenting
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        showHowItWorks = true
-                    }
-                }
             }
         }
     }

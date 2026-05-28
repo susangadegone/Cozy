@@ -23,7 +23,7 @@ struct OnboardingQ5View: View {
     ]
 
     var body: some View {
-        OnboardingShell(step: 5, total: 5, onBack: { appRouter.navigate(to: .onboardingQ4) }) {
+        OnboardingShell(step: 6, total: 6, onBack: { appRouter.navigate(to: .onboardingQ4) }) {
             questionHeader
                 .padding(.bottom, 24)
                 .opacity(appeared ? 1 : 0)
@@ -63,7 +63,6 @@ struct OnboardingQ5View: View {
             ForEach(options) { opt in
                 OnboardingChoiceCard(
                     label: opt.id,
-                    icon: opt.icon,
                     isSelected: selection == opt.id
                 ) { selection = opt.id }
             }
@@ -90,9 +89,9 @@ struct OnboardingQ5View: View {
             "Kitchen": "kitchen",
             "Bedroom": "bedroom",
             "Bathroom": "bathroom",
-            "Living room": "living_room",
+            "Living room": "living",
             "Outdoor/yard": "outdoor",
-            "Home office": "home_office",
+            "Home office": "laundry",
             "Other": "other"
         ]
         let roomIds = onboardingVM.selectedRooms.compactMap { roomIdMap[$0] }
@@ -126,8 +125,8 @@ struct OnboardingQ5View: View {
         let content = UNMutableNotificationContent()
         content.title = "Cozy"
         content.body = h == 8
-            ? "Good morning! Your chores for today are ready."
-            : "Evening check-in — see what's left today."
+            ? "A few quick wins today. Knock them out before coffee?"
+            : "Evening check-in — anything quick before you wind down?"
         content.sound = .default
 
         var comps = DateComponents()

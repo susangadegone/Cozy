@@ -139,6 +139,21 @@ struct ChoreDetailView: View {
     // MARK: - Actions
     private var actionsSection: some View {
         VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                quickAction(label: "Bump 1 day") {
+                    if let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) {
+                        appState.rescheduleChore(chore, to: tomorrow)
+                        dismiss()
+                    }
+                }
+                quickAction(label: "Skip a week") {
+                    if let next = Calendar.current.date(byAdding: .day, value: 7, to: Date()) {
+                        appState.rescheduleChore(chore, to: next)
+                        dismiss()
+                    }
+                }
+            }
+
             Button { showEdit = true } label: {
                 Text("Edit chore")
                     .font(.system(size: 15, weight: .medium))
@@ -151,7 +166,7 @@ struct ChoreDetailView: View {
             .buttonStyle(.plain)
 
             Button { showReschedule = true } label: {
-                Text("Reschedule")
+                Text("Pick a date")
                     .font(.system(size: 15, weight: .medium))
                     .foregroundColor(CozyTheme.primary)
                     .frame(maxWidth: .infinity).frame(height: 48)
@@ -173,6 +188,18 @@ struct ChoreDetailView: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, 4)
+    }
+
+    private func quickAction(label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity).frame(height: 44)
+                .background(CozyTheme.accent)
+                .cornerRadius(12)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Reschedule Sheet

@@ -10,11 +10,11 @@ struct EditChoreView: View {
     @State private var selectedRoom: String
     @State private var selectedFrequency: String
     @State private var selectedDays: Set<String>
+    @State private var preferredTime: Date
 
     private let frequencies = ["Daily", "2–3 times/week", "Weekly", "Every 2 weeks", "Monthly"]
     private let dayPills = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"]
 
-    // Map full day name → pill abbreviation
     private static let dayNameToAbbrev: [String: String] = [
         "Sunday": "SU", "Monday": "MO", "Tuesday": "TU",
         "Wednesday": "WE", "Thursday": "TH", "Friday": "FR", "Saturday": "SA"
@@ -28,9 +28,22 @@ struct EditChoreView: View {
         self.chore = chore
         _choreName = State(initialValue: chore.choreName)
         _selectedRoom = State(initialValue: chore.roomId)
-        _selectedFrequency = State(initialValue: "Weekly")
+        _selectedFrequency = State(initialValue: chore.frequency ?? "Weekly")
         let abbrev = Self.dayNameToAbbrev[chore.dayOfWeek] ?? String(chore.dayOfWeek.prefix(2)).uppercased()
         _selectedDays = State(initialValue: [abbrev])
+
+        // Default preferred time: stored value, or 9:00 AM
+        let cal = Calendar.current
+        let baseDate: Date = {
+            var c = DateComponents(); c.hour = 9; c.minute = 0
+            return cal.date(from: c) ?? Date()
+        }()
+        if let mins = chore.preferredTimeMinutes {
+            var c = DateComponents(); c.hour = mins / 60; c.minute = mins % 60
+            _preferredTime = State(initialValue: cal.date(from: c) ?? baseDate)
+        } else {
+            _preferredTime = State(initialValue: baseDate)
+        }
     }
 
     var body: some View {
@@ -42,7 +55,11 @@ struct EditChoreView: View {
                         nameField
                         roomSection
                         frequencySection
-                        daysSection
+                        if selectedFrequency == "Daily" {
+                            timeSection
+                        } else {
+                            daysSection
+                        }
                         saveButton
                     }
                     .padding(20)
@@ -60,14 +77,9 @@ struct EditChoreView: View {
         }
     }
 
-    // MARK: - Name
     private var nameField: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Chore name")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(CozyTheme.mutedText)
-                .textCase(.uppercase)
-                .tracking(0.5)
+            sectionLabel("Chore name")
             TextField("e.g. Vacuum living room", text: $choreName)
                 .font(.system(size: 16))
                 .foregroundColor(CozyTheme.primary)
@@ -78,14 +90,9 @@ struct EditChoreView: View {
         }
     }
 
-    // MARK: - Room
     private var roomSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Room")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(CozyTheme.mutedText)
-                .textCase(.uppercase)
-                .tracking(0.5)
+            sectionLabel("Room")
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 ForEach(Room.defaults) { room in
                     roomCard(room)
@@ -97,33 +104,23 @@ struct EditChoreView: View {
     private func roomCard(_ room: Room) -> some View {
         let isOn = selectedRoom == room.id
         return Button { selectedRoom = room.id } label: {
-            VStack(spacing: 6) {
-                Image(systemName: room.icon)
-                    .font(.system(size: 20, weight: .light))
-                    .foregroundColor(isOn ? CozyTheme.accent : CozyTheme.primary)
-                Text(room.name)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(isOn ? CozyTheme.accent : Color(hex: "8B6B5A"))
-            }
-            .frame(maxWidth: .infinity).frame(height: 76)
-            .background(isOn ? CozyTheme.accent.opacity(0.12) : Color(hex: room.color))
-            .cornerRadius(14)
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(isOn ? CozyTheme.accent.opacity(0.4) : Color.clear, lineWidth: 1.5)
-            )
+            Text(room.name)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(isOn ? .white : CozyTheme.primary)
+                .frame(maxWidth: .infinity).frame(height: 56)
+                .background(isOn ? CozyTheme.accent : CozyTheme.card)
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(isOn ? CozyTheme.accent : CozyTheme.border, lineWidth: 1)
+                )
         }
         .buttonStyle(.plain)
     }
 
-    // MARK: - Frequency
     private var frequencySection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("How often")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(CozyTheme.mutedText)
-                .textCase(.uppercase)
-                .tracking(0.5)
+            sectionLabel("How often")
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                 ForEach(frequencies, id: \.self) { freq in
                     frequencyPill(freq)
@@ -134,26 +131,46 @@ struct EditChoreView: View {
 
     private func frequencyPill(_ freq: String) -> some View {
         let isOn = selectedFrequency == freq
-        return Button { selectedFrequency = freq } label: {
+        return Button {
+            withAnimation(.easeInOut(duration: 0.18)) { selectedFrequency = freq }
+        } label: {
             Text(freq)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(isOn ? .white : CozyTheme.primary)
                 .padding(.horizontal, 12).padding(.vertical, 10)
                 .frame(maxWidth: .infinity)
-                .background(isOn ? CozyTheme.accent : Color(hex: "F0EBE5"))
+                .background(isOn ? CozyTheme.accent : CozyTheme.card)
                 .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(isOn ? CozyTheme.accent : CozyTheme.border, lineWidth: 1)
+                )
         }
         .buttonStyle(.plain)
     }
 
-    // MARK: - Days
+    private var timeSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            sectionLabel("Time of day")
+            HStack {
+                Text("Do it at")
+                    .font(.system(size: 14))
+                    .foregroundColor(CozyTheme.primary)
+                Spacer()
+                DatePicker("", selection: $preferredTime, displayedComponents: .hourAndMinute)
+                    .labelsHidden()
+                    .tint(CozyTheme.accent)
+            }
+            .padding(14)
+            .background(CozyTheme.card)
+            .cornerRadius(12)
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(CozyTheme.border, lineWidth: 1))
+        }
+    }
+
     private var daysSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Which days")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(CozyTheme.mutedText)
-                .textCase(.uppercase)
-                .tracking(0.5)
+            sectionLabel("Which days")
             HStack(spacing: 6) {
                 ForEach(dayPills, id: \.self) { day in
                     dayPill(day)
@@ -171,13 +188,24 @@ struct EditChoreView: View {
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(isOn ? .white : CozyTheme.primary)
                 .frame(maxWidth: .infinity).frame(height: 36)
-                .background(isOn ? CozyTheme.accent : Color(hex: "F0EBE5"))
+                .background(isOn ? CozyTheme.accent : CozyTheme.card)
                 .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(isOn ? CozyTheme.accent : CozyTheme.border, lineWidth: 1)
+                )
         }
         .buttonStyle(.plain)
     }
 
-    // MARK: - Save
+    private func sectionLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundColor(CozyTheme.mutedText)
+            .textCase(.uppercase)
+            .tracking(0.5)
+    }
+
     private var saveButton: some View {
         let trimmed = choreName.trimmingCharacters(in: .whitespaces)
         let enabled = !trimmed.isEmpty && !selectedRoom.isEmpty
@@ -194,7 +222,6 @@ struct EditChoreView: View {
         .padding(.top, 8)
     }
 
-    // MARK: - Logic
     private func save() {
         let trimmed = choreName.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty, !selectedRoom.isEmpty else { return }
@@ -202,12 +229,48 @@ struct EditChoreView: View {
         var updated = chore
         updated.choreName = trimmed
         updated.roomId = selectedRoom
+        updated.frequency = selectedFrequency
 
-        let scheduled = nextDate(for: selectedDays.first)
-        updated.scheduledDate = DateFormatters.yearMonthDay.string(from: scheduled)
-        updated.dayOfWeek = DateFormatters.dayOfWeek.string(from: scheduled)
+        if selectedFrequency == "Daily" {
+            let cal = Calendar.current
+            let comps = cal.dateComponents([.hour, .minute], from: preferredTime)
+            let timeMinutes = (comps.hour ?? 9) * 60 + (comps.minute ?? 0)
+            updated.preferredTimeMinutes = timeMinutes
 
-        appState.updateChore(updated)
+            let today = Date()
+            updated.scheduledDate = DateFormatters.yearMonthDay.string(from: today)
+            updated.dayOfWeek = DateFormatters.dayOfWeek.string(from: today)
+            appState.updateChore(updated)
+
+            // Generate the next 29 days so "Daily" actually means every day on the calendar.
+            // Skip dates that already have an instance with the same name + room.
+            for offset in 1...29 {
+                guard let date = cal.date(byAdding: .day, value: offset, to: today) else { continue }
+                let ds = DateFormatters.yearMonthDay.string(from: date)
+                let exists = appState.chores.contains {
+                    $0.choreName == trimmed && $0.roomId == selectedRoom && $0.scheduledDate == ds
+                }
+                if exists { continue }
+                let instance = Chore(
+                    userId: chore.userId,
+                    roomId: selectedRoom,
+                    choreName: trimmed,
+                    dayOfWeek: DateFormatters.dayOfWeek.string(from: date),
+                    isDone: false,
+                    scheduledDate: ds,
+                    frequency: "Daily",
+                    preferredTimeMinutes: timeMinutes
+                )
+                appState.addChore(instance)
+            }
+        } else {
+            updated.preferredTimeMinutes = nil
+            let scheduled = nextDate(for: selectedDays.first)
+            updated.scheduledDate = DateFormatters.yearMonthDay.string(from: scheduled)
+            updated.dayOfWeek = DateFormatters.dayOfWeek.string(from: scheduled)
+            appState.updateChore(updated)
+        }
+
         dismiss()
     }
 

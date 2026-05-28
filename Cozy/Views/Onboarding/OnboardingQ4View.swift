@@ -180,7 +180,7 @@ struct OnboardingQ4View: View {
     private let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
-        OnboardingShell(step: 4, total: 5, onBack: { appRouter.navigate(to: .cleanlinessGoal) }) {
+        OnboardingShell(step: 5, total: 6, onBack: { appRouter.navigate(to: .cleanlinessGoal) }) {
             questionHeader
                 .padding(.bottom, 20)
                 .opacity(appeared ? 1 : 0)
@@ -206,7 +206,7 @@ struct OnboardingQ4View: View {
 
     private var questionHeader: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Which rooms do you\nwant to keep on top of?")
+            Text("Which rooms do you\nwant to keep track of?")
                 .font(.system(size: 26, weight: .bold))
                 .foregroundColor(CozyTheme.primary)
                 .lineSpacing(2)
@@ -230,14 +230,12 @@ struct OnboardingQ4View: View {
     private func roomTile(_ room: RoomTile) -> some View {
         let on = selected.contains(room.id)
         return ZStack(alignment: .bottom) {
-            VStack(spacing: 8) {
-                Image(systemName: room.icon)
-                    .font(.system(size: 26))
-                    .foregroundColor(on ? .white : CozyTheme.accent)
+            VStack {
                 Text(room.label)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(on ? .white : CozyTheme.primary)
                     .multilineTextAlignment(.center)
+                    .padding(.horizontal, 8)
             }
             .frame(maxWidth: .infinity)
             .frame(height: 86)
@@ -255,29 +253,7 @@ struct OnboardingQ4View: View {
                         .padding(5)
                 }
             }
-            // "Ideas" badge appears on selected tiles
-            if on {
-                Button {
-                    showChorePreview = true
-                } label: {
-                    HStack(spacing: 3) {
-                        Image(systemName: "eye.fill")
-                            .font(.system(size: 9, weight: .semibold))
-                        Text("Ideas")
-                            .font(.system(size: 9, weight: .semibold))
-                    }
-                    .foregroundColor(CozyTheme.accent)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 3)
-                    .background(.white)
-                    .clipShape(Capsule())
-                    .shadow(color: .black.opacity(0.12), radius: 4, x: 0, y: 2)
-                }
-                .offset(y: 10)
-                .transition(.scale.combined(with: .opacity))
-            }
         }
-        .padding(.bottom, on ? 8 : 0)
     }
 
     private var hint: some View {

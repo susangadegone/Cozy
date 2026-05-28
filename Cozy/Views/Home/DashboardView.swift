@@ -3,11 +3,12 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var dragManager: DragDropManager
+    var energy: TodayEnergy = .normal
     var onChoreComplete: () -> Void
 
     @State private var selectedChore: Chore? = nil
 
-    private let dayChoreCap = 5
+    private var dayChoreCap: Int { energy.cap }
 
     private var capped: [Chore] {
         let all = appState.todayChores
@@ -16,9 +17,20 @@ struct DashboardView: View {
         return Array((undone + done).prefix(dayChoreCap))
     }
 
+    private var allDone: Bool {
+        !capped.isEmpty && capped.allSatisfy { $0.isDone }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            QuoteCard()
+                .padding(.bottom, 18)
             sectionTitle
+            progressBar
+            if allDone {
+                celebrationCard
+                    .padding(.bottom, 4)
+            }
             if capped.isEmpty {
                 emptyState
             } else {
@@ -30,6 +42,55 @@ struct DashboardView: View {
         .sheet(item: $selectedChore) { chore in
             ChoreDetailView(chore: chore).environmentObject(appState)
         }
+    }
+
+    @ViewBuilder
+    private var progressBar: some View {
+        let total = capped.count
+        let done = capped.filter { $0.isDone }.count
+        if total > 0 {
+            let ratio = Double(done) / Double(total)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(CozyTheme.border.opacity(0.5))
+                        .frame(height: 6)
+                    Capsule()
+                        .fill(ratio >= 1.0 ? CozyTheme.teal : CozyTheme.accent)
+                        .frame(width: max(0, geo.size.width * ratio), height: 6)
+                        .animation(.spring(response: 0.5, dampingFraction: 0.75), value: ratio)
+                }
+            }
+            .frame(height: 6)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 14)
+        }
+    }
+
+    private var celebrationCard: some View {
+        let streak = appState.currentStreak
+        return HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("All done today")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(CozyTheme.primary)
+                Text(streak > 1 ? "\(streak)-day streak" : "Keep it going tomorrow.")
+                    .font(.system(size: 14, weight: streak > 1 ? .medium : .regular))
+                    .foregroundColor(streak > 1 ? CozyTheme.teal : CozyTheme.mutedText)
+            }
+            Spacer()
+            if streak > 1 {
+                Image(systemName: "flame.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(CozyTheme.accent)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(CozyTheme.teal.opacity(0.12))
+        .cornerRadius(CozyTheme.cornerRadius)
+        .padding(.horizontal, 20)
     }
 
     private var sectionTitle: some View {

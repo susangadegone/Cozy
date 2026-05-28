@@ -16,6 +16,8 @@ struct AddChoreView: View {
     @State private var selectedDays: Set<String> = []
     @State private var showBrowse = false
     @State private var showNameError: Bool = false
+    @State private var justSaved = false
+    @State private var savedChoreName = ""
 
     private let frequencies = ["Daily", "2–3 times/week", "Weekly", "Every 2 weeks", "Monthly"]
     private let dayPills = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"]
@@ -24,13 +26,17 @@ struct AddChoreView: View {
         NavigationStack {
             ZStack {
                 CozyTheme.background.ignoresSafeArea()
-                VStack(spacing: 0) {
-                    stepIndicator
-                    ScrollView { stepContent.padding(20) }
-                    confirmButton
+                if justSaved {
+                    savedConfirmation
+                } else {
+                    VStack(spacing: 0) {
+                        stepIndicator
+                        ScrollView { stepContent.padding(20) }
+                        confirmButton
+                    }
                 }
             }
-            .navigationTitle("Add Chore")
+            .navigationTitle(justSaved ? "Chore Added" : "Add Chore")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -38,6 +44,66 @@ struct AddChoreView: View {
                         .foregroundColor(CozyTheme.mutedText)
                 }
             }
+        }
+    }
+
+    // MARK: - Saved Confirmation
+    private var savedConfirmation: some View {
+        VStack(spacing: 0) {
+            Spacer()
+            VStack(spacing: 20) {
+                ZStack {
+                    Circle()
+                        .fill(CozyTheme.teal.opacity(0.12))
+                        .frame(width: 80, height: 80)
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 44))
+                        .foregroundColor(CozyTheme.teal)
+                }
+                VStack(spacing: 8) {
+                    Text("\"\(savedChoreName)\" added")
+                        .font(.system(size: 20, weight: .bold, design: .serif))
+                        .foregroundColor(CozyTheme.primary)
+                        .multilineTextAlignment(.center)
+                    Text("Keep going to build out your schedule.")
+                        .font(.system(size: 14))
+                        .foregroundColor(CozyTheme.mutedText)
+                        .multilineTextAlignment(.center)
+                }
+            }
+            Spacer()
+            VStack(spacing: 12) {
+                Button(action: resetForAnother) {
+                    Text("Add another")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity).frame(height: 54)
+                        .background(CozyTheme.accent)
+                        .cornerRadius(CozyTheme.cornerRadius)
+                }
+                Button { dismiss() } label: {
+                    Text("Done")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(CozyTheme.primary)
+                        .frame(maxWidth: .infinity).frame(height: 44)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 32)
+        }
+    }
+
+    private func resetForAnother() {
+        step = 0
+        selectedRoom = ""
+        selectedChore = ""
+        choreNameInput = ""
+        selectedFrequency = "Weekly"
+        selectedDays = []
+        showNameError = false
+        withAnimation(.easeInOut(duration: 0.2)) {
+            justSaved = false
+            savedChoreName = ""
         }
     }
 
@@ -122,8 +188,18 @@ struct AddChoreView: View {
                     .foregroundColor(CozyTheme.accent)
                 }
                 .sheet(isPresented: $showBrowse) {
-                    BrowseChoresView(previewMode: false, limitToRooms: selectedRoom.isEmpty ? [] : [selectedRoom])
-                        .environmentObject(appState)
+                    BrowseChoresView(
+                        previewMode: false,
+                        limitToRooms: selectedRoom.isEmpty ? [] : [selectedRoom],
+                        onPick: { preset in
+                            choreNameInput = preset.name
+                            let mapped = preset.defaultSchedule.capitalized
+                            if frequencies.contains(mapped) {
+                                selectedFrequency = mapped
+                            }
+                        }
+                    )
+                    .environmentObject(appState)
                 }
             }
 
@@ -192,18 +268,64 @@ struct AddChoreView: View {
     // MARK: - Step 3: Schedule
     private var schedulePicker: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("Which days?")
+            Text(scheduleTitle)
                 .font(.system(size: 22, weight: .bold, design: .serif))
                 .foregroundColor(CozyTheme.primary)
-            Text("You can change this anytime.")
+            Text(scheduleSubtitle)
                 .font(.system(size: 14))
                 .foregroundColor(CozyTheme.mutedText)
 
-            HStack(spacing: 6) {
-                ForEach(dayPills, id: \.self) { day in
-                    dayPill(day)
+            if selectedFrequency != "Daily" && selectedFrequency != "Monthly" {
+                HStack(spacing: 6) {
+                    ForEach(dayPills, id: \.self) { day in
+                        dayPill(day)
+                    }
                 }
             }
+        }
+    }
+
+    private var scheduleTitle: String {
+        switch selectedFrequency {
+        case "Daily":              return "Every day"
+        case "Monthly":            return "Once a month"
+        case "2\u{2013}3 times/week": return "Which days?"
+        default:                   return "Which day?"
+        }
+    }
+
+    private var scheduleSubtitle: String {
+        switch selectedFrequency {
+        case "Daily":              return "Scheduled daily for the next 4 weeks."
+        case "Monthly":            return "Scheduled monthly for the next 3 months."
+        case "2\u{2013}3 times/week": return "Pick 2–3 days. Repeats for 4 weeks."
+        case "Every 2 weeks":      return "Pick a day. Repeats every other week for 8 weeks."
+        default:                   return "Pick a day. Repeats weekly for 8 weeks."
+        }
+    }
+
+    private var generatedDates: [Date] {
+        let anchor = Calendar.current.startOfDay(for: initialDate)
+        let cal = Calendar.current
+        switch selectedFrequency {
+        case "Daily":
+            return (0..<28).compactMap { cal.date(byAdding: .day, value: $0, to: anchor) }
+        case "2\u{2013}3 times/week":
+            let days = selectedDays.isEmpty ? ["MO", "WE"] : Array(selectedDays)
+            return days.flatMap { day -> [Date] in
+                let first = nextDate(for: day, from: anchor)
+                return (0..<4).compactMap { cal.date(byAdding: .weekOfYear, value: $0, to: first) }
+            }.sorted()
+        case "Weekly":
+            let first = nextDate(for: selectedDays.first, from: anchor)
+            return (0..<8).compactMap { cal.date(byAdding: .weekOfYear, value: $0, to: first) }
+        case "Every 2 weeks":
+            let first = nextDate(for: selectedDays.first, from: anchor)
+            return (0..<4).compactMap { cal.date(byAdding: .weekOfYear, value: $0 * 2, to: first) }
+        case "Monthly":
+            return (0..<3).compactMap { cal.date(byAdding: .month, value: $0, to: anchor) }
+        default:
+            return [nextDate(for: selectedDays.first, from: anchor)]
         }
     }
 
@@ -225,8 +347,9 @@ struct AddChoreView: View {
     private var confirmButton: some View {
         Group {
             if step == 2 {
-                Button(action: saveChore) {
-                    Text("Add Chore")
+                Button(action: saveChores) {
+                    let n = generatedDates.count
+                    Text(n <= 1 ? "Add Chore" : "Add \(n) Chores")
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity).frame(height: 54)
@@ -243,24 +366,24 @@ struct AddChoreView: View {
         !selectedRoom.isEmpty && !selectedChore.isEmpty
     }
 
-    private func saveChore() {
-        // Use the calendar's selected date as the anchor.
-        // If the user also picked specific weekdays, find the nearest occurrence
-        // on or after the anchor. Otherwise just use the anchor date itself.
-        let anchor = Calendar.current.startOfDay(for: initialDate)
-        let scheduledDate = nextDate(for: selectedDays.first, from: anchor)
-        let scheduledDayName = DateFormatters.dayOfWeek.string(from: scheduledDate)
-        let chore = Chore(
-            id: UUID(),
-            userId: UUID(),
-            roomId: selectedRoom,
-            choreName: selectedChore,
-            dayOfWeek: scheduledDayName,
-            isDone: false,
-            scheduledDate: DateFormatters.yearMonthDay.string(from: scheduledDate)
-        )
-        appState.addChore(chore)
-        dismiss()
+    private func saveChores() {
+        let dates = generatedDates
+        let newChores: [Chore] = dates.map { date in
+            Chore(
+                id: UUID(),
+                userId: UUID(),
+                roomId: selectedRoom,
+                choreName: selectedChore,
+                dayOfWeek: DateFormatters.dayOfWeek.string(from: date),
+                isDone: false,
+                scheduledDate: DateFormatters.yearMonthDay.string(from: date)
+            )
+        }
+        appState.addChores(newChores)
+        savedChoreName = selectedChore
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            justSaved = true
+        }
     }
 
     /// Returns the nearest date on or after `anchor` that matches the given weekday abbreviation.

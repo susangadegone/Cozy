@@ -70,27 +70,52 @@ struct WeekCalendarView: View {
     // MARK: - Day chore list
     @ViewBuilder
     private var dayChoreList: some View {
-        let chores = appState.selectedDateChores
-        if chores.isEmpty {
+        let grouped = groupedByRoom
+        if grouped.isEmpty {
             dayEmptyState
         } else {
             ScrollView {
-                LazyVStack(spacing: 0) {
-                    ForEach(chores) { chore in
-                        ChoreRow(chore: chore)
-                            .onTapGesture { selectedChore = chore }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    appState.deleteChore(chore)
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
+                LazyVStack(spacing: 8, pinnedViews: [.sectionHeaders]) {
+                    ForEach(grouped, id: \.room.id) { section in
+                        Section {
+                            ForEach(section.chores) { chore in
+                                ChoreRow(chore: chore)
+                                    .onTapGesture { selectedChore = chore }
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                        Button(role: .destructive) {
+                                            appState.deleteChore(chore)
+                                        } label: { Label("Delete", systemImage: "trash") }
+                                    }
                             }
+                        } header: {
+                            CalRoomHeader(room: section.room, count: section.chores.count)
+                        }
                     }
                 }
+                .padding(.top, 4)
                 .padding(.bottom, 100)
             }
         }
+    }
+
+    private struct RoomGroup { let room: Room; let chores: [Chore] }
+
+    private var groupedByRoom: [RoomGroup] {
+        let chores = appState.selectedDateChores
+        var result: [RoomGroup] = []
+        for room in Room.defaults {
+            let rc = chores.filter { $0.roomId == room.id }
+            if !rc.isEmpty { result.append(RoomGroup(room: room, chores: rc)) }
+        }
+        let knownIds = Set(Room.defaults.map(\.id))
+        let other = chores.filter { !knownIds.contains($0.roomId) }
+        if !other.isEmpty {
+            result.append(RoomGroup(
+                room: Room(id: "other", name: "Other", icon: "archivebox", color: "EDE6F5"),
+                chores: other
+            ))
+        }
+        return result
     }
 
     private var dayEmptyState: some View {
@@ -105,6 +130,32 @@ struct WeekCalendarView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+// MARK: - Cal Room Header
+private struct CalRoomHeader: View {
+    let room: Room
+    let count: Int
+
+    var body: some View {
+        HStack {
+            Image(systemName: room.icon)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(CozyTheme.accent)
+            Text(room.name)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(CozyTheme.primary)
+            Spacer()
+            Text("\(count)")
+                .font(.system(size: 12))
+                .foregroundColor(CozyTheme.mutedText)
+                .monospacedDigit()
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 14)
+        .padding(.bottom, 6)
+        .background(CozyTheme.background)
     }
 }
 

@@ -18,7 +18,8 @@ struct OnboardingView: View {
                 .science, .onboardingName,
                 .onboardingQ1, .onboardingQ2, .onboardingQ3,
                 .cleanlinessType, .cleanlinessGoal,
-                .onboardingQ4, .onboardingQ5, .scheduleReady, .recap
+                .onboardingQ4, .onboardingQ5, .scheduleReady,
+                .howCozyWorks, .recap
             ]
             if !onboardingRoutes.contains(appRouter.route) {
                 appRouter.navigate(to: .onboardingName)
@@ -49,6 +50,14 @@ struct OnboardingView: View {
             OnboardingQ5View()
         case .scheduleReady:
             ScheduleReadyView()
+        case .howCozyWorks:
+            HowCozyWorksView {
+                if var p = appState.profile {
+                    p.onboardingCompleted = true
+                    appState.profile = p
+                    LocalStore.shared.saveProfile(p)
+                }
+            }
         default:
             OnboardingNameView()
         }
@@ -65,7 +74,7 @@ struct OnboardingNameView: View {
     @State private var appeared = false
 
     var body: some View {
-        OnboardingShell(step: 0, total: 6, onBack: nil) {
+        OnboardingShell(step: 0, total: 6, onBack: nil) { // intro
             VStack(alignment: .leading, spacing: 0) {
                 headerBlock
                     .opacity(appeared ? 1 : 0)
