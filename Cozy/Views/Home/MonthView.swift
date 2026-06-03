@@ -1,13 +1,17 @@
 import SwiftUI
 
+// MARK: - Identifiable wrapper so Date can drive .sheet(item:)
+private struct SelectedDay: Identifiable {
+    let id = UUID()
+    let date: Date
+}
+
 // MARK: - Month Calendar View
 struct MonthCalendarView: View {
     @EnvironmentObject var appState: AppState
     @Binding var displayMonth: Date
-    @Binding var selectedChore: Chore?
 
-    @State private var selectedDay: Date? = nil
-    @State private var showDaySheet = false
+    @State private var selectedDay: SelectedDay? = nil
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
     private let dayHeaders = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"]
@@ -23,13 +27,11 @@ struct MonthCalendarView: View {
                     .padding(.bottom, 80)
             }
         }
-        .sheet(isPresented: $showDaySheet) {
-            if let day = selectedDay {
-                DayChoresSheet(date: day, selectedChore: $selectedChore)
-                    .environmentObject(appState)
-                    .presentationDetents([.medium])
-                    .presentationDragIndicator(.visible)
-            }
+        .sheet(item: $selectedDay) { selected in
+            DayChoresSheet(date: selected.date)
+                .environmentObject(appState)
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
         }
     }
 
@@ -94,8 +96,7 @@ struct MonthCalendarView: View {
                         date: date,
                         chores: allChores.filter { $0.scheduledDate == CalendarHelpers.dateString(date) }
                     ) {
-                        selectedDay = date
-                        showDaySheet = true
+                        selectedDay = SelectedDay(date: date)
                     }
                 } else {
                     Color.clear.frame(height: 60)
@@ -157,8 +158,9 @@ private struct MonthDayCell: View {
 struct DayChoresSheet: View {
     @EnvironmentObject var appState: AppState
     let date: Date
-    @Binding var selectedChore: Chore?
     @Environment(\.dismiss) private var dismiss
+
+    @State private var detailChore: Chore? = nil
 
     private var dateLabel: String {
         DateFormatters.fullDate.string(from: date)
@@ -170,59 +172,58 @@ struct DayChoresSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                CozyTheme.background.ignoresSafeArea()
-                VStack(alignment: .leading, spacing: 0) {
+        ZStack {
+            CozyTheme.background.ignoresSafeArea()
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
                     Text(dateLabel)
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundColor(CozyTheme.primary)
-                        .padding(.horizontal, 20)
-                        .padding(.top, 20)
-                        .padding(.bottom, 16)
-
-                    if chores.isEmpty {
-                        Spacer()
-                        Text("Nothing scheduled")
-                            .font(.system(size: 15))
-                            .foregroundColor(CozyTheme.mutedText)
-                            .frame(maxWidth: .infinity)
-                        Spacer()
-                    } else {
-                        ScrollView(showsIndicators: false) {
-                            VStack(spacing: 0) {
-                                ForEach(Array(chores.enumerated()), id: \.element.id) { idx, chore in
-                                    DaySheetChoreRow(chore: chore)
-                                        .onTapGesture {
-                                            dismiss()
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                                                selectedChore = chore
-                                            }
-                                        }
-                                    if idx < chores.count - 1 {
-                                        Divider()
-                                            .padding(.leading, 20)
-                                            .opacity(0.4)
-                                    }
-                                }
-                            }
-                            .background(CozyTheme.card)
-                            .cornerRadius(12)
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(CozyTheme.border, lineWidth: 1))
-                            .padding(.horizontal, 20)
-                        }
-                    }
-                    Spacer(minLength: 20)
-                }
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                    Spacer()
                     Button("Close") { dismiss() }
                         .foregroundColor(CozyTheme.mutedText)
                         .font(.system(size: 15))
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 16)
+
+                if chores.isEmpty {
+                    Spacer()
+                    Text("Nothing scheduled")
+                        .font(.system(size: 15))
+                        .foregroundColor(CozyTheme.mutedText)
+                        .frame(maxWidth: .infinity)
+                    Spacer()
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 0) {
+                            ForEach(Array(chores.enumerated()), id: \.element.id) { idx, chore in
+                                DaySheetChoreRow(chore: chore)
+                                    .onTapGesture { detailChore = chore }
+                                if idx < chores.count - 1 {
+                                    Divider()
+                                        .padding(.leading, 20)
+                                        .opacity(0.4)
+                                }
+                            }
+                        }
+                        .background(CozyTheme.card)
+                        .cornerRadius(12)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(CozyTheme.border, lineWidth: 1))
+                        .padding(.horizontal, 20)
+                    }
+                }
+                Spacer(minLength: 20)
             }
+        }
+        .sheet(item: $detailChore) { chore in
+            NavigationStack {
+                ChoreDetailView(chore: chore)
+                    .environmentObject(appState)
+            }
+            .presentationDetents([.fraction(0.7)])
+            .presentationDragIndicator(.visible)
         }
     }
 }

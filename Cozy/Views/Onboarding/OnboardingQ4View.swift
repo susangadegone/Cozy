@@ -1,158 +1,5 @@
 import SwiftUI
 
-// MARK: - Chore Preview Sheet (onboarding, read-only)
-struct ChorePreviewSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    let selectedRooms: [String]
-
-    // Map onboarding display names → PresetChoreLibrary roomIds
-    private let roomIdMap: [String: String] = [
-        "Kitchen": "kitchen",
-        "Bedroom": "bedroom",
-        "Bathroom": "bathroom",
-        "Living room": "living",
-        "Outdoor/yard": "outdoor",
-        "Home office": "laundry"
-    ]
-
-    private var roomIds: [String] {
-        let mapped = selectedRooms.compactMap { roomIdMap[$0] }
-        return mapped.isEmpty ? [] : Array(Set(mapped))
-    }
-
-    private let allRooms: [RoomSection] = [
-        RoomSection(id: "kitchen",  name: "Kitchen",     icon: "fork.knife", color: "FFF3DC"),
-        RoomSection(id: "bedroom",  name: "Bedroom",     icon: "bed.double", color: "F0E8E0"),
-        RoomSection(id: "bathroom", name: "Bathroom",    icon: "shower",     color: "E4EEF2"),
-        RoomSection(id: "living",   name: "Living Room", icon: "sofa",       color: "FDF3E3"),
-        RoomSection(id: "outdoor",  name: "Outdoor",     icon: "leaf",       color: "E5EDDF"),
-        RoomSection(id: "laundry",  name: "Laundry",     icon: "washer",     color: "EDE6F5"),
-    ]
-
-    private var visibleRooms: [RoomSection] {
-        allRooms.filter { roomIds.contains($0.id) }
-    }
-
-    @State private var selectedRoomIndex = 0
-
-    private var currentRoom: RoomSection {
-        visibleRooms.indices.contains(selectedRoomIndex) ? visibleRooms[selectedRoomIndex] : (visibleRooms.first ?? allRooms[0])
-    }
-
-    private var currentPresets: [PresetChore] {
-        PresetChoreLibrary.all(for: currentRoom.id)
-    }
-
-    var body: some View {
-        NavigationStack {
-            ZStack {
-                CozyTheme.background.ignoresSafeArea()
-                VStack(spacing: 0) {
-                    if visibleRooms.count > 1 { previewTabStrip }
-                    previewList
-                }
-            }
-            .navigationTitle("Chore ideas")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { dismiss() }
-                        .foregroundColor(CozyTheme.accent)
-                        .fontWeight(.semibold)
-                }
-            }
-        }
-    }
-
-    private var previewTabStrip: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(Array(visibleRooms.enumerated()), id: \.element.id) { idx, room in
-                    let isSelected = selectedRoomIndex == idx
-                    Button {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                            selectedRoomIndex = idx
-                        }
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: room.icon).font(.system(size: 13, weight: .medium))
-                            Text(room.name).font(.system(size: 14, weight: isSelected ? .semibold : .regular))
-                        }
-                        .foregroundColor(isSelected ? .white : CozyTheme.primary)
-                        .padding(.horizontal, 14).padding(.vertical, 8)
-                        .background(isSelected ? CozyTheme.accent : Color(hex: room.color))
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(isSelected ? CozyTheme.accent : CozyTheme.border, lineWidth: 1))
-                    }
-                }
-            }
-            .padding(.horizontal, 16).padding(.vertical, 12)
-        }
-        .background(CozyTheme.card)
-        .overlay(alignment: .bottom) { Divider() }
-    }
-
-    private var previewList: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                roomHeaderCard.padding(.horizontal, 16).padding(.vertical, 16)
-                LazyVStack(spacing: 0) {
-                    ForEach(currentPresets) { preset in
-                        previewRow(preset)
-                    }
-                }
-                .background(CozyTheme.card)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-                .overlay(RoundedRectangle(cornerRadius: 14).stroke(CozyTheme.border, lineWidth: 1))
-                .padding(.horizontal, 16)
-                .padding(.bottom, 32)
-            }
-        }
-    }
-
-    private var roomHeaderCard: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                Circle().fill(Color(hex: currentRoom.color)).frame(width: 44, height: 44)
-                Image(systemName: currentRoom.icon)
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(CozyTheme.accent)
-            }
-            VStack(alignment: .leading, spacing: 2) {
-                Text(currentRoom.name)
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(CozyTheme.primary)
-                let c = currentPresets.count
-                Text("\(c) idea\(c == 1 ? "" : "s") — you'll be able to add these after setup")
-                    .font(.system(size: 12))
-                    .foregroundColor(CozyTheme.mutedText)
-            }
-            Spacer()
-        }
-    }
-
-    private func previewRow(_ preset: PresetChore) -> some View {
-        VStack(spacing: 0) {
-            HStack {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(preset.name)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(CozyTheme.primary)
-                    Text(preset.defaultSchedule.capitalized)
-                        .font(.system(size: 12))
-                        .foregroundColor(CozyTheme.mutedText)
-                }
-                Spacer()
-                Image(systemName: preset.isDefaultAdded ? "star.fill" : "star")
-                    .font(.system(size: 14))
-                    .foregroundColor(preset.isDefaultAdded ? CozyTheme.accent : CozyTheme.border)
-            }
-            .padding(.horizontal, 16).padding(.vertical, 14)
-            Divider().padding(.leading, 16)
-        }
-    }
-}
-
 // MARK: - RoomTile
 private struct RoomTile: Identifiable {
     let id: String
@@ -166,7 +13,6 @@ struct OnboardingQ4View: View {
 
     @State private var selected: Set<String> = []
     @State private var appeared = false
-    @State private var showChorePreview = false
 
     private let rooms: [RoomTile] = [
         RoomTile(id: "Kitchen",      label: "Kitchen",     icon: "fork.knife"),
@@ -174,7 +20,7 @@ struct OnboardingQ4View: View {
         RoomTile(id: "Bathroom",     label: "Bathroom",    icon: "shower"),
         RoomTile(id: "Living room",  label: "Living room", icon: "sofa"),
         RoomTile(id: "Outdoor/yard", label: "Outdoor",     icon: "leaf"),
-        RoomTile(id: "Home office",  label: "Office",      icon: "desktopcomputer")
+        RoomTile(id: "Laundry",      label: "Laundry",     icon: "washer")
     ]
 
     private let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
@@ -199,14 +45,11 @@ struct OnboardingQ4View: View {
         .onAppear {
             withAnimation(.easeOut(duration: 0.4)) { appeared = true }
         }
-        .sheet(isPresented: $showChorePreview) {
-            ChorePreviewSheet(selectedRooms: Array(selected))
-        }
     }
 
     private var questionHeader: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Which rooms do you\nwant to keep track of?")
+            Text("Which rooms do you\nwant to take care of?")
                 .font(.system(size: 26, weight: .bold))
                 .foregroundColor(CozyTheme.primary)
                 .lineSpacing(2)
@@ -229,29 +72,30 @@ struct OnboardingQ4View: View {
 
     private func roomTile(_ room: RoomTile) -> some View {
         let on = selected.contains(room.id)
-        return ZStack(alignment: .bottom) {
-            VStack {
-                Text(room.label)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(on ? .white : CozyTheme.primary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 8)
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 86)
-            .background(on ? CozyTheme.accent : CozyTheme.card)
-            .cornerRadius(14)
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(on ? CozyTheme.accent : CozyTheme.border, lineWidth: on ? 2 : 1)
-            )
-            .overlay(alignment: .topTrailing) {
-                if on {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.white)
-                        .font(.system(size: 14))
-                        .padding(5)
-                }
+        return VStack(spacing: 6) {
+            Image(systemName: room.icon)
+                .font(.system(size: 22, weight: .medium))
+                .foregroundColor(on ? .white : CozyTheme.accent)
+            Text(room.label)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(on ? .white : CozyTheme.primary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 4)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 86)
+        .background(on ? CozyTheme.accent : CozyTheme.card)
+        .cornerRadius(14)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(on ? CozyTheme.accent : CozyTheme.border, lineWidth: on ? 2 : 1)
+        )
+        .overlay(alignment: .topTrailing) {
+            if on {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.white)
+                    .font(.system(size: 14))
+                    .padding(5)
             }
         }
     }

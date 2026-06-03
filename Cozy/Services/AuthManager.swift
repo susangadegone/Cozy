@@ -14,13 +14,8 @@ final class AuthManager: ObservableObject {
         if let saved = UserDefaults.standard.string(forKey: key),
            let uuid = UUID(uuidString: saved) {
             currentUserId = uuid
-        } else {
-            // Auto-create a guest UUID on first launch — no sign-up screen needed for v1.
-            let id = UUID()
-            UserDefaults.standard.set(id.uuidString, forKey: key)
-            currentUserId = id
+            isAuthenticated = true
         }
-        isAuthenticated = true
     }
 
     func checkSession() async {

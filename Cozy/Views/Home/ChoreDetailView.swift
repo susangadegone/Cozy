@@ -19,28 +19,26 @@ struct ChoreDetailView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color(hex: "FAF7F2").ignoresSafeArea()
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 0) {
-                        choreHeader
-                        Divider().opacity(0.2).padding(.horizontal, 20)
-                        thisWeekSection
-                        Divider().opacity(0.2).padding(.horizontal, 20)
-                        historySection
-                        actionsSection
-                        Spacer(minLength: 40)
-                    }
+        ZStack {
+            Color(hex: "FAF7F2").ignoresSafeArea()
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 0) {
+                    choreHeader
+                    Divider().opacity(0.2).padding(.horizontal, 20)
+                    thisWeekSection
+                    Divider().opacity(0.2).padding(.horizontal, 20)
+                    historySection
+                    actionsSection
+                    Spacer(minLength: 40)
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Back") { dismiss() }
-                        .foregroundColor(CozyTheme.mutedText)
-                        .font(.system(size: 15))
-                }
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Close") { dismiss() }
+                    .foregroundColor(CozyTheme.mutedText)
+                    .font(.system(size: 15))
             }
         }
         .confirmationDialog("Delete \(chore.choreName)?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {

@@ -32,8 +32,17 @@ struct AppEntryView: View {
     var body: some View {
         Group {
             if showSplash {
-                SplashView { withAnimation { showSplash = false } }
-                    .transition(.opacity)
+                SplashView(
+                    onGetStarted: {
+                        appRouter.navigate(to: .signUp)
+                        withAnimation { showSplash = false }
+                    },
+                    onSignIn: {
+                        appRouter.navigate(to: .login)
+                        withAnimation { showSplash = false }
+                    }
+                )
+                .transition(.opacity)
             } else if !authManager.isAuthenticated {
                 AuthFlowView()
                     .transition(.opacity)

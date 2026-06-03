@@ -35,10 +35,12 @@ struct ChoresView: View {
                 .presentationDragIndicator(.visible)
         }
         .sheet(item: $selectedChore) { chore in
-            ChoreDetailView(chore: chore)
-                .environmentObject(appState)
-                .presentationDetents([.fraction(0.7)])
-                .presentationDragIndicator(.visible)
+            NavigationStack {
+                ChoreDetailView(chore: chore)
+                    .environmentObject(appState)
+            }
+            .presentationDetents([.fraction(0.7)])
+            .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showLibrary) {
             ChoreLibraryView().environmentObject(appState)

@@ -18,6 +18,7 @@ struct BrowseChoresView: View {
     @State private var selectedRoomIndex: Int = 0
     @State private var showToast = false
     @State private var toastMessage = ""
+    @State private var choreToSchedule: PresetChore?
 
     private var rooms: [RoomSection] {
         let base: [RoomSection] = [
@@ -58,6 +59,10 @@ struct BrowseChoresView: View {
                         .foregroundColor(CozyTheme.accent)
                         .fontWeight(.semibold)
                 }
+            }
+            .sheet(item: $choreToSchedule) { preset in
+                QuickScheduleSheet(preset: preset)
+                    .environmentObject(appState)
             }
         }
     }
@@ -206,40 +211,7 @@ struct BrowseChoresView: View {
             dismiss()
             return
         }
-        guard let userId = appState.profile?.id else { return }
-        let scheduledDate = findLeastLoadedDay()
-        let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"
-        let dow = DateFormatter(); dow.dateFormat = "EEEE"
-        let chore = Chore(
-            id: UUID(), userId: userId,
-            roomId: preset.roomId, choreName: preset.name,
-            dayOfWeek: dow.string(from: scheduledDate),
-            isDone: false,
-            scheduledDate: fmt.string(from: scheduledDate),
-            completedAt: nil
-        )
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-            appState.addChore(chore)
-        }
-        toastMessage = "\"\(preset.name)\" added"
-        withAnimation(.spring()) { showToast = true }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
-            withAnimation(.spring()) { showToast = false }
-        }
-    }
-
-    private func findLeastLoadedDay() -> Date {
-        let cal = Calendar.current
-        let today = cal.startOfDay(for: Date())
-        let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"
-        var best = cal.date(byAdding: .day, value: 1, to: today) ?? today
-        var bestCount = Int.max
-        for i in 1...7 {
-            guard let d = cal.date(byAdding: .day, value: i, to: today) else { continue }
-            let c = appState.chores.filter { $0.scheduledDate == fmt.string(from: d) }.count
-            if c < bestCount { bestCount = c; best = d }
-        }
-        return best
+        choreToSchedule = preset
     }
 }
 
@@ -301,4 +273,162 @@ struct RoomSection: Identifiable {
     let name: String
     let icon: String
     let color: String
+}
+
+// MARK: - QuickScheduleSheet
+struct QuickScheduleSheet: View {
+    let preset: PresetChore
+    @EnvironmentObject var appState: AppState
+    @Environment(\.dismiss) private var dismiss
+
+    private let frequencies = ["Daily", "2\u{2013}3 times/week", "Weekly", "Every 2 weeks", "Monthly"]
+    private let dayPills = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"]
+
+    @State private var selectedFrequency = "Weekly"
+    @State private var selectedDays: Set<String> = []
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                CozyTheme.background.ignoresSafeArea()
+                VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(preset.name)
+                            .font(.system(size: 24, weight: .bold, design: .serif))
+                            .foregroundColor(CozyTheme.primary)
+                        Text("When do you want to do this?")
+                            .font(.system(size: 15))
+                            .foregroundColor(CozyTheme.mutedText)
+                    }
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("How often?")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(CozyTheme.primary)
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                            ForEach(frequencies, id: \.self) { freq in
+                                frequencyPill(freq)
+                            }
+                        }
+                    }
+
+                    if selectedFrequency != "Daily" && selectedFrequency != "Monthly" {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text(selectedFrequency == "2\u{2013}3 times/week" ? "Which days? (pick 2–3)" : "Which day?")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(CozyTheme.primary)
+                            HStack(spacing: 6) {
+                                ForEach(dayPills, id: \.self) { day in
+                                    dayPill(day)
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer()
+
+                    Button(action: save) {
+                        let n = generatedDates.count
+                        Text(n <= 1 ? "Add to my schedule" : "Add \(n) to my schedule")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 54)
+                            .background(CozyTheme.accent)
+                            .cornerRadius(CozyTheme.cornerRadius)
+                    }
+                }
+                .padding(20)
+            }
+            .navigationTitle("Schedule it")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                        .foregroundColor(CozyTheme.mutedText)
+                }
+            }
+        }
+    }
+
+    private func frequencyPill(_ freq: String) -> some View {
+        let isOn = selectedFrequency == freq
+        return Button { selectedFrequency = freq } label: {
+            Text(freq)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(isOn ? .white : CozyTheme.primary)
+                .padding(.horizontal, 12).padding(.vertical, 10)
+                .frame(maxWidth: .infinity)
+                .background(isOn ? CozyTheme.accent : Color(hex: "F0EBE5"))
+                .cornerRadius(10)
+        }
+    }
+
+    private func dayPill(_ day: String) -> some View {
+        let isOn = selectedDays.contains(day)
+        return Button {
+            if isOn { selectedDays.remove(day) } else { selectedDays.insert(day) }
+        } label: {
+            Text(day)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(isOn ? .white : CozyTheme.primary)
+                .frame(maxWidth: .infinity).frame(height: 36)
+                .background(isOn ? CozyTheme.accent : Color(hex: "F0EBE5"))
+                .cornerRadius(8)
+        }
+    }
+
+    private var generatedDates: [Date] {
+        let anchor = Calendar.current.startOfDay(for: Date())
+        let cal = Calendar.current
+        switch selectedFrequency {
+        case "Daily":
+            return (0..<28).compactMap { cal.date(byAdding: .day, value: $0, to: anchor) }
+        case "2\u{2013}3 times/week":
+            let days = selectedDays.isEmpty ? ["MO", "WE"] : Array(selectedDays)
+            return days.flatMap { day -> [Date] in
+                let first = nextDate(for: day, from: anchor)
+                return (0..<4).compactMap { cal.date(byAdding: .weekOfYear, value: $0, to: first) }
+            }.sorted()
+        case "Every 2 weeks":
+            let first = nextDate(for: selectedDays.first, from: anchor)
+            return (0..<4).compactMap { cal.date(byAdding: .weekOfYear, value: $0 * 2, to: first) }
+        case "Monthly":
+            return (0..<3).compactMap { cal.date(byAdding: .month, value: $0, to: anchor) }
+        default:
+            let first = nextDate(for: selectedDays.first, from: anchor)
+            return (0..<8).compactMap { cal.date(byAdding: .weekOfYear, value: $0, to: first) }
+        }
+    }
+
+    private func nextDate(for dayAbbrev: String?, from anchor: Date) -> Date {
+        guard let abbrev = dayAbbrev else { return anchor }
+        let map = ["SU": 1, "MO": 2, "TU": 3, "WE": 4, "TH": 5, "FR": 6, "SA": 7]
+        guard let target = map[abbrev] else { return anchor }
+        let cal = Calendar.current
+        var check = anchor
+        for _ in 0..<8 {
+            if cal.component(.weekday, from: check) == target { return check }
+            check = cal.date(byAdding: .day, value: 1, to: check) ?? check
+        }
+        return anchor
+    }
+
+    private func save() {
+        guard let userId = appState.profile?.id else { return }
+        let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"
+        let dow = DateFormatter(); dow.dateFormat = "EEEE"
+        let chores = generatedDates.map { date in
+            Chore(
+                id: UUID(), userId: userId,
+                roomId: preset.roomId, choreName: preset.name,
+                dayOfWeek: dow.string(from: date),
+                isDone: false,
+                scheduledDate: fmt.string(from: date),
+                completedAt: nil
+            )
+        }
+        appState.addChores(chores)
+        dismiss()
+    }
 }

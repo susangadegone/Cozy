@@ -28,8 +28,7 @@ struct CalendarView: View {
                             )
                         } else {
                             MonthCalendarView(
-                                displayMonth: $displayMonth,
-                                selectedChore: $selectedChore
+                                displayMonth: $displayMonth
                             )
                         }
                     }
@@ -46,10 +45,12 @@ struct CalendarView: View {
                 .presentationDragIndicator(.visible)
         }
         .sheet(item: $selectedChore) { chore in
-            ChoreDetailView(chore: chore)
-                .environmentObject(appState)
-                .presentationDetents([.fraction(0.7)])
-                .presentationDragIndicator(.visible)
+            NavigationStack {
+                ChoreDetailView(chore: chore)
+                    .environmentObject(appState)
+            }
+            .presentationDetents([.fraction(0.7)])
+            .presentationDragIndicator(.visible)
         }
     }
 

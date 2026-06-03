@@ -40,7 +40,11 @@ struct DashboardView: View {
         .padding(.top, 14)
         .padding(.bottom, 120)
         .sheet(item: $selectedChore) { chore in
-            ChoreDetailView(chore: chore).environmentObject(appState)
+            NavigationStack {
+                ChoreDetailView(chore: chore).environmentObject(appState)
+            }
+            .presentationDetents([.fraction(0.7)])
+            .presentationDragIndicator(.visible)
         }
     }
 
