@@ -36,13 +36,12 @@ struct BadgeTileView: View {
             VStack(spacing: 6) {
                 ZStack {
                     Circle()
-                        .fill(earned ? CozyTheme.accent.opacity(0.15) : Color.gray.opacity(0.08))
+                        .fill(earned ? iconColor.opacity(0.15) : Color.gray.opacity(0.08))
                         .frame(width: 52, height: 52)
 
-                    Text(badge.icon)
-                        .font(.system(size: 24))
-                        .grayscale(earned ? 0 : 1)
-                        .opacity(earned ? 1 : 0.4)
+                    Image(systemName: badge.icon)
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundColor(earned ? iconColor : Color.gray.opacity(0.4))
 
                     if !earned {
                         Image(systemName: "lock.fill")
@@ -84,6 +83,19 @@ struct BadgeTileView: View {
                 }
             }
         )
+    }
+
+    private var iconColor: Color {
+        switch badge.id {
+        case "first-chore":   return Color(hex: "E8C84A")
+        case "streak-5":      return Color(hex: "E09A5A")
+        case "streak-30":     return Color(hex: "D4761A")
+        case "kitchen-hero":  return Color(hex: "D4956A")
+        case "perfect-week":  return CozyTheme.teal
+        case "all-rooms":     return CozyTheme.accent
+        case "100-chores":    return Color(hex: "C0392B")
+        default:              return CozyTheme.accent
+        }
     }
 }
 

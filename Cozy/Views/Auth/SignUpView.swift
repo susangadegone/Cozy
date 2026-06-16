@@ -134,34 +134,10 @@ struct SignUpView: View {
     }
 
     private var socialButtons: some View {
-        VStack(spacing: 12) {
-            googleButton
-            SignInWithAppleButton(.continue, onRequest: configureApple, onCompletion: handleApple)
-                .signInWithAppleButtonStyle(.black)
-                .frame(height: 50)
-                .cornerRadius(CozyTheme.cornerRadius)
-        }
-    }
-
-    private var googleButton: some View {
-        Button {} label: {
-            HStack(spacing: 10) {
-                Text("G")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(Color(hex: "4285F4"))
-                Text("Continue with Google")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(CozyTheme.primary)
-            }
-            .frame(maxWidth: .infinity)
+        SignInWithAppleButton(.continue, onRequest: configureApple, onCompletion: handleApple)
+            .signInWithAppleButtonStyle(.black)
             .frame(height: 50)
-            .background(CozyTheme.card)
             .cornerRadius(CozyTheme.cornerRadius)
-            .overlay(
-                RoundedRectangle(cornerRadius: CozyTheme.cornerRadius)
-                    .stroke(CozyTheme.border, lineWidth: 1)
-            )
-        }
     }
 
     private var footerLinks: some View {

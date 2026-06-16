@@ -139,13 +139,15 @@ struct ChoreDetailView: View {
         VStack(spacing: 10) {
             HStack(spacing: 10) {
                 quickAction(label: "Bump 1 day") {
-                    if let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) {
-                        appState.rescheduleChore(chore, to: tomorrow)
+                    let base = DateFormatters.yearMonthDay.date(from: chore.scheduledDate) ?? Date()
+                    if let bumped = Calendar.current.date(byAdding: .day, value: 1, to: base) {
+                        appState.rescheduleChore(chore, to: bumped)
                         dismiss()
                     }
                 }
                 quickAction(label: "Skip a week") {
-                    if let next = Calendar.current.date(byAdding: .day, value: 7, to: Date()) {
+                    let base = DateFormatters.yearMonthDay.date(from: chore.scheduledDate) ?? Date()
+                    if let next = Calendar.current.date(byAdding: .day, value: 7, to: base) {
                         appState.rescheduleChore(chore, to: next)
                         dismiss()
                     }
@@ -215,6 +217,7 @@ struct ChoreDetailView: View {
                 Button {
                     appState.rescheduleChore(chore, to: rescheduleDate)
                     showReschedule = false
+                    dismiss()
                 } label: {
                     Text("Confirm")
                         .font(.system(size: 16, weight: .semibold))

@@ -15,35 +15,35 @@ enum BadgeService {
         BadgeDefinition(
             id: "first-chore",
             name: "First chore!",
-            icon: "⭐",
+            icon: "sparkle",
             description: "Complete your very first chore",
             check: { _, chores, _ in chores.filter(\.isDone).count >= 1 }
         ),
         BadgeDefinition(
             id: "streak-5",
             name: "5-day streak",
-            icon: "🔥",
+            icon: "flame.fill",
             description: "Keep a 5-day completion streak",
             check: { _, _, streak in streak >= 5 }
         ),
         BadgeDefinition(
             id: "streak-30",
             name: "30-day streak",
-            icon: "🏆",
+            icon: "trophy.fill",
             description: "Complete chores 30 days in a row",
             check: { _, _, streak in streak >= 30 }
         ),
         BadgeDefinition(
             id: "kitchen-hero",
             name: "Kitchen hero",
-            icon: "🍳",
+            icon: "fork.knife",
             description: "Complete 10 kitchen chores",
             check: { _, chores, _ in chores.filter { $0.roomId == "kitchen" && $0.isDone }.count >= 10 }
         ),
         BadgeDefinition(
             id: "perfect-week",
             name: "Perfect week",
-            icon: "🎯",
+            icon: "checkmark.seal.fill",
             description: "Complete every scheduled chore in a week",
             check: { _, chores, _ in
                 let cal = Calendar.current
@@ -58,7 +58,7 @@ enum BadgeService {
         BadgeDefinition(
             id: "all-rooms",
             name: "All rooms",
-            icon: "🏠",
+            icon: "house.fill",
             description: "Complete a chore in every room",
             check: { _, chores, _ in
                 let rooms = Set(["kitchen", "bedroom", "bathroom", "living", "outdoor"])
@@ -69,7 +69,7 @@ enum BadgeService {
         BadgeDefinition(
             id: "100-chores",
             name: "100 chores",
-            icon: "🌟",
+            icon: "bolt.fill",
             description: "Complete 100 chores total",
             check: { _, chores, _ in chores.filter(\.isDone).count >= 100 }
         ),

@@ -24,6 +24,10 @@ struct DashboardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             QuoteCard()
+                .padding(.bottom, 12)
+            StreakFlameCard()
+                .environmentObject(appState)
+                .padding(.horizontal, 20)
                 .padding(.bottom, 18)
             sectionTitle
             progressBar
@@ -149,35 +153,45 @@ private struct DashChoreRow: View {
     let onToggle: (Chore) -> Void
 
     var body: some View {
-        HStack(spacing: 12) {
-            Button { onToggle(chore) } label: {
-                ZStack {
-                    Circle()
-                        .strokeBorder(chore.isDone ? CozyTheme.teal : CozyTheme.border, lineWidth: 1.5)
-                        .background(Circle().fill(chore.isDone ? CozyTheme.teal : Color.clear))
-                        .frame(width: 24, height: 24)
-                    if chore.isDone {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(.white)
+        HStack(spacing: 0) {
+            // Room accent bar
+            RoundedRectangle(cornerRadius: 2)
+                .fill(chore.isDone ? CozyTheme.border : roomAccentColor)
+                .frame(width: 4)
+                .padding(.vertical, 10)
+                .padding(.leading, 12)
+                .animation(.easeInOut(duration: 0.3), value: chore.isDone)
+
+            HStack(spacing: 12) {
+                Button { onToggle(chore) } label: {
+                    ZStack {
+                        Circle()
+                            .strokeBorder(chore.isDone ? CozyTheme.teal : CozyTheme.border, lineWidth: 1.5)
+                            .background(Circle().fill(chore.isDone ? CozyTheme.teal : Color.clear))
+                            .frame(width: 24, height: 24)
+                        if chore.isDone {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(.white)
+                        }
                     }
                 }
+                .buttonStyle(.plain)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(chore.choreName)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(chore.isDone ? CozyTheme.mutedText : CozyTheme.primary)
+                        .strikethrough(chore.isDone, color: CozyTheme.mutedText)
+                        .lineLimit(2)
+                    Text(roomName)
+                        .font(.system(size: 12))
+                        .foregroundColor(CozyTheme.mutedText)
+                }
+                Spacer()
             }
-            .buttonStyle(.plain)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(chore.choreName)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(chore.isDone ? CozyTheme.mutedText : CozyTheme.primary)
-                    .strikethrough(chore.isDone, color: CozyTheme.mutedText)
-                    .lineLimit(2)
-                Text(roomName)
-                    .font(.system(size: 12))
-                    .foregroundColor(CozyTheme.mutedText)
-            }
-            Spacer()
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
         .background(CozyTheme.card)
         .cornerRadius(14)
         .padding(.horizontal, 20)
@@ -185,5 +199,17 @@ private struct DashChoreRow: View {
 
     private var roomName: String {
         Room.defaults.first(where: { $0.id == chore.roomId })?.name ?? chore.roomId.capitalized
+    }
+
+    private var roomAccentColor: Color {
+        switch chore.roomId {
+        case "kitchen":  return Color(hex: "E8A44A")
+        case "bedroom":  return Color(hex: "B5A8D9")
+        case "bathroom": return Color(hex: "6BA8C4")
+        case "living":   return Color(hex: "D4956A")
+        case "outdoor":  return Color(hex: "6F9B7B")
+        case "laundry":  return Color(hex: "8EC5D4")
+        default:         return CozyTheme.border
+        }
     }
 }

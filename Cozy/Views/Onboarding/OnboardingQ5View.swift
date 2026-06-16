@@ -9,6 +9,7 @@ struct OnboardingQ5View: View {
     @State private var selection: String? = nil
     @State private var isBuilding = false
     @State private var appeared = false
+    @State private var seedFailed = false
 
     private struct ReminderOption: Identifiable {
         let id: String
@@ -32,6 +33,17 @@ struct OnboardingQ5View: View {
                 .opacity(appeared ? 1 : 0)
                 .offset(y: appeared ? 0 : 14)
             hint.padding(.top, 10)
+            if seedFailed {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.circle.fill")
+                        .foregroundColor(.red)
+                    Text("Couldn't build your schedule. Tap below to try again.")
+                        .font(.system(size: 13))
+                        .foregroundColor(.red)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 12)
+            }
             Spacer()
             OnboardingNextButton(
                 label: "Build my schedule",
@@ -78,6 +90,7 @@ struct OnboardingQ5View: View {
     private func buildSchedule() async {
         guard let chosen = selection else { return }
         isBuilding = true
+        seedFailed = false
         onboardingVM.reminderStyle = chosen
 
         let center = UNUserNotificationCenter.current()
@@ -103,6 +116,12 @@ struct OnboardingQ5View: View {
             rooms: roomIds.isEmpty ? Array(onboardingVM.selectedRooms) : roomIds,
             notificationPref: chosen
         )
+
+        if appState.chores.isEmpty {
+            seedFailed = true
+            isBuilding = false
+            return
+        }
 
         onboardingVM.generateSchedule()
         // Persist cleanliness types for dashboard journey badge

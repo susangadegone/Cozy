@@ -30,10 +30,11 @@ struct NextBadgeCard: View {
     private func nextBadgeRow(_ badge: BadgeDefinition) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
-                Text(badge.icon)
-                    .font(.system(size: 26))
+                Image(systemName: badge.icon)
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundColor(CozyTheme.accent)
                     .frame(width: 44, height: 44)
-                    .background(CozyTheme.accent.opacity(0.08))
+                    .background(CozyTheme.accent.opacity(0.12))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
 
                 VStack(alignment: .leading, spacing: 3) {
@@ -95,8 +96,9 @@ struct NextBadgeCard: View {
 
     private var allUnlockedState: some View {
         HStack(spacing: 12) {
-            Text("🎉")
-                .font(.system(size: 26))
+            Image(systemName: "party.popper.fill")
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundColor(Color(hex: "4CAF82"))
                 .frame(width: 44, height: 44)
                 .background(Color(hex: "4CAF82").opacity(0.1))
                 .clipShape(RoundedRectangle(cornerRadius: 10))

@@ -40,8 +40,18 @@ struct AddChoreView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                        .foregroundColor(CozyTheme.mutedText)
+                    if !justSaved && step > 0 {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.15)) { step -= 1 }
+                        } label: {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(CozyTheme.primary)
+                        }
+                    } else {
+                        Button("Cancel") { dismiss() }
+                            .foregroundColor(CozyTheme.mutedText)
+                    }
                 }
             }
         }
@@ -254,7 +264,12 @@ struct AddChoreView: View {
 
     private func frequencyPill(_ freq: String) -> some View {
         let isOn = selectedFrequency == freq
-        return Button { selectedFrequency = freq } label: {
+        return Button {
+            selectedFrequency = freq
+            if freq == "2\u{2013}3 times/week" && selectedDays.isEmpty {
+                selectedDays = ["MO", "WE"]
+            }
+        } label: {
             Text(freq)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(isOn ? .white : CozyTheme.primary)

@@ -181,7 +181,9 @@ struct HomeView: View {
                 Spacer()
                 HStack(spacing: 10) {
                     if let icon = toastIcon {
-                        Text(icon).font(.system(size: 18))
+                        Image(systemName: icon)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
                     }
                     Text(msg)
                         .font(.system(size: 14, weight: .semibold))

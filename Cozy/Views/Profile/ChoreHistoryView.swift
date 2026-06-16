@@ -88,8 +88,9 @@ struct HistoryRow: View {
                 Circle()
                     .fill(Color(hex: room?.color ?? "F0EBF5"))
                     .frame(width: 40, height: 40)
-                Text(room?.icon ?? "📦")
-                    .font(.system(size: 18))
+                Image(systemName: room?.icon ?? "archivebox")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(CozyTheme.mutedText)
             }
             VStack(alignment: .leading, spacing: 3) {
                 Text(chore.choreName)

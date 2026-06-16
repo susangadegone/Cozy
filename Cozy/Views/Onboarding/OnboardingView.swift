@@ -16,7 +16,7 @@ struct OnboardingView: View {
             // If we landed here from a pre-auth route, drop to name entry
             let onboardingRoutes: [AppRoute] = [
                 .science, .onboardingName,
-                .onboardingQ1, .onboardingQ2, .onboardingQ3,
+                .onboardingQ1, .onboardingQ3,
                 .cleanlinessType, .cleanlinessGoal,
                 .onboardingQ4, .onboardingQ5, .scheduleReady,
                 .howCozyWorks, .recap
@@ -36,8 +36,6 @@ struct OnboardingView: View {
             OnboardingNameView()
         case .onboardingQ1:
             OnboardingQ1View()
-        case .onboardingQ2:
-            OnboardingQ2View()
         case .onboardingQ3:
             OnboardingQ3View()
         case .cleanlinessType:
