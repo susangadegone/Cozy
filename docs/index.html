@@ -137,6 +137,39 @@
     .store-text strong { display: block; font-size: 17px; font-weight: 600; }
     .coming-note { display: block; margin-top: 16px; font-size: 13px; color: var(--muted); }
 
+    /* ── OTHER PROJECTS ── */
+    .other-section { padding: 80px 0; border-top: 1px solid var(--border); }
+    .other-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center;
+    }
+    .other-copy .section-label { display: block; }
+    .other-copy p.section-sub { max-width: 520px; margin-bottom: 20px; }
+    .other-stack { font-size: 13px; color: var(--muted); margin-top: 20px; }
+    .other-stack strong { color: var(--primary); font-weight: 600; }
+    .other-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 600; color: var(--primary);
+      text-decoration: none; margin-top: 24px; padding-bottom: 2px;
+      border-bottom: 1px solid var(--primary);
+    }
+    .placeholder-strip { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    .placeholder-card {
+      width: 130px; height: 230px; border-radius: 22px;
+      border: 1px dashed var(--border); background: var(--card);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; text-align: center; padding: 14px;
+    }
+    .placeholder-card .ph-icon {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--teal));
+      opacity: .55;
+    }
+    .placeholder-card .ph-label { font-size: 11px; color: var(--muted); line-height: 1.4; }
+    @media (max-width: 768px) {
+      .other-row { grid-template-columns: 1fr; gap: 32px; }
+      .placeholder-strip { justify-content: center; }
+    }
+
     /* ── FOOTER ── */
     footer { border-top: 1px solid var(--border); padding: 28px 48px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
     footer span { font-size: 13px; color: var(--muted); }
@@ -310,6 +343,41 @@
     </div>
   </a>
   <span class="coming-note">Available when Cozy launches.</span>
+</section>
+
+<!-- OTHER PROJECTS -->
+<section class="other-section">
+  <div class="section-wrap">
+    <div class="other-row">
+      <div class="other-copy">
+        <span class="section-label">Also building</span>
+        <h2 class="section-title">Cal Mood Tracker</h2>
+        <p class="section-sub">Most calendar apps only track what you have to do, not how you're doing while you do it. Cal Mood Tracker gives busy professionals a place to log quick mood check-ins right alongside their schedule, so patterns in stress or energy show up next to the meetings that caused them. It slots short wellness activities into the day view in five-minute blocks, and a stats dashboard turns weeks of check-ins into a simple picture of what's working.</p>
+        <ul class="feature-bullets">
+          <li><span class="bullet-dot"></span>Month, week, and day views with 30-minute time blocks</li>
+          <li><span class="bullet-dot"></span>Five-emotion mood tracking with pattern analysis over time</li>
+          <li><span class="bullet-dot"></span>Five-minute wellness activities scheduled right into the day</li>
+          <li><span class="bullet-dot"></span>Stats dashboard, freeform notes, and pastel color themes</li>
+        </ul>
+        <p class="other-stack">Built with <strong>React Native</strong> and <strong>Expo</strong>.</p>
+        <a class="other-link" href="https://github.com/susangadegone/cal-mood-tracker" target="_blank" rel="noopener">View on GitHub →</a>
+      </div>
+      <div class="placeholder-strip">
+        <div class="placeholder-card">
+          <div class="ph-icon"></div>
+          <p class="ph-label">Day view<br>screenshot goes here</p>
+        </div>
+        <div class="placeholder-card">
+          <div class="ph-icon"></div>
+          <p class="ph-label">Mood check-in<br>screenshot goes here</p>
+        </div>
+        <div class="placeholder-card">
+          <div class="ph-icon"></div>
+          <p class="ph-label">Stats dashboard<br>screenshot goes here</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- FOOTER -->
